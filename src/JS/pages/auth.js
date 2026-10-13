@@ -23,9 +23,9 @@ if (!supabaseClient) {
     showAuthMessage("Accounts aren't available yet: add your Supabase keys to src/JS/shared/supabaseClient.js.", true);
 }
 
-// already signed in: show the account page instead of the form
+// already signed in: show account settings instead of the form
 getSignedInUser().then((user) => {
-    if (user) window.location.replace("account.html");
+    if (user) window.location.replace("settings.html");
 });
 
 const createForm = document.getElementById("inputSect");
