@@ -1,0 +1,13 @@
+/* settings.html */
+
+/* fieldsets only group controls so they can be disabled together; don't draw a box */
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+fieldset:disabled {
+  opacity: 0.6;
+}

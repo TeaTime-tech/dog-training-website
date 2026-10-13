@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commands</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- shared styles, then this page's styles -->
+    <link rel="stylesheet" href="../CSS/shared/base.css">
+    <link rel="stylesheet" href="../CSS/shared/nav.css">
+    <link rel="stylesheet" href="../CSS/shared/forms.css">
+    <link rel="stylesheet" href="../CSS/pages/commands.css">
+    <!-- shared scripts, then this page's script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../JS/shared/supabaseClient.js" defer></script>
+    <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/shared/accountNav.js" defer></script>
+    <script src="../JS/shared/trainingData.js" defer></script>
+    <script src="../JS/shared/mastery.js" defer></script>
+    <script src="../JS/pages/commands.js" defer></script>
+</head>
+<body>
+    <div class="top-nav">
+        <details class="nav-dropdown">
+            <summary class="home-link nav-dropdown-toggle">Directory</summary>
+            <div class="nav-dropdown-menu">
+                <a href="index.html">Home</a>
+                <a href="today.html">Today</a>
+                <a href="commands.html">Commands</a>
+                <a href="log.html">Log</a>
+                <a href="load.html">View Logs</a>
+                <a href="settings.html">Settings</a>
+            </div>
+        </details>
+        <div class="top-nav-links">
+            <a class="home-link" href="create.html" target="_blank" rel="noopener noreferrer">Create Account</a>
+            <a class="home-link" href="login.html" target="_blank" rel="noopener noreferrer">Login</a>
+        </div>
+    </div>
+
+    <h1>Command Selection</h1>
+
+    <section class="page-section">
+        <details open>
+            <summary class="collapsible-toggle"><h2 class="section-title">Commands</h2></summary>
+            <div id="command-buttons" class="command-tiles">
+                <button type="button" value="sit">Sit</button>
+                <button type="button" value="stay">Stay</button>
+                <button type="button" value="come">Come</button>
+            </div>
+            <div class="field-row">
+                <label for="new-command">Add a new command:</label>
+                <input type="text" id="new-command" placeholder="Enter command name...">
+                <button id="add-command" type="button" class="save-btn">Add Command</button>
+            </div>
+            <div class="field-row">
+                <label for="delete-command">Remove a command:</label>
+                <select id="delete-command">
+                    <option value="">Select a command</option>
+                </select>
+                <button id="delete-command-button" type="button" class="hide-btn">Delete Command</button>
+            </div>
+        </details>
+    </section>
+
+    <section class="page-section">
+        <details open>
+            <summary class="collapsible-toggle"><h2 class="section-title">Command Mastery</h2></summary>
+            <div class="toggle-row">
+                <label for="mastery-decay-toggle">Show mastery decay:</label>
+                <label class="toggle">
+                    <input type="checkbox" id="mastery-decay-toggle" class="toggle-input" checked disabled>
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
+            <p class="subhead mastery-hint">With decay on, skills slip a level after time away from practice. Faded segments show levels to win back.</p>
+            <p id="mastery-status" class="mastery-status" role="status"></p>
+            <ul id="mastery-list" class="mastery-list"></ul>
+        </details>
+    </section>
+
+    <section class="page-section">
+        <details open>
+            <summary class="collapsible-toggle"><h2 class="section-title">Programs and Goals</h2></summary>
+            <div class="cgc-header">
+                <button type="button" id="cgc-toggle">Canine Good Citizen (CGC)</button>
+                <div class="cgc-progress">
+                    <progress id="cgc-progress-bar" max="10" value="0"></progress>
+                    <span id="cgc-progress-label">0/10</span>
+                </div>
+            </div>
+            <div id="cgc-panel" class="cgc-panel" hidden>
+                <p class="subhead">Track your dog's progress toward the AKC Canine Good Citizen certification:</p>
+                <ul class="cgc-checklist" id="cgc-checklist"></ul>
+            </div>
+        </details>
+    </section>
+
+    <section class="page-section">
+        <details open>
+            <summary class="collapsible-toggle"><h2 class="section-title">Display Settings</h2></summary>
+            <div class="toggle-row">
+                <label for="score">Score Display:</label>
+                <label class="toggle">
+                    <input type="checkbox" id="score" class="toggle-input">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
+            <div class="toggle-row">
+                <label for="toggle-repetitions">Repetitions Display:</label>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-repetitions" class="toggle-input">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
+            <div class="toggle-row">
+                <label for="toggle-duration">Duration Display:</label>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-duration" class="toggle-input">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
+            <div class="toggle-row">
+                <label for="toggle-location">Location Display:</label>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-location" class="toggle-input">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
+            <div class="toggle-row">
+                <label for="toggle-distractions">Distractions Display:</label>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-distractions" class="toggle-input">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
+            <div class="toggle-row">
+                <label for="toggle-weather">Weather Display:</label>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-weather" class="toggle-input">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
+            <button id="save-settings" type="button" class="save-btn">Save Settings</button>
+        </details>
+    </section>
+
+    <section class="page-section">
+        <p>Ready to practice? Log your training session.</p>
+        <a class="save-btn" href="log.html" target="_blank" rel="noopener noreferrer">Log Training Session</a>
+    </section>
+
+</body>
+</html>

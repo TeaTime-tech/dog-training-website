@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- shared styles, then this page's styles -->
+    <link rel="stylesheet" href="../CSS/shared/base.css">
+    <link rel="stylesheet" href="../CSS/shared/nav.css">
+    <link rel="stylesheet" href="../CSS/shared/forms.css">
+    <link rel="stylesheet" href="../CSS/pages/today.css">
+    <!-- shared scripts, then this page's script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../JS/shared/supabaseClient.js" defer></script>
+    <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/shared/accountNav.js" defer></script>
+    <script src="../JS/shared/trainingData.js" defer></script>
+    <script src="../JS/pages/today.js" defer></script>
+</head>
+
+<body class="today-page">
+    <div class="top-nav">
+        <details class="nav-dropdown">
+            <summary class="home-link nav-dropdown-toggle">Directory</summary>
+            <div class="nav-dropdown-menu">
+                <a href="index.html">Home</a>
+                <a href="today.html">Today</a>
+                <a href="commands.html">Commands</a>
+                <a href="log.html">Log</a>
+                <a href="load.html">View Logs</a>
+                <a href="settings.html">Settings</a>
+            </div>
+        </details>
+        <div class="top-nav-links">
+            <a class="home-link" href="create.html" target="_blank" rel="noopener noreferrer">Create Account</a>
+            <a class="home-link" href="login.html" target="_blank" rel="noopener noreferrer">Login</a>
+        </div>
+    </div>
+
+    <div class="today-hero">
+        <div class="today-ring-wrap">
+            <svg class="today-ring" viewBox="0 0 120 120" role="img" aria-label="Sessions logged today">
+                <circle class="today-ring-track" cx="60" cy="60" r="52"></circle>
+                <circle class="today-ring-progress" id="today-ring-progress" cx="60" cy="60" r="52"></circle>
+            </svg>
+            <div class="today-ring-center">
+                <span class="today-ring-value" id="today-session-count">0</span>
+                <span class="today-ring-goal" id="today-session-goal-label">of 3 goal</span>
+            </div>
+        </div>
+        <div class="today-hero-text">
+            <div class="today-date-nav">
+                <button type="button" id="today-view-prev-btn" class="today-date-nav-arrow" aria-label="Previous day">&larr;</button>
+                <button type="button" class="today-date" id="today-date-label" aria-expanded="false" aria-controls="today-date-nav-controls"></button>
+                <button type="button" id="today-view-next-btn" class="today-date-nav-arrow" aria-label="Next day">&rarr;</button>
+
+                <div class="today-date-nav-controls" id="today-date-nav-controls" hidden>
+                    <input type="date" id="today-view-date" class="today-date-nav-input" aria-label="Viewing date">
+                    <button type="button" id="today-view-today-btn" class="today-date-nav-today" hidden>Jump to today</button>
+                </div>
+            </div>
+            <h1 id="today-hero-title">Today's Training</h1>
+            <a class="today-cta" href="log.html" target="_blank" rel="noopener noreferrer">+ Log a Session</a>
+        </div>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-tile stat-tile--coral">
+            <span class="stat-value" id="today-command-count">0</span>
+            <span class="stat-label">Commands practiced</span>
+        </div>
+        <div class="stat-tile stat-tile--purple">
+            <span class="stat-value" id="today-time-stat">0 sec</span>
+            <span class="stat-label">Total time</span>
+        </div>
+    </div>
+
+    <details class="today-section" open>
+        <summary class="today-section-title today-collapsible-toggle">Daily Goal</summary>
+
+        <div class="today-goal-card">
+            <div class="today-goal-select-row">
+                <label for="today-goal-type">Goal:</label>
+                <select id="today-goal-type">
+                    <option value="sessions">Sessions</option>
+                    <option value="minutes">Minutes</option>
+                    <option value="commands">Commands</option>
+                </select>
+            </div>
+
+            <div class="today-goal-row" id="today-goal-row-sessions">
+                <div class="today-goal-text">
+                    <p class="today-goal-hint">How many sessions do you want to log each day?</p>
+                </div>
+                <div class="today-goal-controls">
+                    <input type="number" id="today-goal-input" min="1" max="20" value="3">
+                    <button type="button" id="today-goal-save" class="save-btn">Save Goal</button>
+                </div>
+            </div>
+
+            <div class="today-goal-row" id="today-goal-row-minutes" hidden>
+                <div class="today-goal-text">
+                    <p class="today-goal-hint">How many minutes do you want to log each day?</p>
+                </div>
+                <div class="today-goal-controls">
+                    <input type="number" id="today-goal-minutes-input" min="1" max="600" value="30">
+                    <button type="button" id="today-goal-minutes-save" class="save-btn">Save Goal</button>
+                </div>
+            </div>
+
+            <div class="today-goal-row" id="today-goal-row-commands" hidden>
+                <div class="today-goal-text">
+                    <p class="today-goal-hint">How many commands do you want to work on each day?</p>
+                </div>
+                <div class="today-goal-controls">
+                    <input type="number" id="today-goal-commands-input" min="1" max="20" value="3">
+                    <button type="button" id="today-goal-commands-save" class="save-btn">Save Goal</button>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details class="today-section" open>
+        <summary class="today-section-title today-collapsible-toggle">Session Log</summary>
+
+        <div class="today-list-header">
+            <button type="button" id="today-delete-selected" class="hide-btn" disabled>Delete Selected</button>
+        </div>
+        <div class="today-section-card">
+            <ul class="today-session-list" id="today-session-list"></ul>
+            <div class="today-section-footer">
+                <button type="button" class="save-btn" id="today-add-session-btn">+ Add Session</button>
+            </div>
+        </div>
+    </details>
+
+    <details class="today-section" open>
+        <summary class="today-section-title today-collapsible-toggle">Exercise Log</summary>
+
+        <div class="today-list-header">
+            <button type="button" id="today-exercise-delete-selected" class="hide-btn" disabled>Delete Selected</button>
+        </div>
+        <div class="today-section-card">
+            <ul class="today-session-list" id="today-exercise-list"></ul>
+            <div class="today-section-footer">
+                <button type="button" class="save-btn" id="today-add-exercise-btn">+ Add Exercise</button>
+            </div>
+        </div>
+    </details>
+
+    <div class="modal-overlay" id="add-session-overlay" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="add-session-title">
+            <h2 class="today-section-title" id="add-session-title">Add Session</h2>
+            <form id="add-session-form">
+                <div class="field-row">
+                    <label for="add-session-command">Command:</label>
+                    <select id="add-session-command"></select>
+                </div>
+                <div class="field-row">
+                    <label for="add-session-repetitions">Repetitions:</label>
+                    <input type="text" id="add-session-repetitions" placeholder="e.g. 5">
+                </div>
+                <div class="field-row">
+                    <label for="add-session-duration">Duration:</label>
+                    <input type="text" id="add-session-duration" placeholder="e.g. 30">
+                    <select id="add-session-duration-unit">
+                        <option value="sec">sec</option>
+                        <option value="min">min</option>
+                    </select>
+                </div>
+                <div class="field-row">
+                    <label for="add-session-notes">Notes:</label>
+                    <input type="text" id="add-session-notes" placeholder="Enter notes here...">
+                </div>
+                <div class="field-row">
+                    <label for="add-session-date">Date:</label>
+                    <input type="date" id="add-session-date">
+                    <label for="add-session-time">Time:</label>
+                    <input type="time" id="add-session-time">
+                </div>
+                <div class="field-row">
+                    <button type="submit" class="save-btn">Save Session</button>
+                    <button type="button" id="add-session-cancel" class="hide-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="add-exercise-overlay" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="add-exercise-title">
+            <h2 class="today-section-title" id="add-exercise-title">Add Exercise</h2>
+            <form id="add-exercise-form">
+                <div class="field-row">
+                    <label for="add-exercise-name">Exercise name:</label>
+                    <input type="text" id="add-exercise-name" placeholder="Enter exercise name...">
+                </div>
+                <div class="field-row">
+                    <label for="add-exercise-duration">Duration:</label>
+                    <input type="text" id="add-exercise-duration" placeholder="e.g. 15">
+                    <select id="add-exercise-duration-unit">
+                        <option value="min">min</option>
+                        <option value="sec">sec</option>
+                    </select>
+                </div>
+                <div class="field-row">
+                    <label for="add-exercise-notes">Notes:</label>
+                    <input type="text" id="add-exercise-notes" placeholder="Enter notes here...">
+                </div>
+                <div class="field-row">
+                    <label for="add-exercise-date">Date:</label>
+                    <input type="date" id="add-exercise-date">
+                    <label for="add-exercise-time">Time:</label>
+                    <input type="time" id="add-exercise-time">
+                </div>
+                <div class="field-row">
+                    <button type="submit" class="save-btn">Save Exercise</button>
+                    <button type="button" id="add-exercise-cancel" class="hide-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

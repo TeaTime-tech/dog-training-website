@@ -1,0 +1,30 @@
+/* create.html: centered sign-up form */
+
+body {
+  display: grid;
+}
+
+h1,
+#inputSect {
+  justify-self: center;
+  text-align: center;
+
+  padding: 1em;
+}
+
+#inputSect {
+  display: grid;
+  grid-template-columns: auto minmax(0, 220px);
+  gap: 12px 10px;
+  align-items: center;
+}
+
+#inputSect label {
+  text-align: right;
+}
+
+#inputSect button,
+#inputSect p {
+  grid-column: 1 / -1;
+  justify-self: center;
+}

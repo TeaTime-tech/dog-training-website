@@ -1,0 +1,200 @@
+/* load.html: tables, pagination, and graphs. */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0 24px;
+  max-width: 720px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.pagination button {
+  background: var(--clay);
+  color: var(--ink);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: var(--moss);
+  color: var(--white);
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Session data table + Exercise Log table (load.html) */
+.table-wrap {
+  overflow-x: auto;
+  margin: 16px 0 32px;
+  max-width: 720px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+#data-table,
+#exercise-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  background: var(--white);
+  font-size: 14px;
+}
+
+#data-table th,
+#data-table td,
+#exercise-table th,
+#exercise-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--clay);
+  white-space: nowrap;
+}
+
+#data-table th,
+#exercise-table th {
+  background: var(--clay);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+#data-table tbody tr:last-child td,
+#exercise-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+#data-table tbody tr:hover,
+#exercise-table tbody tr:hover {
+  background: var(--bg);
+}
+
+#data-table tbody td:empty::after,
+#exercise-table tbody td:empty::after {
+  content: "\2014";
+  color: var(--muted);
+}
+
+#data-table td input,
+#data-table td select,
+#exercise-table td input,
+#exercise-table td select {
+  width: 100%;
+  min-width: 90px;
+  padding: 6px 8px;
+  border: 1px solid var(--clay);
+  border-radius: 6px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+#data-table td:last-child button + button,
+#exercise-table td:last-child button + button {
+  margin-left: 8px;
+}
+
+/* Training graph (load.html) */
+.graph-area {
+  position: relative;
+  max-width: 720px;
+}
+
+/* custom circular hover badge for the Gantt chart, replacing Plotly's default tooltip box */
+.gantt-hover-badge {
+  position: absolute;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--moss);
+  text-align: center;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(47, 64, 48, 0.3);
+  transform: translate(-50%, -120%);
+}
+
+.gantt-hover-badge[hidden] {
+  display: none;
+}
+
+.gantt-hover-badge-count {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.gantt-hover-badge-label {
+  margin-top: 2px;
+  padding: 0 6px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: capitalize;
+  line-height: 1.2;
+  overflow-wrap: break-word;
+}
+
+.graph-plot {
+  width: 100%;
+  height: 320px;
+}
+
+/* All-Time stat summary, shown instead of a chart for the "All Time" timeframe */
+.graph-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.graph-stat-row[hidden] {
+  display: none;
+}
+
+.graph-stat-tile {
+  flex: 1 1 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px;
+  min-width: 160px;
+  background: var(--bg);
+  border-top: 4px solid var(--moss);
+  border-radius: 12px;
+}
+
+.graph-stat-tile--brass {
+  border-top-color: var(--brass);
+}
+
+.graph-stat-value {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.graph-stat-label {
+  font-size: 13px;
+  color: var(--muted);
+}

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training session log</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- shared styles, then this page's styles -->
+    <link rel="stylesheet" href="../CSS/shared/base.css">
+    <link rel="stylesheet" href="../CSS/shared/nav.css">
+    <link rel="stylesheet" href="../CSS/shared/forms.css">
+    <link rel="stylesheet" href="../CSS/pages/log.css">
+    <!-- shared scripts, then this page's script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../JS/shared/supabaseClient.js" defer></script>
+    <script src="../JS/shared/accountNav.js" defer></script>
+    <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/pages/log.js" defer></script>
+</head>
+<body>
+    <div class="top-nav">
+        <details class="nav-dropdown">
+            <summary class="home-link nav-dropdown-toggle">Directory</summary>
+            <div class="nav-dropdown-menu">
+                <a href="index.html">Home</a>
+                <a href="today.html">Today</a>
+                <a href="commands.html">Commands</a>
+                <a href="log.html">Log</a>
+                <a href="load.html">View Logs</a>
+                <a href="settings.html">Settings</a>
+            </div>
+        </details>
+        <div class="top-nav-links">
+            <a class="home-link" href="create.html" target="_blank" rel="noopener noreferrer">Create Account</a>
+            <a class="home-link" href="login.html" target="_blank" rel="noopener noreferrer">Login</a>
+        </div>
+    </div>
+
+    <h1>Log Training Session</h1>
+
+    <section class="page-section">
+        <h2 class="section-title">Command</h2>
+        <div class="field-row">
+            <label for="command">Select a command:</label>
+            <select id="command" name="command">
+                <option value="sit">Sit</option>
+                <option value="stay">Stay</option>
+                <option value="come">Come</option>
+            </select>
+        </div>
+        <div class="field-row">
+            <label for="new-command">Add a new command:</label>
+            <input type="text" id="new-command" placeholder="Enter command name...">
+            <button id="add-command" type="button" class="save-btn">Add Command</button>
+        </div>
+        <a class="home-link" href="commands.html" target="_blank" rel="noopener noreferrer">Go to Commands Page</a>
+    </section>
+
+    <section class="page-section">
+        <h2 class="section-title">Repetitions</h2>
+        <p class="subhead">How many times your dog has performed the command.</p>
+        <div class="field-row">
+            <label for="repitions">Select a number:</label>
+            <select id="repitions" name="repitions">
+                <option value="N/A">N/A</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+            <button id="remove-repition" type="button" class="hide-btn">Remove Selected</button>
+        </div>
+        <div class="field-row">
+            <label for="new-repition">Add a new repetition:</label>
+            <input type="text" id="new-repition" placeholder="Enter repetition count...">
+            <button id="add-repition" type="button" class="save-btn">Add Repetition</button>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <h2 class="section-title">Duration</h2>
+        <p class="subhead">Log the duration of the command.</p>
+        <div class="field-row">
+            <label for="duration">Select a duration:</label>
+            <select id="duration" name="duration">
+                <option value="N/A">N/A</option>
+                <option value="5">5 sec</option>
+                <option value="10">10 sec</option>
+                <option value="15">15 sec</option>
+                <option value="20">20 sec</option>
+                <option value="30">30 sec</option>
+                <option value="1">1 min</option>
+                <option value="1:30">1 min 30 sec</option>
+            </select>
+            <button id="remove-duration" type="button" class="hide-btn">Remove Selected</button>
+        </div>
+        <div class="field-row">
+            <label for="new-duration">Add a new duration:</label>
+            <input type="text" id="new-duration" placeholder="Enter duration...">
+            <button id="add-duration" type="button" class="save-btn">Add Duration</button>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <h2 class="section-title">Timer</h2>
+        <p class="subhead">Use a timer to help track your command durations.</p>
+        <div class="field-row">
+            <label for="timer">Timer:</label>
+            <input type="text" id="timer" placeholder="00:00" readonly>
+            <button id="timer-start" type="button" class="save-btn">Start</button>
+            <button id="timer-stop" type="button" class="hide-btn">Stop</button>
+            <button id="timer-reset" type="button" class="hide-btn">Reset</button>
+        </div>
+        <div class="field-row">
+            <button id="timer-direction" type="button" class="hide-btn">Mode: Countdown</button>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <h2 class="section-title">Distractions</h2>
+        <p class="subhead">List of distractions during the training.</p>
+        <div class="field-row">
+            <label for="distractions">Select a distraction:</label>
+            <select id="distractions" name="distractions">
+                <option value="none">None</option>
+                <option value="other dogs">Other dogs</option>
+                <option value="people">People</option>
+                <option value="squirrels">Squirrels</option>
+                <option value="birds">Birds</option>
+                <option value="other">Other</option>
+            </select>
+            <button id="remove-distraction" type="button" class="hide-btn">Remove Selected</button>
+        </div>
+        <div class="field-row">
+            <label for="new-distraction">Add a new distraction:</label>
+            <input type="text" id="new-distraction" placeholder="Enter distraction...">
+            <button id="add-distraction" type="button" class="save-btn">Add Distraction</button>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <h2 class="section-title">Location</h2>
+        <p class="subhead">Track location(s) where the training took place.</p>
+        <div class="field-row">
+            <label for="location">Select a location:</label>
+            <select id="location" name="location">
+                <option value="home">Home</option>
+                <option value="park">Park</option>
+                <option value="street">Street</option>
+                <!-- keep this at the very end-->
+                <option value="other">Other</option>
+            </select>
+            <button id="remove-location" type="button" class="hide-btn">Remove Selected</button>
+        </div>
+        <div class="field-row">
+            <label for="new-location">Add a new location:</label>
+            <input type="text" id="new-location" placeholder="Enter location...">
+            <button id="add-location" type="button" class="save-btn">Add Location</button>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <h2 class="section-title">Date/Time</h2>
+        <p class="subhead">Here is the date and time of the training session.</p>
+        <div class="field-row">
+            <label for="date">Select a date:</label>
+            <input type="date" id="date" name="date">
+        </div>
+        <div class="field-row">
+            <label for="time">Select a time:</label>
+            <input type="time" id="time" name="time">
+        </div>
+    </section>
+
+    <section class="page-section">
+        <h2 class="section-title">Session Duration</h2>
+        <p class="subhead">Track the total time spent on this training session.</p>
+
+        <div class="field-row">
+            <label for="session-duration-mode-toggle">Log duration without the clock:</label>
+            <label class="toggle">
+                <input type="checkbox" id="session-duration-mode-toggle" class="toggle-input">
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+        </div>
+
+        <div class="field-row" id="session-clock-fields">
+            <label for="session-start-time">From:</label>
+            <input type="time" id="session-start-time" name="session-start-time">
+            <label for="session-end-time">To:</label>
+            <input type="time" id="session-end-time" name="session-end-time">
+        </div>
+
+        <div class="field-row" id="session-manual-fields" hidden>
+            <label for="session-duration-hours">Hours:</label>
+            <input type="number" id="session-duration-hours" min="0" max="23" value="0">
+            <label for="session-duration-minutes">Minutes:</label>
+            <input type="number" id="session-duration-minutes" min="0" max="59" value="0">
+        </div>
+
+        <div class="field-row">
+            <span class="total-time-display" id="session-total-time-label">Total time: &mdash;</span>
+        </div>
+    </section>
+
+    <section class="page-section">
+        <h2 class="section-title">Notes</h2>
+        <form id="notes-form">
+            <div class="field-row">
+                <label for="notes">Notes:</label>
+                <input type="text" id="notes" placeholder="Enter notes here...">
+                <button type="reset" class="hide-btn">Clear</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="page-section">
+        <h2 class="section-title">Save</h2>
+        <form id="saveForm">
+            <button type="submit" id="triggerBtn" class="save-btn">Save</button>
+            <p id="save-message" hidden>Session saved!</p>
+        </form>
+    </section>
+
+    <div style="text-align:right">
+        <a class="home-link" href="load.html">Logged sessions &rarr;</a>
+    </div>
+
+</body>
+</html>

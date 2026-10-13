@@ -1,0 +1,101 @@
+/* Shared by every page: top nav bar, Directory dropdown, and home links. */
+
+/* Top-right account nav */
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 8px;
+}
+
+.top-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.top-nav .home-link {
+  margin-bottom: 0;
+}
+
+/* Signed-in account link: username, then email in a lighter style */
+.nav-username {
+  font-weight: 600;
+}
+
+.nav-username + .nav-email {
+  margin-left: 6px;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+/* Directory dropdown */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-toggle {
+  cursor: pointer;
+  list-style: none;
+}
+
+.nav-dropdown-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.nav-dropdown-toggle::after {
+  content: '\25BE';
+  margin-left: 4px;
+  font-size: 11px;
+}
+
+.nav-dropdown[open] .nav-dropdown-toggle::after {
+  content: '\25B4';
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  padding: 8px;
+  border: 1px solid var(--clay);
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(47, 64, 48, 0.12);
+}
+
+.nav-dropdown-menu a {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-dropdown-menu a:hover {
+  background: var(--bg);
+}
+
+/* Home link */
+.home-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--moss-dark);
+  text-decoration: none;
+}
+
+.home-link:hover {
+  text-decoration: underline;
+}

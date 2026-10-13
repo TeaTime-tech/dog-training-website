@@ -1,0 +1,524 @@
+/* Fitbit-inspired layout for today.html, recolored to the site's white/moss theme */
+
+body.today-page {
+  background: var(--bg);
+  font-family: 'Work Sans', sans-serif;
+}
+
+.today-page h1,
+.today-page h2 {
+  font-family: 'Work Sans', sans-serif;
+}
+
+/* Day arrows, compressed into the hero card, flanking the date label */
+.today-date-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.today-date-nav .today-date {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.today-date-nav-arrow {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--white);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.today-date-nav-arrow:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Date picker + "Jump to today", a popover anchored under the date label */
+.today-date-nav-controls {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  width: max-content;
+  background: var(--white);
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(47, 64, 48, 0.25);
+}
+
+.today-date-nav-controls[hidden] {
+  display: none;
+}
+
+.today-date-nav-input {
+  padding: 6px 10px;
+  border: 1px solid var(--clay);
+  border-radius: 8px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.today-date-nav-today {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--moss);
+  color: var(--white);
+  font-family: 'Work Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.today-date-nav-today:hover {
+  background: var(--moss-dark);
+}
+
+/* Hero card with progress ring */
+.today-hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 20px 0 24px;
+  padding: 24px;
+  max-width: 640px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--moss-dark) 0%, var(--ink) 100%);
+  color: var(--white);
+  box-shadow: 0 8px 24px rgba(47, 64, 48, 0.3);
+}
+
+.today-ring-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.today-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.today-ring-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 10;
+}
+
+.today-ring-progress {
+  fill: none;
+  stroke: var(--white);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 326.7256;
+  stroke-dashoffset: 326.7256;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.today-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.today-ring-value {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.today-ring-goal {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.today-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.today-date {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.today-date:hover {
+  color: var(--white);
+}
+
+.today-hero-text h1 {
+  margin: 0 0 4px;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.today-cta {
+  display: inline-block;
+  width: fit-content;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--moss-dark);
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.today-cta:hover {
+  background: var(--clay);
+}
+
+/* Stat tiles, Fitbit-card style */
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 16px 0 24px;
+  max-width: 640px;
+}
+
+.stat-tile {
+  flex: 1 1 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+  min-width: 140px;
+  background: var(--white);
+  border-top: 4px solid var(--muted);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(47, 64, 48, 0.08);
+}
+
+.stat-tile--coral {
+  border-top-color: var(--brass);
+}
+
+.stat-tile--purple {
+  border-top-color: var(--moss);
+}
+
+.stat-value {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Daily goal card */
+.today-goal-card {
+  margin: 0 0 24px;
+  padding: 18px 20px;
+  max-width: 640px;
+  background: var(--white);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(47, 64, 48, 0.08);
+}
+
+.today-goal-select-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+
+.today-goal-select-row select {
+  padding: 8px 10px;
+  border: 1px solid var(--clay);
+  border-radius: 8px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.today-goal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.today-goal-row[hidden] {
+  display: none;
+}
+
+.today-goal-text .today-section-title {
+  margin: 0 0 4px;
+}
+
+.today-goal-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.today-goal-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.today-goal-controls input {
+  width: 70px;
+  padding: 8px 10px;
+  border: 1px solid var(--clay);
+  border-radius: 8px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--ink);
+  text-align: center;
+}
+
+/* Session log, card list style */
+.today-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  max-width: 640px;
+  margin: 8px 0 12px;
+}
+
+/* Single white card wrapping a section's logged-item rows and its "+ Add" row */
+.today-section-card {
+  max-width: 640px;
+  margin: 0 0 24px;
+  background: var(--white);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(47, 64, 48, 0.08);
+  overflow: hidden;
+}
+
+.today-section-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px 18px;
+}
+
+.today-section-footer .save-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.today-section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Collapsible Daily Goal / Session Log / Exercise Log sections */
+.today-section {
+  max-width: 640px;
+  margin: 0 0 24px;
+}
+
+.today-collapsible-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.today-collapsible-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.today-collapsible-toggle::after {
+  content: '\25BE';
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.today-section[open] > .today-collapsible-toggle::after {
+  content: '\25B4';
+}
+
+/* while collapsed, the summary becomes its own white tile like the rest of the page's cards */
+.today-section:not([open]) > .today-collapsible-toggle {
+  padding: 14px 18px;
+  background: var(--white);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(47, 64, 48, 0.08);
+}
+
+.today-session-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.today-session-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+}
+
+.today-session-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.today-session-card--editing {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.today-session-card--editing .field-row {
+  width: 100%;
+}
+
+.today-session-checkbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--moss);
+  cursor: pointer;
+}
+
+.today-session-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.today-session-command {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: capitalize;
+}
+
+.today-session-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.today-session-notes {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.today-session-chips {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.today-session-chip {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--clay);
+  color: var(--moss-dark);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.today-session-chip--reps {
+  background: #F3E7D6;
+  color: #6B4E2A;
+}
+
+.today-empty-state {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Edit-session pop-up */
+
+/* Popup modal (e.g. "+ Add Exercise" on today.html) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(47, 64, 48, 0.55);
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(47, 64, 48, 0.3);
+}
+
+.modal-card .today-section-title {
+  margin: 0 0 16px;
+}

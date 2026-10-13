@@ -1,0 +1,342 @@
+/* commands.html */
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--clay);
+}
+
+.toggle-row:last-of-type {
+  border-bottom: none;
+}
+
+.command-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.command-tiles button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: var(--clay);
+  color: var(--ink);
+  font-family: 'Work Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.command-tiles button:hover {
+  background: var(--moss);
+  color: var(--white);
+}
+
+/* Canine Good Citizen checklist */
+.cgc-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cgc-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+#cgc-progress-bar {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 120px;
+  height: 10px;
+  border: none;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--clay);
+}
+
+#cgc-progress-bar::-webkit-progress-bar {
+  background: var(--clay);
+  border-radius: 999px;
+}
+
+#cgc-progress-bar::-webkit-progress-value {
+  background: var(--moss);
+  border-radius: 999px;
+}
+
+#cgc-progress-bar::-moz-progress-bar {
+  background: var(--moss);
+  border-radius: 999px;
+}
+
+.cgc-panel {
+  margin-top: 12px;
+  padding: 14px 18px;
+  max-width: 480px;
+  border: 1px solid var(--clay);
+  border-radius: 12px;
+  background: var(--white);
+}
+
+.cgc-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cgc-row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--clay);
+}
+
+.cgc-row:last-child {
+  border-bottom: none;
+}
+
+.cgc-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cgc-name {
+  font-weight: 500;
+}
+
+.cgc-log-btn {
+  flex-shrink: 0;
+  background: var(--clay);
+  color: var(--ink);
+  border: none;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cgc-log-btn:hover {
+  background: var(--moss);
+  color: var(--white);
+}
+
+.cgc-summary-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 4px;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: left;
+}
+
+.cgc-expand-icon {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cgc-attempt-log {
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.cgc-no-attempts {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cgc-attempt-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cgc-attempt-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.cgc-attempt-date {
+  color: var(--muted);
+  min-width: 52px;
+}
+
+.cgc-attempt-result {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  padding: 1px 8px;
+  border-radius: 999px;
+}
+
+.cgc-attempt-pass .cgc-attempt-result {
+  background: var(--moss);
+  color: var(--white);
+}
+
+.cgc-attempt-fail .cgc-attempt-result {
+  background: var(--brass);
+  color: var(--white);
+}
+
+.cgc-attempt-notes {
+  color: var(--ink);
+  flex-basis: 100%;
+}
+
+.cgc-log-form {
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--clay);
+  border-radius: 8px;
+}
+
+.cgc-log-form select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--clay);
+  border-radius: 8px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 14px;
+  background: var(--white);
+  color: var(--ink);
+}
+
+.cgc-log-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cgc-log-form-actions .save-btn {
+  padding: 7px 16px;
+  font-size: 13px;
+}
+
+.cgc-cancel-attempt-btn {
+  background: none;
+  border: none;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Command mastery */
+.mastery-hint {
+  margin: 10px 0 0;
+  font-size: 13px;
+}
+
+.mastery-status {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.mastery-status:empty {
+  display: none;
+}
+
+.mastery-status a {
+  color: var(--moss-dark);
+  font-weight: 600;
+}
+
+.mastery-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.mastery-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--clay);
+}
+
+.mastery-row:last-child {
+  border-bottom: none;
+}
+
+.mastery-row-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mastery-command {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.mastery-level-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--moss-dark);
+}
+
+.mastery-level-name--none {
+  color: var(--muted);
+}
+
+.mastery-meter {
+  display: grid;
+  grid-template-columns: repeat(var(--levels, 5), 1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.mastery-segment {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--clay);
+}
+
+.mastery-segment--earned {
+  background: var(--moss);
+}
+
+/* levels earned before but lost to time away from practice */
+.mastery-segment--decayed {
+  background: var(--brass);
+  opacity: 0.5;
+}
+
+.mastery-detail {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <title>Load Session</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- shared styles, then this page's styles -->
+    <link rel="stylesheet" href="../CSS/shared/base.css">
+    <link rel="stylesheet" href="../CSS/shared/nav.css">
+    <link rel="stylesheet" href="../CSS/shared/forms.css">
+    <link rel="stylesheet" href="../CSS/pages/load.css">
+    <!-- shared scripts, then this page's script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../JS/shared/supabaseClient.js" defer></script>
+    <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/shared/accountNav.js" defer></script>
+    <script src="../JS/shared/trainingData.js" defer></script>
+    <script src="../JS/pages/load.js" defer></script>
+</head>
+
+<body>
+    <div class="top-nav">
+        <details class="nav-dropdown">
+            <summary class="home-link nav-dropdown-toggle">Directory</summary>
+            <div class="nav-dropdown-menu">
+                <a href="index.html">Home</a>
+                <a href="today.html">Today</a>
+                <a href="commands.html">Commands</a>
+                <a href="log.html">Log</a>
+                <a href="load.html">View Logs</a>
+                <a href="settings.html">Settings</a>
+            </div>
+        </details>
+        <div class="top-nav-links">
+            <a class="home-link" href="create.html" target="_blank" rel="noopener noreferrer">Create Account</a>
+            <a class="home-link" href="login.html" target="_blank" rel="noopener noreferrer">Login</a>
+        </div>
+    </div>
+    <details open>
+        <summary class="collapsible-toggle"><h1>Training Log</h1></summary>
+
+        <div>
+            <p>Ready to log a new session?</p>
+            <a class="save-btn" href="log.html" target="_blank" rel="noopener noreferrer">Log Training Session</a>
+        </div>
+
+        <div>
+            <p class="subhead">Testing: fill in some random sessions and exercises to try out this page.</p>
+            <button type="button" id="seed-test-data" class="hide-btn">Generate Test Data</button>
+        </div>
+
+        <p>Select the date of a previous training session:</p>
+        <div>
+            <label for="date">Select a date:</label>
+            <input type="date" id="date" name="date">
+            <button id="load" type="button">Load Session Info</button>
+
+            <!-- select logs per page-->
+            <label for="page-size">Logs per page:</label>
+            <select id="page-size">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+            </select>
+        </div>
+
+        <div class="table-wrap">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Repetition(s)</th>
+                        <th>Duration</th>
+                        <th>Location</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body">
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination" id="pagination">
+            <button type="button" id="prev-page" disabled>&larr; Previous</button>
+            <label for="page-select">Page</label>
+            <select id="page-select" disabled></select>
+            <span id="page-total-label"></span>
+            <button type="button" id="next-page" disabled>Next &rarr;</button>
+        </div>
+    </details>
+
+    <details open>
+        <summary class="collapsible-toggle"><h1>Exercise Log</h1></summary>
+        <p>Select the date of a previous exercise, or leave blank to see all:</p>
+        <div>
+            <label for="exercise-date">Select a date:</label>
+            <input type="date" id="exercise-date" name="exercise-date">
+            <button id="load-exercises" type="button">Load Exercise Info</button>
+
+            <!-- select logs per page-->
+            <label for="exercise-page-size">Logs per page:</label>
+            <select id="exercise-page-size">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+            </select>
+        </div>
+
+        <div class="table-wrap">
+            <table id="exercise-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Duration</th>
+                        <th>Notes</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="exercise-table-body">
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination" id="exercise-pagination">
+            <button type="button" id="exercise-prev-page" disabled>&larr; Previous</button>
+            <label for="exercise-page-select">Page</label>
+            <select id="exercise-page-select" disabled></select>
+            <span id="exercise-page-total-label"></span>
+            <button type="button" id="exercise-next-page" disabled>Next &rarr;</button>
+        </div>
+    </details>
+
+    <details open>
+        <summary class="collapsible-toggle"><h1>Training Graphs</h1></summary>
+        <p>Select a command and a metric to view over time:</p>
+
+        <div class="page-section">
+            <div class="field-row">
+                <label for="graph-command">Command:</label>
+                <select id="graph-command" name="graph-command"></select>
+                <label for="graph-metric">Metric:</label>
+                <select id="graph-metric" name="graph-metric">
+                    <option value="repetitions">Repetitions</option>
+                    <option value="duration">Duration</option>
+                    <option value="both" selected>Both</option>
+                </select>
+            </div>
+            <div class="field-row">
+                <label for="graph-timeframe">Group by:</label>
+                <select id="graph-timeframe" name="graph-timeframe">
+                    <option value="daily">Day</option>
+                    <option value="monthly" selected>Month</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="all">All Time</option>
+                </select>
+                <label for="graph-day-picker" id="graph-day-picker-label" hidden>Day:</label>
+                <input type="date" id="graph-day-picker" hidden>
+                <label for="graph-month-picker" id="graph-month-picker-label">Month:</label>
+                <input type="month" id="graph-month-picker">
+                <label for="graph-year-picker" id="graph-year-picker-label" hidden>Year:</label>
+                <input type="number" id="graph-year-picker" min="2000" max="2100" step="1" hidden>
+            </div>
+            <div class="field-row">
+                <label for="graph-chart-type">Chart type:</label>
+                <select id="graph-chart-type" name="graph-chart-type">
+                    <option value="auto" selected>Auto</option>
+                    <option value="bar">Bar</option>
+                    <option value="line">Line</option>
+                </select>
+                <button id="graph-command-button" type="button" class="save-btn">View Data Over Time</button>
+            </div>
+        </div>
+
+        <div class="page-section graph-area" id="graph-area">
+            <div id="tester" class="graph-plot"></div>
+            <div id="graph-stat-summary" class="graph-stat-row" hidden></div>
+        </div>
+    </details>
+
+    <details open>
+        <summary class="collapsible-toggle"><h1>Command History Timeline</h1></summary>
+        <p>Each bar spans from a command's first practiced date to its most recent.</p>
+
+        <div class="page-section">
+            <div class="field-row">
+                <button type="button" id="gantt-refresh" class="save-btn">Refresh Timeline</button>
+            </div>
+        </div>
+
+        <div class="page-section graph-area" id="gantt-area">
+            <div id="gantt-chart" class="graph-plot"></div>
+            <div id="gantt-hover-badge" class="gantt-hover-badge" hidden></div>
+        </div>
+    </details>
+
+</body>
+
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- shared styles, then this page's styles -->
+    <link rel="stylesheet" href="../CSS/shared/base.css">
+    <link rel="stylesheet" href="../CSS/shared/nav.css">
+    <link rel="stylesheet" href="../CSS/shared/forms.css">
+    <link rel="stylesheet" href="../CSS/pages/settings.css">
+    <!-- shared scripts, then this page's script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../JS/shared/supabaseClient.js" defer></script>
+    <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/shared/accountNav.js" defer></script>
+    <script src="../JS/shared/mastery.js" defer></script>
+    <script src="../JS/pages/settings.js" defer></script>
+</head>
+<body>
+<div class="top-nav">
+    <details class="nav-dropdown">
+        <summary class="home-link nav-dropdown-toggle">Directory</summary>
+        <div class="nav-dropdown-menu">
+            <a href="index.html">Home</a>
+            <a href="today.html">Today</a>
+            <a href="commands.html">Commands</a>
+            <a href="log.html">Log</a>
+            <a href="load.html">View Logs</a>
+            <a href="settings.html">Settings</a>
+        </div>
+    </details>
+    <div class="top-nav-links">
+        <a class="home-link" href="create.html" target="_blank" rel="noopener noreferrer">Create Account</a>
+        <a class="home-link" href="login.html" target="_blank" rel="noopener noreferrer">Login</a>
+    </div>
+</div>
+<h1>Settings</h1>
+
+<h3>Account and Profile</h3>
+    <!-- settings.js enables these once someone is signed in -->
+    <p id="account-status" class="subhead" role="status">Loading your account...</p>
+    <fieldset id="account-fields" disabled>
+        <div>
+            <label for="display-name">Display Name:</label>
+            <input type="text" id="display-name" placeholder="Enter display name...">
+            <button id="change-display-name" type="button">Change Display Name</button>
+        </div>
+        <div>
+            <label for="email-change">Change Email:</label>
+            <input type="email" id="email-change" placeholder="Enter new email...">
+            <button id="change-email" type="button">Change Email</button>
+        </div>
+        <div>
+            <label for="current-password-change">Current Password:</label>
+            <input type="password" id="current-password-change" placeholder="Enter current password..." autocomplete="current-password">
+        </div>
+        <div>
+            <label for="password-change">New Password:</label>
+            <input type="password" id="password-change" placeholder="Enter new password..." autocomplete="new-password">
+            <button id="change-password" type="button">Change Password</button>
+        </div>
+    </fieldset>
+
+<h3>Training</h3>
+    <div>
+        <label for="mastery-decay-toggle">Show mastery decay:</label>
+        <label class="toggle">
+            <input type="checkbox" id="mastery-decay-toggle" class="toggle-input" checked disabled>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </label>
+    </div>
+    <p id="mastery-decay-status" class="subhead" role="status"></p>
+
+<h3>Units</h3>
+    <div>
+        <label for="weight-unit">Weight Unit:</label>
+        <select id="weight-unit">
+            <option value="kg">Kilograms(kg)</option>
+            <option value="lb">Pounds(lb)</option>
+        </select>
+    </div>
+    <div>
+        <label for="distance-unit">Distance Unit:</label>
+        <select id="distance-unit">
+            <option value="m">Meters(m)</option>
+            <option value="ft">Feet(ft)</option>
+        </select>
+    </div>
+    <div>
+        <button id="save-settings" type="button">Save Settings</button>
+    </div>
+
+<h3>Data</h3>
+    <div>
+        <label for="export-data">Export My Data:</label>
+        <button id="export-data" type="button">Export</button>
+    </div>
+    <p id="export-status" class="subhead" role="status"></p>
+
+<h3>Coming Soon</h3>
+    <p class="subhead">These settings aren't set up yet.</p>
+    <fieldset disabled>
+        <div>
+            <label for="profile-picture">Profile Picture:</label>
+            <input type="file" id="profile-picture" accept="image/*">
+        </div>
+        <div>
+            <label for="language">Language:</label>
+            <select id="language">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+            </select>
+        </div>
+        <div>
+            <label for="date-format">Date format:</label>
+            <select id="date-format">
+                <option value="dd/mm/yyyy">Day/Month/Year</option>
+                <option value="mm/dd/yyyy">Month/Day/Year</option>
+            </select>
+        </div>
+        <div>
+            <label for="theme">Theme:</label>
+            <select id="theme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+        <div>
+            <label for="email-notifications">Email Notifications:</label>
+            <label class="toggle">
+                <input type="checkbox" id="email-notifications" class="toggle-input">
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+        </div>
+        <div>
+            <label for="vaccination-and-health-reminder">Vaccination and Health Reminders:</label>
+            <label class="toggle">
+                <input type="checkbox" id="vaccination-and-health-reminder" class="toggle-input">
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+        </div>
+        <div>
+            <label for="privacy">Privacy Settings:</label>
+            <select id="privacy">
+                <option value="public">Public</option>
+                <option value="friends">Friends Only</option>
+                <option value="private">Private</option>
+            </select>
+        </div>
+        <div>
+            <label for="show-display-name">Show my name on shared commands</label>
+            <label class="toggle">
+                <input type="checkbox" id="show-display-name" class="toggle-input">
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+        </div>
+        <div>
+            <label for="trainer-sharing">Share my training plans with other users:</label>
+            <label class="toggle">
+                <input type="checkbox" id="trainer-sharing" class="toggle-input">
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+            <input type="email" id="trainer-email" placeholder="Enter trainer's email...">
+        </div>
+        <div>
+            <label for="subscription">Subscription Plan:</label>
+            <select id="subscription">
+                <option value="free">Free</option>
+                <option value="premium">Premium</option>
+                <option value="pro">Pro</option>
+            </select>
+            <button id="renew-subscription" type="button">Renew</button>
+        </div>
+        <div>
+            <label for="delete-data">Delete My Data:</label>
+            <button id="delete-data" type="button">Delete</button>
+        </div>
+        <div>
+            <label for="help">Help and Support:</label>
+            <button id="help" type="button">Get Help</button>
+        </div>
+        <div>
+            <label for="feedback">Feedback:</label>
+            <textarea id="feedback" placeholder="Enter your feedback..."></textarea>
+            <button id="submit-feedback" type="button">Submit Feedback</button>
+        </div>
+    </fieldset>
+
+</body>
+</html>

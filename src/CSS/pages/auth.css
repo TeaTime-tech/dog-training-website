@@ -1,0 +1,11 @@
+/* create.html and login.html: sign-up / login status line. */
+
+/* sign-up / login status line */
+#auth-message {
+  min-height: 1.5em;
+  color: var(--muted);
+}
+
+#auth-message.auth-error {
+  color: #A4442E;
+}

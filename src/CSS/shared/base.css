@@ -1,0 +1,97 @@
+/* Shared by every page: color tokens, page layout, headings, and section cards. */
+
+:root {
+  --bg: #F5F1E8;
+  --ink: #2F4030;
+  --moss: #6B8F5E;
+  --moss-dark: #547247;
+  --brass: #B8925A;
+  --clay: #E8DFC9;
+  --muted: #8A8271;
+  --white: #FFFDF8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Work Sans', sans-serif;
+  line-height: 1.5;
+}
+
+/* Section cards */
+.page-section {
+  max-width: 560px;
+  margin: 0 0 24px;
+  padding: 18px 20px;
+  border: 1px solid var(--clay);
+  border-radius: 12px;
+  background: var(--white);
+}
+
+.section-title {
+  margin: 0 0 14px;
+  font-family: 'Fraunces', serif;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 32px;
+  margin: 0;
+}
+
+.subhead {
+  color: var(--muted);
+  font-size: 15px;
+  margin: 0 0 24px;
+}
+
+/* Collapsible section: <details open><summary class="collapsible-toggle">heading</summary>...</details>
+   (load.html, commands.html) */
+.collapsible-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.collapsible-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible-toggle::after {
+  content: '\25BE';
+  font-size: 12px;
+  color: var(--muted);
+}
+
+details[open] > .collapsible-toggle::after {
+  content: '\25B4';
+}
+
+/* a collapsible section card (commands.html): the title sits flush, with space below it when open */
+.page-section > details > .collapsible-toggle > .section-title {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.page-section > details[open] > .collapsible-toggle {
+  margin-bottom: 12px;
+}
