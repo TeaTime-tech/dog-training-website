@@ -2,7 +2,7 @@
 
 .dogs-status {
   margin: 0 0 16px;
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .dogs-status:empty {
@@ -21,6 +21,7 @@
 
 .dog-list-empty {
   margin: 0;
+  font-size: 17px;
   color: var(--muted);
 }
 
@@ -42,7 +43,7 @@
 .dog-name {
   flex: 1 1 140px;
   font-family: 'Fraunces', serif;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
@@ -59,7 +60,7 @@
   border-radius: 999px;
   background: var(--clay);
   color: var(--moss-dark);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -74,7 +75,7 @@
   border: 1px solid var(--clay);
   border-radius: 8px;
   font-family: 'Work Sans', sans-serif;
-  font-size: 15px;
+  font-size: 17px;
   background: var(--bg);
   color: var(--ink);
 }
@@ -87,4 +88,28 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* larger text on this page (these shared classes only change here, since this file loads only on dogs.html) */
+.subhead {
+  font-size: 18px;
+}
+
+.section-title {
+  font-size: 23px;
+}
+
+.page-section .field-row input {
+  font-size: 17px;
+}
+
+.page-section .save-btn {
+  font-size: 16px;
+}
+
+.dog-row .row-save-btn,
+.dog-row .row-cancel-btn,
+.dog-row .restore-btn,
+.dog-row .hide-btn {
+  font-size: 15px;
 }
