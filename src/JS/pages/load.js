@@ -1,6 +1,11 @@
 /* load.html: session and exercise tables, test data, metric graphs, and the command timeline.
    Needs dogs.js, sessions.js and trainingData.js loaded first. */
 
+// tell the totals section that sessions or exercises were edited on this page
+function notifyTrainingDataChanged() {
+    window.dispatchEvent(new CustomEvent("trainingdatachanged"));
+}
+
 /*which dog's sessions this page shows (load.html)*/
 
 const VIEWING_DOG_STORAGE_KEY = "loadViewingDog";
@@ -135,6 +140,7 @@ if (loadButton) {
             const currentHistory = getSessionHistory();
             currentHistory.splice(index, 1);
             setSessionHistory(currentHistory);
+            notifyTrainingDataChanged();
             renderSessionTable();
         });
 
@@ -219,6 +225,7 @@ if (loadButton) {
                 notes: notesInput.value.trim(),
             };
             setSessionHistory(currentHistory);
+            notifyTrainingDataChanged();
             editingIndex = null;
             renderSessionTable();
         });
@@ -397,6 +404,7 @@ if (loadExercisesButton) {
             const currentHistory = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
             currentHistory.splice(index, 1);
             localStorage.setItem("exerciseHistory", JSON.stringify(currentHistory));
+            notifyTrainingDataChanged();
             renderExerciseTable();
         });
 
@@ -459,6 +467,7 @@ if (loadExercisesButton) {
                 time: timeInputEdit.value,
             };
             localStorage.setItem("exerciseHistory", JSON.stringify(currentHistory));
+            notifyTrainingDataChanged();
             editingExerciseIndex = null;
             renderExerciseTable();
         });
@@ -632,6 +641,7 @@ if (seedTestDataButton) {
             "exerciseHistory",
             JSON.stringify(exerciseHistory.concat(generateRandomExercises(15)))
         );
+        notifyTrainingDataChanged();
 
         if (loadButton) {
             loadButton.click();
@@ -981,6 +991,205 @@ if (graphCommandSelect) {
     });
 }
 
+/*total training and exercise time: all-time tiles plus a day/week/month/year graph (load.html)*/
+
+const totalsTiles = document.getElementById("totals-tiles");
+
+if (totalsTiles) {
+    const totalsGroupSelect = document.getElementById("totals-group");
+    const totalsShowSelect = document.getElementById("totals-show");
+    const totalsChartTypeSelect = document.getElementById("totals-chart-type");
+    const totalsChartEl = document.getElementById("totals-chart");
+    const totalsNote = document.getElementById("totals-note");
+    const TOTALS_MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    totalsChartEl.addEventListener("mouseleave", () => clearPlotlyHover(totalsChartEl));
+
+    // time spent on one session: its length (Session Duration) if entered, else its Duration
+    const sessionTrainingSeconds = (session) => {
+        const minutes = Number(session.sessionTotalMinutes);
+        if (Number.isFinite(minutes) && minutes > 0) return minutes * 60;
+        return parseStoredDurationSeconds(session.duration) || 0;
+    };
+
+    const exerciseSeconds = (exercise) => parseStoredDurationSeconds(exercise.duration) || 0;
+
+    // "X hr Y min" (or "X min" / "X sec") for a number of seconds
+    const formatTotalTime = (seconds) => {
+        if (seconds > 0 && seconds < 60) return `${Math.round(seconds)} sec`;
+        const totalMinutes = Math.round(seconds / 60);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        if (hours === 0) return `${minutes} min`;
+        return minutes ? `${hours} hr ${minutes} min` : `${hours} hr`;
+    };
+
+    const readExercises = () => {
+        try {
+            return JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+        } catch {
+            return [];
+        }
+    };
+
+    // a Date for a "YYYY-MM-DD" string, at local midnight
+    const parseIsoDate = (iso) => {
+        const [year, month, day] = iso.split("-").map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    // the Monday that starts a date's week
+    const weekStart = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate() - ((date.getDay() + 6) % 7));
+
+    // the buckets to plot for a grouping, oldest first: a key (see bucketKeyFor) and a label
+    const buildTotalsBuckets = (group, allDates) => {
+        const today = new Date();
+        const buckets = [];
+        if (group === "daily") {
+            // the last 30 days
+            for (let i = 29; i >= 0; i -= 1) {
+                const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+                buckets.push({ key: localDateString(day), label: `${TOTALS_MONTH_NAMES[day.getMonth()]} ${day.getDate()}` });
+            }
+        } else if (group === "weekly") {
+            // the last 12 weeks, Monday to Sunday
+            const thisWeek = weekStart(today);
+            for (let i = 11; i >= 0; i -= 1) {
+                const start = new Date(thisWeek.getFullYear(), thisWeek.getMonth(), thisWeek.getDate() - i * 7);
+                buckets.push({ key: localDateString(start), label: `Week of ${TOTALS_MONTH_NAMES[start.getMonth()]} ${start.getDate()}` });
+            }
+        } else if (group === "monthly") {
+            // the last 12 months
+            for (let i = 11; i >= 0; i -= 1) {
+                const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                buckets.push({ key: localDateString(month).slice(0, 7), label: `${TOTALS_MONTH_NAMES[month.getMonth()]} ${month.getFullYear()}` });
+            }
+        } else {
+            // every year from the first logged date to this year
+            const years = allDates.map((iso) => Number(iso.slice(0, 4))).filter(Number.isFinite);
+            const firstYear = Math.min(today.getFullYear(), ...years);
+            for (let year = firstYear; year <= today.getFullYear(); year += 1) {
+                buckets.push({ key: String(year), label: String(year) });
+            }
+        }
+        return buckets;
+    };
+
+    // which bucket a "YYYY-MM-DD" date falls in for a grouping
+    const bucketKeyFor = (group, iso) => {
+        if (group === "daily") return iso;
+        if (group === "weekly") return localDateString(weekStart(parseIsoDate(iso)));
+        if (group === "monthly") return iso.slice(0, 7);
+        return iso.slice(0, 4);
+    };
+
+    // one stat tile (value + label)
+    const buildTotalsTile = (value, label, variant) => {
+        const tile = document.createElement("div");
+        tile.className = `graph-stat-tile graph-stat-tile--${variant}`;
+        const valueEl = document.createElement("span");
+        valueEl.className = "graph-stat-value";
+        valueEl.textContent = value;
+        const labelEl = document.createElement("span");
+        labelEl.className = "graph-stat-label";
+        labelEl.textContent = label;
+        tile.append(valueEl, labelEl);
+        return tile;
+    };
+
+    // all-time tiles: training time and sessions (for the picked dog), exercise time and exercises
+    const renderTotalsTiles = (sessions, exercises) => {
+        const trainingTotal = sessions.reduce((sum, session) => sum + sessionTrainingSeconds(session), 0);
+        const exerciseTotal = exercises.reduce((sum, exercise) => sum + exerciseSeconds(exercise), 0);
+        totalsTiles.replaceChildren(
+            buildTotalsTile(formatTotalTime(trainingTotal), "Total training time", "moss"),
+            buildTotalsTile(String(sessions.length), `Training session${sessions.length === 1 ? "" : "s"} logged`, "moss"),
+            buildTotalsTile(formatTotalTime(exerciseTotal), "Total exercise time", "brass"),
+            buildTotalsTile(String(exercises.length), `Exercise${exercises.length === 1 ? "" : "s"} logged`, "brass"),
+        );
+    };
+
+    // the training/exercise time graph for the picked grouping
+    const renderTotalsChart = (sessions, exercises) => {
+        const group = totalsGroupSelect.value;
+        const show = totalsShowSelect.value;
+        const allDates = [...sessions, ...exercises].map((item) => item.date).filter(Boolean);
+        const buckets = buildTotalsBuckets(group, allDates);
+        const indexByKey = new Map(buckets.map((bucket, i) => [bucket.key, i]));
+
+        const trainingByBucket = buckets.map(() => 0);
+        const exerciseByBucket = buckets.map(() => 0);
+        sessions.forEach((session) => {
+            const i = session.date ? indexByKey.get(bucketKeyFor(group, session.date)) : undefined;
+            if (i !== undefined) trainingByBucket[i] += sessionTrainingSeconds(session);
+        });
+        exercises.forEach((exercise) => {
+            const i = exercise.date ? indexByKey.get(bucketKeyFor(group, exercise.date)) : undefined;
+            if (i !== undefined) exerciseByBucket[i] += exerciseSeconds(exercise);
+        });
+
+        // plot in hours once the biggest value passes 3 hours, otherwise minutes
+        const shown = [];
+        if (show !== "exercise") shown.push(...trainingByBucket);
+        if (show !== "training") shown.push(...exerciseByBucket);
+        const useHours = Math.max(0, ...shown) >= 3 * 3600;
+        const toUnit = (seconds) => Math.round((seconds / (useHours ? 3600 : 60)) * 10) / 10;
+
+        const labels = buckets.map((bucket) => bucket.label);
+        const buildTrace = (name, seconds, color) => {
+            const base = {
+                name,
+                x: labels,
+                y: seconds.map(toUnit),
+                customdata: seconds.map(formatTotalTime),
+                hovertemplate: `${name}: %{customdata}<extra></extra>`,
+            };
+            return totalsChartTypeSelect.value === "line"
+                ? { ...base, type: "scatter", mode: "lines+markers", line: { color, width: 3, shape: "spline" }, marker: { color, size: 6 } }
+                : { ...base, type: "bar", marker: { color, cornerradius: 6 } };
+        };
+        const data = [];
+        if (show !== "exercise") data.push(buildTrace("Training time", trainingByBucket, "#6B8F5E"));
+        if (show !== "training") data.push(buildTrace("Exercise time", exerciseByBucket, "#B8925A"));
+
+        const axisFont = { family: "Work Sans, sans-serif", color: "#8A8271", size: 12 };
+        const layout = {
+            font: { family: "Work Sans, sans-serif", color: "#2F4030" },
+            paper_bgcolor: "#FFFDF8",
+            plot_bgcolor: "#FFFDF8",
+            margin: { t: 24, r: 24, b: 72, l: 56 },
+            barmode: "group",
+            bargap: 0.3,
+            hovermode: "x unified",
+            hoverlabel: { bgcolor: "#FFFDF8", bordercolor: "#E8DFC9", font: { family: "Work Sans, sans-serif", color: "#2F4030" } },
+            xaxis: { type: "category", gridcolor: "transparent", tickfont: axisFont, tickangle: group === "yearly" ? 0 : -45 },
+            yaxis: { gridcolor: "#E8DFC9", zeroline: false, rangemode: "tozero", tickfont: axisFont, title: { text: `Time (${useHours ? "hours" : "minutes"})`, font: axisFont } },
+            legend: { orientation: "h", y: -0.35, font: { family: "Work Sans, sans-serif", color: "#8A8271" } },
+            showlegend: data.length > 1,
+        };
+        Plotly.react(totalsChartEl, data, layout, { responsive: true, displayModeBar: false });
+    };
+
+    // redraw the tiles and graph from the latest sessions (picked dog only) and exercises
+    const renderTrainingTotals = () => {
+        const sessions = getSessionHistory().filter((session) => matchesViewingDog(session));
+        const exercises = readExercises();
+        renderTotalsTiles(sessions, exercises);
+        totalsNote.hidden = viewingDogFilter === VIEWING_ALL_DOGS;
+        if (typeof Plotly !== "undefined") renderTotalsChart(sessions, exercises);
+    };
+
+    [totalsGroupSelect, totalsShowSelect, totalsChartTypeSelect].forEach((select) => {
+        select.addEventListener("change", renderTrainingTotals);
+    });
+    window.addEventListener("viewingdogchanged", renderTrainingTotals);
+    window.addEventListener("trainingdatachanged", renderTrainingTotals);
+    window.addEventListener("sessionhistorysynced", (event) => {
+        if (event.detail.changed) renderTrainingTotals();
+    });
+    renderTrainingTotals();
+}
+
 /*command history timeline, a Gantt-style chart (load.html)*/
 
 const ganttChartEl = document.getElementById("gantt-chart");
@@ -993,7 +1202,8 @@ if (ganttChartEl) {
         muted: "#8A8271",
         white: "#FFFDF8",
     };
-    const GANTT_MIN_SPAN_MS = 24 * 60 * 60 * 1000; // keep single-session commands visible as a thin bar
+    const GANTT_DAY_MS = 24 * 60 * 60 * 1000; // each practiced day is drawn one day wide
+    const ganttBreakSelect = document.getElementById("gantt-break");
 
     // Plotly's mouseout hover-dismiss can miss when the cursor leaves quickly, leaving the
     // tooltip stuck on screen - force-clear it whenever the pointer leaves the chart area
@@ -1051,30 +1261,58 @@ if (ganttChartEl) {
 
     ganttChartEl.addEventListener("mouseleave", hideGanttHoverBadge);
 
+    // whole days from one "YYYY-MM-DD" date to another (local dates, so daylight saving doesn't matter)
+    const ganttDaysBetween = (fromIso, toIso) => {
+        const [fy, fm, fd] = fromIso.split("-").map(Number);
+        const [ty, tm, td] = toIso.split("-").map(Number);
+        return Math.round((Date.UTC(ty, tm - 1, td) - Date.UTC(fy, fm - 1, fd)) / GANTT_DAY_MS);
+    };
+
+    // the "YYYY-MM-DD" date one day after another
+    const ganttNextDay = (iso) => {
+        const [year, month, day] = iso.split("-").map(Number);
+        return localDateString(new Date(year, month - 1, day + 1));
+    };
+
+    // split each command's practiced dates into stretches, starting a new one after a long enough gap
+    const buildPracticeStretches = (sessionsByCommand, breakDays) => {
+        const stretchesByCommand = new Map();
+        sessionsByCommand.forEach((countsByDate, command) => {
+            const dates = Array.from(countsByDate.keys()).sort();
+            const stretches = [];
+            dates.forEach((date) => {
+                const current = stretches[stretches.length - 1];
+                if (current && ganttDaysBetween(current.last, date) <= breakDays) {
+                    current.last = date;
+                    current.count += countsByDate.get(date);
+                } else {
+                    stretches.push({ first: date, last: date, count: countsByDate.get(date) });
+                }
+            });
+            stretchesByCommand.set(command, stretches);
+        });
+        return stretchesByCommand;
+    };
+
     function renderCommandTimeline() {
         const sessionHistory = getSessionHistory();
 
-        // find each command's earliest/latest practiced date and how many times it was practiced
-        const rangesByCommand = new Map();
+        // how many sessions of each command were logged on each date
+        const sessionsByCommand = new Map();
         sessionHistory.forEach((session) => {
             if (!session.command || !session.date || !matchesViewingDog(session)) {
                 return;
             }
-            const existing = rangesByCommand.get(session.command);
-            if (!existing) {
-                rangesByCommand.set(session.command, { first: session.date, last: session.date, count: 1 });
-                return;
+            if (!sessionsByCommand.has(session.command)) {
+                sessionsByCommand.set(session.command, new Map());
             }
-            if (session.date < existing.first) {
-                existing.first = session.date;
-            }
-            if (session.date > existing.last) {
-                existing.last = session.date;
-            }
-            existing.count += 1;
+            const countsByDate = sessionsByCommand.get(session.command);
+            countsByDate.set(session.date, (countsByDate.get(session.date) || 0) + 1);
         });
 
-        const commands = Array.from(rangesByCommand.keys()).sort().reverse();
+        const breakDays = Number(ganttBreakSelect && ganttBreakSelect.value) || 7;
+        const stretchesByCommand = buildPracticeStretches(sessionsByCommand, breakDays);
+        const commands = Array.from(stretchesByCommand.keys()).sort().reverse();
 
         Plotly.purge(ganttChartEl);
         ganttChartEl.innerHTML = "";
@@ -1087,17 +1325,27 @@ if (ganttChartEl) {
             return;
         }
 
+        // one bar per stretch, from its first practiced day to the end of its last
+        const barCommands = [];
         const bases = [];
         const spans = [];
         const counts = [];
+        // a faint dotted line across each break, so the stretches still read as one command
+        const breakX = [];
+        const breakY = [];
         commands.forEach((command) => {
-            const { first, last, count } = rangesByCommand.get(command);
-            const firstMs = new Date(`${first}T00:00:00`).getTime();
-            const lastMs = new Date(`${last}T00:00:00`).getTime();
-            const span = Math.max(lastMs - firstMs, GANTT_MIN_SPAN_MS);
-            bases.push(first);
-            spans.push(span);
-            counts.push(count);
+            const stretches = stretchesByCommand.get(command);
+            stretches.forEach((stretch, i) => {
+                barCommands.push(command);
+                bases.push(stretch.first);
+                spans.push((ganttDaysBetween(stretch.first, stretch.last) + 1) * GANTT_DAY_MS);
+                counts.push(stretch.count);
+                const next = stretches[i + 1];
+                if (next) {
+                    breakX.push(ganttNextDay(stretch.last), next.first, null);
+                    breakY.push(command, command, null);
+                }
+            });
         });
 
         const data = [
@@ -1105,7 +1353,7 @@ if (ganttChartEl) {
                 type: "bar",
                 orientation: "h",
                 x: spans,
-                y: commands,
+                y: barCommands,
                 base: bases,
                 marker: { color: GANTT_COLORS.moss, cornerradius: 6 },
                 // "none" draws nothing, but the bar still emits plotly_hover/unhover events for
@@ -1114,6 +1362,16 @@ if (ganttChartEl) {
                 // Plotly's rectangular tooltip following the cursor
                 hoverinfo: "none",
             },
+            {
+                type: "scatter",
+                mode: "lines",
+                x: breakX,
+                y: breakY,
+                line: { color: GANTT_COLORS.muted, width: 1.5, dash: "dot" },
+                connectgaps: false,
+                hoverinfo: "skip",
+                showlegend: false,
+            },
         ];
 
         const layout = {
@@ -1121,6 +1379,7 @@ if (ganttChartEl) {
             paper_bgcolor: GANTT_COLORS.white,
             plot_bgcolor: GANTT_COLORS.white,
             margin: { t: 24, r: 24, b: 48, l: 100 },
+            showlegend: false,
             xaxis: {
                 type: "date",
                 title: { text: "Date", font: { family: "Work Sans, sans-serif", color: GANTT_COLORS.muted, size: 12 } },
@@ -1141,10 +1400,11 @@ if (ganttChartEl) {
 
             ganttChartEl.on("plotly_hover", (eventData) => {
                 const point = eventData.points && eventData.points[0];
-                if (!point || typeof point.pointIndex !== "number") {
+                if (!point || point.curveNumber !== 0 || typeof point.pointIndex !== "number") {
                     return;
                 }
-                showGanttHoverBadge(commands[point.pointIndex], counts[point.pointIndex], point, eventData.event);
+                // the badge counts the sessions in the hovered stretch
+                showGanttHoverBadge(barCommands[point.pointIndex], counts[point.pointIndex], point, eventData.event);
             });
 
             ganttChartEl.on("plotly_unhover", hideGanttHoverBadge);
@@ -1154,6 +1414,9 @@ if (ganttChartEl) {
     const ganttRefreshButton = document.getElementById("gantt-refresh");
     if (ganttRefreshButton) {
         ganttRefreshButton.addEventListener("click", renderCommandTimeline);
+    }
+    if (ganttBreakSelect) {
+        ganttBreakSelect.addEventListener("change", renderCommandTimeline);
     }
 
     renderCommandTimeline();

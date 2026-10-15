@@ -7,7 +7,7 @@ A static, multi-page website for tracking dog training: logging sessions, managi
 Code is split into **shared** (used by several pages) and **pages** (one file per page, named after the page).
 
 - `index.html` (repo root): redirects to `src/HTML/index.html`, so the GitHub Pages site root works.
-- `src/HTML/`: pages. `index.html` is the home page. Others: `today`, `commands`, `log`, `load` (view logs + Plotly charts, filtered by a "Switch dog" picker), `dogs` (My Dogs: add, rename, delete and pick the current dog), `settings`, `upcoming` (planned features), `directory`, `create` (sign up), `login`. Signed-in users opening `create`/`login` are sent to `settings`.
+- `src/HTML/`: pages. `index.html` is the home page. Others: `today`, `commands`, `log`, `load` (view logs, training/exercise time totals, Plotly charts and a command timeline with practice breaks, filtered by a "Switch dog" picker), `dogs` (My Dogs: add, rename, delete and pick the current dog), `settings`, `upcoming` (planned features), `directory`, `create` (sign up), `login`. Signed-in users opening `create`/`login` are sent to `settings`.
 - `src/CSS/shared/`: every page loads `base.css` (color tokens, layout, headings, section cards), `nav.css` (top nav, Directory dropdown), and `forms.css` (buttons, fields, toggle switches), in that order.
 - `src/CSS/pages/<page>.css`: styles for one page, loaded after the shared files. `auth.css` is shared by `create` and `login`.
 - `src/JS/shared/`:

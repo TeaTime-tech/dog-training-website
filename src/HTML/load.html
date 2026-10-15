@@ -149,6 +149,15 @@
     </details>
 
     <details open>
+        <summary class="collapsible-toggle"><h1>Training Totals</h1></summary>
+        <p class="subhead">Training time uses each session's length (Session Duration), or its Duration when no length was entered.</p>
+        <p id="totals-note" class="subhead" hidden>Training totals are for the dog picked in Switch dog. Exercises aren't tied to a dog, so they include everything.</p>
+        <div class="page-section graph-area">
+            <div id="totals-tiles" class="graph-stat-row"></div>
+        </div>
+    </details>
+
+    <details open>
         <summary class="collapsible-toggle"><h1>Training Graphs</h1></summary>
         <p>Select a command and a metric to view over time:</p>
 
@@ -193,14 +202,50 @@
             <div id="tester" class="graph-plot"></div>
             <div id="graph-stat-summary" class="graph-stat-row" hidden></div>
         </div>
+
+        <h2 class="section-title totals-chart-title">Training &amp; Exercise Time</h2>
+        <div class="page-section">
+            <div class="field-row">
+                <label for="totals-group">Group by:</label>
+                <select id="totals-group">
+                    <option value="daily">Daily (last 30 days)</option>
+                    <option value="weekly" selected>Weekly (last 12 weeks)</option>
+                    <option value="monthly">Monthly (last 12 months)</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+            </div>
+            <div class="field-row">
+                <label for="totals-show">Show:</label>
+                <select id="totals-show">
+                    <option value="both" selected>Training &amp; exercise</option>
+                    <option value="training">Training time</option>
+                    <option value="exercise">Exercise time</option>
+                </select>
+                <label for="totals-chart-type">Chart type:</label>
+                <select id="totals-chart-type">
+                    <option value="bar" selected>Bar</option>
+                    <option value="line">Line</option>
+                </select>
+            </div>
+        </div>
+        <div class="page-section graph-area">
+            <div id="totals-chart" class="graph-plot totals-plot"></div>
+        </div>
     </details>
 
     <details open>
         <summary class="collapsible-toggle"><h1>Command History Timeline</h1></summary>
-        <p>Each bar spans from a command's first practiced date to its most recent.</p>
+        <p>Each bar shows a stretch of practice for a command. A gap means the command wasn't practiced for a while.</p>
 
         <div class="page-section">
             <div class="field-row">
+                <label for="gantt-break">Show a break after:</label>
+                <select id="gantt-break">
+                    <option value="3">3 days without practice</option>
+                    <option value="7" selected>1 week without practice</option>
+                    <option value="14">2 weeks without practice</option>
+                    <option value="30">1 month without practice</option>
+                </select>
                 <button type="button" id="gantt-refresh" class="save-btn">Refresh Timeline</button>
             </div>
         </div>

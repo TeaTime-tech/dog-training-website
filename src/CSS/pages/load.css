@@ -198,3 +198,26 @@
   font-size: 0.8125rem;
   color: var(--muted);
 }
+
+/* Training & Exercise Time graph (load.html): a heading inside Training Graphs, and room for slanted labels */
+.totals-chart-title {
+  margin-top: 8px;
+}
+
+.totals-plot {
+  height: 380px;
+}
+
+/* Training Totals tiles: a 2 x 2 grid, with values sized so "6 hr 43 min" fits on one line */
+#totals-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#totals-tiles .graph-stat-tile {
+  min-width: 0;
+}
+
+#totals-tiles .graph-stat-value {
+  font-size: 1.5rem;
+}
