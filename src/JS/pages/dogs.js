@@ -8,6 +8,10 @@ const dogList = document.getElementById("dog-list");
 const dogListEmpty = document.getElementById("dog-list-empty");
 const addDogForm = document.getElementById("add-dog-form");
 const newDogNameInput = document.getElementById("new-dog-name");
+const unassignedSection = document.getElementById("unassigned-section");
+const unassignedSummary = document.getElementById("unassigned-summary");
+const assignForm = document.getElementById("assign-form");
+const assignDogSelect = document.getElementById("assign-dog");
 
 let accountDogs = [];
 let renamingDogId = null;
@@ -83,6 +87,24 @@ function renderDogRow(dog) {
 function renderDogList() {
     dogList.replaceChildren(...accountDogs.map(renderDogRow));
     dogListEmpty.hidden = accountDogs.length > 0;
+    renderUnassignedSessions();
+}
+
+// show "Sessions Without a Dog" when there are dogs to give them to, with the current dog preselected
+function renderUnassignedSessions() {
+    const count = getSessionHistory().filter((session) => !session.dogId).length;
+    unassignedSection.hidden = count === 0 || accountDogs.length === 0;
+    if (unassignedSection.hidden) return;
+
+    unassignedSummary.textContent = `${count} training session${count === 1 ? " isn't" : "s aren't"} assigned to a dog, so ${count === 1 ? "it doesn't" : "they don't"} show on View Logs.`;
+    const picked = assignDogSelect.value || getCurrentDogId();
+    assignDogSelect.replaceChildren(...accountDogs.map((dog) => {
+        const option = document.createElement("option");
+        option.value = dog.id;
+        option.textContent = dog.name;
+        return option;
+    }));
+    if (accountDogs.some((dog) => dog.id === picked)) assignDogSelect.value = picked;
 }
 
 // load the account's dogs, keep the selected dog valid, and draw the page
@@ -169,6 +191,27 @@ async function removeDog(dog) {
         showDogsStatus(`Couldn't delete ${dog.name}: ${error.message}`, true);
     }
 }
+
+// give every session without a dog to the picked dog; the edit syncs them to the account
+assignForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const dog = accountDogs.find((d) => d.id === assignDogSelect.value);
+    if (!dog) return;
+    const history = getSessionHistory();
+    const unassigned = history.filter((session) => !session.dogId);
+    if (!unassigned.length) return;
+    unassigned.forEach((session) => {
+        session.dogId = dog.id;
+    });
+    setSessionHistory(history);
+    renderUnassignedSessions();
+    showDogsStatus(`Assigned ${unassigned.length} session${unassigned.length === 1 ? "" : "s"} to ${dog.name}.`);
+});
+
+// sessions from the account arrived; the unassigned count may have changed
+window.addEventListener("sessionhistorysynced", (event) => {
+    if (event.detail.changed && !dogListSection.hidden) renderUnassignedSessions();
+});
 
 addDogForm.addEventListener("submit", async (event) => {
     event.preventDefault();

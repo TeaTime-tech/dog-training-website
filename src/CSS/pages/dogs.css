@@ -113,3 +113,12 @@
 .dog-row .hide-btn {
   font-size: 0.875rem;
 }
+
+.unassigned-summary {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.page-section .field-row select {
+  font-size: 0.96875rem;
+}

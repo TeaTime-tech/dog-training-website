@@ -51,6 +51,17 @@
         <ul id="dog-list" class="dog-list"></ul>
     </section>
 
+    <!-- shown only when some sessions (e.g. logged before dogs existed) don't belong to a dog -->
+    <section id="unassigned-section" class="page-section" hidden>
+        <h2 class="section-title">Sessions Without a Dog</h2>
+        <p id="unassigned-summary" class="unassigned-summary"></p>
+        <form id="assign-form" class="field-row">
+            <label for="assign-dog">Assign them to:</label>
+            <select id="assign-dog"></select>
+            <button class="save-btn" type="submit">Assign Sessions</button>
+        </form>
+    </section>
+
     <section id="add-dog-section" class="page-section" hidden>
         <h2 class="section-title">Add a Dog</h2>
         <form id="add-dog-form" class="field-row">
