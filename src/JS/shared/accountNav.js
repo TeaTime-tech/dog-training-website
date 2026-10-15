@@ -45,13 +45,9 @@ async function updateAccountNav() {
     fillAccountLink(createLink, user);
     createLink.classList.add("nav-account-link");
     createLink.href = "settings.html";
-    createLink.removeAttribute("target");
-    createLink.removeAttribute("rel");
 
     loginLink.textContent = "Log Out";
     loginLink.href = "#";
-    loginLink.removeAttribute("target");
-    loginLink.removeAttribute("rel");
     loginLink.addEventListener("click", (event) => {
         event.preventDefault();
         logOut();
