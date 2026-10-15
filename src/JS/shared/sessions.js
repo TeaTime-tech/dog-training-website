@@ -3,7 +3,8 @@
 
    Pages read with getSessionHistory() and write with setSessionHistory(); never write the key directly,
    or edits and deletes won't reach the account. Each session gets an id (shared with its Supabase row),
-   updatedAt, and two sync flags: inCloud (a row exists for it) and dirty (local changes not uploaded yet).
+   updatedAt, dogId (the dog selected when it was logged, or null; set once, never re-guessed later),
+   and two sync flags: inCloud (a row exists for it) and dirty (local changes not uploaded yet).
    Sync runs on every page that loads this file; pages listen for "sessionhistorysynced" to redraw. */
 
 const SESSION_HISTORY_KEY = "sessionHistory";
@@ -61,6 +62,9 @@ function setSessionHistory(history) {
         const before = session.id && previous.get(session.id);
         if (!before) {
             session.id = session.id || newSessionId();
+            if (session.dogId === undefined) {
+                session.dogId = typeof getCurrentDogId === "function" ? getCurrentDogId() : null;
+            }
             session.updatedAt = now;
             session.dirty = true;
         } else if (sessionContent(before) !== sessionContent(session)) {
@@ -93,6 +97,7 @@ function sessionToRow(session, accountId) {
     return {
         id: session.id,
         account_id: accountId,
+        dog_id: session.dogId ?? null,
         command: session.command,
         repetitions: toNullableInteger(session.repetitions),
         duration: session.duration && session.duration !== "N/A" ? session.duration : null,
@@ -112,6 +117,7 @@ function sessionToRow(session, accountId) {
 function rowToSession(row) {
     return {
         id: row.id,
+        dogId: row.dog_id,
         command: row.command,
         repetitions: row.repetitions === null ? "" : String(row.repetitions),
         duration: row.duration ?? "",

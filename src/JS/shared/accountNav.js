@@ -27,6 +27,8 @@ async function logOut() {
     }
     // pages without trainingData.js skip this; the next account's goal sync drops the old goals instead
     if (typeof clearGoalsForLogOut === "function") clearGoalsForLogOut();
+    // forget the selected dog so the next account never tags sessions with this account's dog
+    localStorage.removeItem("currentDogId");
     if (supabaseClient) await supabaseClient.auth.signOut();
     window.location.href = "index.html";
 }
