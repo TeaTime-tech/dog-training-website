@@ -188,3 +188,9 @@ details[open] > .collapsible-toggle::after {
     max-width: 640px;
   }
 }
+
+/* Fraunces draws "&" as a curly script shape; headings wrap it in <span class="amp"> to use a plainer one */
+.amp {
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 600;
+}
