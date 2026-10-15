@@ -76,9 +76,15 @@
                     <span class="toggle-track"><span class="toggle-thumb"></span></span>
                 </label>
             </div>
-            <p class="subhead mastery-hint">With decay on, skills slip a level after time away from practice. Faded segments show levels to win back.</p>
+            <p class="subhead mastery-hint">With decay on, skills slip a level after time away from practice. Faded segments show levels to win back. Commands are listed from least practiced to mastered.</p>
             <p id="mastery-status" class="mastery-status" role="status"></p>
             <ul id="mastery-list" class="mastery-list"></ul>
+            <!-- commands.js shows this when there are more commands than fit on one page -->
+            <div id="mastery-pager" class="mastery-pager" hidden>
+                <button type="button" id="mastery-prev" class="mastery-pager-arrow" aria-label="Previous commands">&lsaquo;</button>
+                <span id="mastery-page-label" class="mastery-page-label" aria-live="polite"></span>
+                <button type="button" id="mastery-next" class="mastery-pager-arrow" aria-label="Next commands">&rsaquo;</button>
+            </div>
         </details>
     </section>
 

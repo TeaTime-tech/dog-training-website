@@ -355,6 +355,52 @@
   opacity: 0.5;
 }
 
+/* previous / next page arrows at the bottom of the Command Mastery card */
+.mastery-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.mastery-pager[hidden] {
+  display: none;
+}
+
+.mastery-pager-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--clay);
+  color: var(--ink);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mastery-pager-arrow:hover:not(:disabled) {
+  background: var(--moss);
+  color: var(--white);
+}
+
+.mastery-pager-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mastery-page-label {
+  min-width: 52px;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
 .mastery-detail {
   margin: 6px 0 0;
   font-size: 0.8125rem;

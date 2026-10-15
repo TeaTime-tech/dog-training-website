@@ -346,9 +346,15 @@ const masteryList = document.getElementById("mastery-list");
 if (masteryList) {
     const masteryStatus = document.getElementById("mastery-status");
     const masteryDecayToggle = document.getElementById("mastery-decay-toggle");
+    const masteryPager = document.getElementById("mastery-pager");
+    const masteryPrevButton = document.getElementById("mastery-prev");
+    const masteryNextButton = document.getElementById("mastery-next");
+    const masteryPageLabel = document.getElementById("mastery-page-label");
+    const MASTERY_PAGE_SIZE = 5;
 
     let masteryTiers = [];
     let masteryRows = [];
+    let masteryPage = 0;
 
     // "today" / "yesterday" / "N days ago"
     const formatDaysAgo = (days) => {
@@ -427,20 +433,50 @@ if (masteryList) {
         return item;
     };
 
-    // redraw the whole list using the toggle's current setting
-    const renderMasteryList = () => {
+    // every command with its mastery row, least worked on first: lowest shown level, then fewest sessions, then name
+    const getSortedMasteryEntries = (showDecay) => {
         const rowsByCommand = new Map(masteryRows.map((row) => [row.command.toLowerCase(), row]));
-        masteryList.replaceChildren(
-            ...getMasteryCommandNames().map((name) =>
-                renderMasteryRow(name, rowsByCommand.get(name.toLowerCase()), masteryDecayToggle.checked)
-            )
-        );
+        const entries = getMasteryCommandNames().map((name) => {
+            const row = rowsByCommand.get(name.toLowerCase());
+            const level = row ? (showDecay ? row.decayed_level : row.base_level) : 0;
+            return { name, row, level, sessions: row ? row.session_count : 0 };
+        });
+        return entries.sort((a, b) => a.level - b.level || a.sessions - b.sessions || a.name.localeCompare(b.name));
     };
+
+    // redraw the current page of the list using the toggle's current setting
+    const renderMasteryList = () => {
+        const showDecay = masteryDecayToggle.checked;
+        const entries = getSortedMasteryEntries(showDecay);
+        const pageCount = Math.max(1, Math.ceil(entries.length / MASTERY_PAGE_SIZE));
+        masteryPage = Math.min(Math.max(masteryPage, 0), pageCount - 1);
+
+        const start = masteryPage * MASTERY_PAGE_SIZE;
+        masteryList.replaceChildren(
+            ...entries.slice(start, start + MASTERY_PAGE_SIZE).map(({ name, row }) => renderMasteryRow(name, row, showDecay))
+        );
+
+        masteryPager.hidden = pageCount <= 1;
+        masteryPageLabel.textContent = `${masteryPage + 1} of ${pageCount}`;
+        masteryPrevButton.disabled = masteryPage === 0;
+        masteryNextButton.disabled = masteryPage >= pageCount - 1;
+    };
+
+    masteryPrevButton.addEventListener("click", () => {
+        masteryPage -= 1;
+        renderMasteryList();
+    });
+
+    masteryNextButton.addEventListener("click", () => {
+        masteryPage += 1;
+        renderMasteryList();
+    });
 
     // show a message instead of the list
     const showMasteryStatus = (message) => {
         masteryStatus.replaceChildren(message);
         masteryList.replaceChildren();
+        masteryPager.hidden = true;
     };
 
     const loadMastery = async () => {
@@ -479,8 +515,10 @@ if (masteryList) {
         }
     };
 
-    // the toggle only changes what's displayed, so redraw right away and save in the background
+    // the toggle only changes what's displayed, so redraw right away (from page 1, since the order can change)
+    // and save in the background
     masteryDecayToggle.addEventListener("change", async () => {
+        masteryPage = 0;
         renderMasteryList();
         try {
             await setMasteryDecayEnabled(masteryDecayToggle.checked);
