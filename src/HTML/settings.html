@@ -65,6 +65,21 @@
         </div>
     </fieldset>
 
+<h3>My Dogs</h3>
+    <!-- settings.js fills the dog list and enables these once someone is signed in -->
+    <p id="dogs-status" class="subhead" role="status">Loading your dogs...</p>
+    <fieldset id="dog-fields" disabled>
+        <div>
+            <label for="current-dog">Training:</label>
+            <select id="current-dog"></select>
+        </div>
+        <div>
+            <label for="new-dog-name">Add a Dog:</label>
+            <input type="text" id="new-dog-name" placeholder="Enter your dog's name..." maxlength="50">
+            <button id="add-dog" type="button">Add Dog</button>
+        </div>
+    </fieldset>
+
 <h3>Training</h3>
     <div>
         <label for="mastery-decay-toggle">Show mastery decay:</label>
