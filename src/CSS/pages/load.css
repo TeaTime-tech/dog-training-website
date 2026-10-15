@@ -7,7 +7,7 @@
   gap: 12px;
   margin: 12px 0 24px;
   max-width: 720px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
 }
 
@@ -18,7 +18,7 @@
   padding: 6px 14px;
   border-radius: 999px;
   font-family: 'Work Sans', sans-serif;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -48,7 +48,7 @@
   min-width: 640px;
   border-collapse: collapse;
   background: var(--white);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 #data-table th,
@@ -65,7 +65,7 @@
 #exercise-table th {
   background: var(--clay);
   color: var(--ink);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -97,7 +97,7 @@
   border: 1px solid var(--clay);
   border-radius: 6px;
   font-family: 'Work Sans', sans-serif;
-  font-size: 13px;
+  font-size: 0.8125rem;
   background: var(--bg);
   color: var(--ink);
 }
@@ -138,7 +138,7 @@
 
 .gantt-hover-badge-count {
   font-family: 'Work Sans', sans-serif;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 800;
   line-height: 1;
 }
@@ -147,7 +147,7 @@
   margin-top: 2px;
   padding: 0 6px;
   font-family: 'Work Sans', sans-serif;
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 600;
   text-transform: capitalize;
   line-height: 1.2;
@@ -188,13 +188,13 @@
 
 .graph-stat-value {
   font-family: 'Work Sans', sans-serif;
-  font-size: 30px;
+  font-size: 1.875rem;
   font-weight: 800;
   line-height: 1;
   color: var(--ink);
 }
 
 .graph-stat-label {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
 }

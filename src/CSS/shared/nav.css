@@ -47,7 +47,7 @@
 .nav-dropdown-toggle::after {
   content: '\25BE';
   margin-left: 4px;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 .nav-dropdown[open] .nav-dropdown-toggle::after {
@@ -74,7 +74,7 @@
   padding: 8px 10px;
   border-radius: 6px;
   font-family: 'Work Sans', sans-serif;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--ink);
   text-decoration: none;
@@ -90,7 +90,7 @@
   display: inline-block;
   margin-bottom: 16px;
   font-family: 'Work Sans', sans-serif;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--moss-dark);
   text-decoration: none;

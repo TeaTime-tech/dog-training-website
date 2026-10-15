@@ -18,7 +18,7 @@
   border: 1px solid var(--clay);
   border-radius: 8px;
   font-family: 'Work Sans', sans-serif;
-  font-size: 14px;
+  font-size: 0.875rem;
   background: var(--bg);
   color: var(--ink);
 }
@@ -33,7 +33,7 @@
 
 .field label {
   display: block;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--muted);
   margin-bottom: 5px;
@@ -46,7 +46,7 @@
   border: 1px solid var(--clay);
   border-radius: 8px;
   font-family: 'Work Sans', sans-serif;
-  font-size: 15px;
+  font-size: 0.9375rem;
   background: var(--bg);
   color: var(--ink);
 }
@@ -70,7 +70,7 @@
   padding: 10px 20px;
   border-radius: 8px;
   font-family: 'Work Sans', sans-serif;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -82,7 +82,7 @@
   background: none;
   border: none;
   font-family: 'Work Sans', sans-serif;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
   cursor: pointer;
   text-decoration: underline;
@@ -124,7 +124,7 @@
   top: 50%;
   transform: translateY(-50%);
   font-family: 'Work Sans', sans-serif;
-  font-size: 9px;
+  font-size: 0.5625rem;
   font-weight: 600;
   letter-spacing: 0.03em;
   color: var(--muted);
@@ -169,7 +169,7 @@
   padding: 5px 12px;
   border-radius: 6px;
   font-family: 'Work Sans', sans-serif;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -182,7 +182,7 @@
   background: none;
   border: none;
   font-family: 'Work Sans', sans-serif;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--muted);
   cursor: pointer;
   text-decoration: underline;

@@ -43,4 +43,5 @@ Pages reference assets relatively (`../CSS/...`, `../JS/...`). Folder names HTML
 
 - Short lowercase `//` comments above functions describing what they do.
 - LF line endings, UTF-8 without BOM.
+- Font sizes are in `rem` (1rem = 16px on phones). `base.css` raises the root size to 18px on screens 900px+ wide, so new font sizes should use `rem` too or they won't scale.
 - Fonts: Google Fonts (Fraunces + Work Sans). Charts: Plotly from CDN (`load.html`).
