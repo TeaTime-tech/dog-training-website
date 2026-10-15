@@ -1,4 +1,77 @@
-/* load.html: session and exercise tables, test data, metric graphs, and the command timeline. */
+/* load.html: session and exercise tables, test data, metric graphs, and the command timeline.
+   Needs dogs.js, sessions.js and trainingData.js loaded first. */
+
+/*which dog's sessions this page shows (load.html)*/
+
+const VIEWING_DOG_STORAGE_KEY = "loadViewingDog";
+const VIEWING_ALL_DOGS = "all";
+const VIEWING_NO_DOG = "none";
+const viewingDogRow = document.getElementById("viewing-dog-row");
+const viewingDogSelect = document.getElementById("viewing-dog");
+let viewingDogFilter = VIEWING_ALL_DOGS;
+
+// true when a session belongs to the dog picked in "Switch dog"
+function matchesViewingDog(session) {
+    if (viewingDogFilter === VIEWING_ALL_DOGS) return true;
+    if (viewingDogFilter === VIEWING_NO_DOG) return !session.dogId;
+    return session.dogId === viewingDogFilter;
+}
+
+// fill "Switch dog" with the account's dogs (plus "No dog" if older sessions have none), keeping the last choice
+async function loadViewingDogOptions() {
+    if (!viewingDogSelect) return;
+    let dogs = [];
+    try {
+        if (await getSignedInUser()) dogs = await getDogs();
+    } catch (error) {
+        console.error("Could not load dogs:", error);
+    }
+    if (dogs.length === 0) {
+        viewingDogRow.hidden = true;
+        viewingDogFilter = VIEWING_ALL_DOGS;
+        return;
+    }
+
+    const options = [{ value: VIEWING_ALL_DOGS, label: "All dogs" }, ...dogs.map((dog) => ({ value: dog.id, label: dog.name }))];
+    if (getSessionHistory().some((session) => !session.dogId)) {
+        options.push({ value: VIEWING_NO_DOG, label: "Sessions with no dog" });
+    }
+    viewingDogSelect.replaceChildren(...options.map(({ value, label }) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        return option;
+    }));
+
+    let saved = null;
+    try {
+        saved = localStorage.getItem(VIEWING_DOG_STORAGE_KEY);
+    } catch (error) {
+        // storage blocked; start from "All dogs"
+    }
+    const previous = viewingDogFilter;
+    viewingDogFilter = options.some((option) => option.value === saved) ? saved : VIEWING_ALL_DOGS;
+    viewingDogSelect.value = viewingDogFilter;
+    viewingDogRow.hidden = false;
+    if (viewingDogFilter !== previous) window.dispatchEvent(new CustomEvent("viewingdogchanged"));
+}
+
+if (viewingDogSelect) {
+    viewingDogSelect.addEventListener("change", () => {
+        viewingDogFilter = viewingDogSelect.value;
+        try {
+            localStorage.setItem(VIEWING_DOG_STORAGE_KEY, viewingDogFilter);
+        } catch (error) {
+            // storage blocked; the choice just won't be remembered
+        }
+        window.dispatchEvent(new CustomEvent("viewingdogchanged"));
+    });
+    loadViewingDogOptions();
+    // a sync can bring in sessions with no dog, which adds that option
+    window.addEventListener("sessionhistorysynced", (event) => {
+        if (event.detail.changed) loadViewingDogOptions();
+    });
+}
 
 /*load session history into a table (load.html)*/
 
@@ -193,6 +266,7 @@ if (loadButton) {
 
         const matches = sessionHistory
             .map((session, index) => ({ session, index }))
+            .filter(({ session }) => matchesViewingDog(session))
             .filter(({ session }) => !dateInput.value || session.date === dateInput.value)
             .sort((a, b) => {
                 const dateCompare = (b.session.date || "").localeCompare(a.session.date || "");
@@ -236,6 +310,14 @@ if (loadButton) {
     // sessions from the account arrived; refresh the table if it's showing and nothing is mid-edit
     window.addEventListener("sessionhistorysynced", (event) => {
         if (event.detail.changed && tableLoaded && editingIndex === null) renderSessionTable();
+    });
+
+    // a different dog was picked; start back on page 1
+    window.addEventListener("viewingdogchanged", () => {
+        if (!tableLoaded) return;
+        editingIndex = null;
+        currentPage = 1;
+        renderSessionTable();
     });
 
     pageSizeSelect.addEventListener("change", () => {
@@ -759,7 +841,15 @@ if (graphCommandSelect) {
         return tile;
     };
 
+    let graphDrawn = false;
+
+    // a different dog was picked; redraw the graph if one is showing
+    window.addEventListener("viewingdogchanged", () => {
+        if (graphDrawn) graphCommandButton.click();
+    });
+
     graphCommandButton.addEventListener("click", () => {
+        graphDrawn = true;
         const sessionHistory = getSessionHistory();
         const selectedCommand = graphCommandSelect.value;
         const selectedMetric = graphMetricSelect.value;
@@ -767,7 +857,7 @@ if (graphCommandSelect) {
         const selectedChartType = graphChartTypeSelect.value;
 
         let matches = sessionHistory
-            .filter((session) => session.command === selectedCommand && session.date)
+            .filter((session) => session.command === selectedCommand && session.date && matchesViewingDog(session))
             .sort((a, b) => a.date.localeCompare(b.date));
 
         if (selectedTimeframe === "daily") {
@@ -970,7 +1060,7 @@ if (ganttChartEl) {
         // find each command's earliest/latest practiced date and how many times it was practiced
         const rangesByCommand = new Map();
         sessionHistory.forEach((session) => {
-            if (!session.command || !session.date) {
+            if (!session.command || !session.date || !matchesViewingDog(session)) {
                 return;
             }
             const existing = rangesByCommand.get(session.command);
@@ -1074,4 +1164,5 @@ if (ganttChartEl) {
     window.addEventListener("sessionhistorysynced", (event) => {
         if (event.detail.changed) renderCommandTimeline();
     });
+    window.addEventListener("viewingdogchanged", renderCommandTimeline);
 }
