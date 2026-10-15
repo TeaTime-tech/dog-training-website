@@ -157,6 +157,12 @@
   transform: translateX(24px);
 }
 
+/* a switch that can't be changed yet (still loading, or a "coming soon" setting) */
+.toggle-input:disabled + .toggle-track {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .toggle-input:focus-visible + .toggle-track {
   outline: 2px solid var(--moss);
   outline-offset: 2px;

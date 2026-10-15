@@ -1,4 +1,5 @@
-/* commands.html: command tiles and the Canine Good Citizen checklist. */
+/* commands.html: command tiles, the Canine Good Citizen checklist, mastery, and per-command display settings.
+   Needs trainingData.js, mastery.js and commandDisplay.js loaded first. */
 
 /*view, add, and hide commands as buttons (commands.html)*/
 /*commands are never deleted from storage, only hidden from view*/
@@ -68,6 +69,7 @@ if (commandButtonsContainer) {
         localStorage.setItem("customCommands", JSON.stringify(savedNames));
 
         newCommandPageInput.value = "";
+        window.dispatchEvent(new CustomEvent("commandlistchanged"));
     });
 
     hideCommandButton.addEventListener("click", () => {
@@ -101,6 +103,7 @@ if (commandButtonsContainer) {
         }
 
         hideCommandSelect.value = "";
+        window.dispatchEvent(new CustomEvent("commandlistchanged"));
     });
 }
 
@@ -493,4 +496,85 @@ if (masteryList) {
     window.addEventListener("sessionhistorysynced", (event) => {
         if (event.detail.uploaded > 0) loadMastery();
     });
+}
+
+/*per-command display settings: which fields show for a command on the Log and Today pages (commands.html)*/
+
+const displayCommandSelect = document.getElementById("display-command");
+
+if (displayCommandSelect) {
+    const displayStatus = document.getElementById("display-status");
+    const saveDisplayButton = document.getElementById("save-settings");
+    const displayToggles = {
+        score: document.getElementById("score"),
+        repetitions: document.getElementById("toggle-repetitions"),
+        duration: document.getElementById("toggle-duration"),
+        location: document.getElementById("toggle-location"),
+        distractions: document.getElementById("toggle-distractions"),
+        weather: document.getElementById("toggle-weather"),
+    };
+    let displayedCommand = null;
+    let displayChanged = false;
+
+    // commands that aren't hidden, in the same order as the command tiles
+    const getVisibleCommands = () => {
+        const hidden = JSON.parse(localStorage.getItem("hiddenCommands")) || [];
+        return getAllCommandNames().filter((name) => !hidden.includes(name.toLowerCase()));
+    };
+
+    // set the toggles to a command's saved settings
+    const showCommandDisplay = (command) => {
+        displayedCommand = command;
+        const display = getCommandDisplay(command);
+        Object.entries(displayToggles).forEach(([field, toggle]) => {
+            if (toggle) toggle.checked = display[field];
+        });
+        displayChanged = false;
+        displayStatus.textContent = "";
+    };
+
+    // refill the command dropdown, keeping the current choice when it's still there
+    const fillDisplayCommands = () => {
+        const commands = getVisibleCommands();
+        displayCommandSelect.replaceChildren(...commands.map((name) => {
+            const option = document.createElement("option");
+            option.value = name;
+            option.textContent = name;
+            return option;
+        }));
+        const keep = commands.find((name) => name === displayedCommand) || commands[0] || null;
+        if (keep) displayCommandSelect.value = keep;
+        saveDisplayButton.disabled = !keep;
+        if (keep !== displayedCommand) showCommandDisplay(keep);
+    };
+
+    Object.values(displayToggles).forEach((toggle) => {
+        if (!toggle) return;
+        toggle.addEventListener("change", () => {
+            displayChanged = true;
+            displayStatus.textContent = "Unsaved changes.";
+        });
+    });
+
+    // switching commands drops unsaved changes, so check first
+    displayCommandSelect.addEventListener("change", () => {
+        if (displayChanged && !confirm(`Discard your unsaved display changes for "${displayedCommand}"?`)) {
+            displayCommandSelect.value = displayedCommand;
+            return;
+        }
+        showCommandDisplay(displayCommandSelect.value);
+    });
+
+    saveDisplayButton.addEventListener("click", () => {
+        if (!displayedCommand) return;
+        const display = Object.fromEntries(
+            Object.entries(displayToggles).map(([field, toggle]) => [field, toggle ? toggle.checked : true])
+        );
+        setCommandDisplay(displayedCommand, display);
+        displayChanged = false;
+        displayStatus.textContent = `Saved display settings for "${displayedCommand}".`;
+    });
+
+    window.addEventListener("commandlistchanged", fillDisplayCommands);
+    fillDisplayCommands();
 }

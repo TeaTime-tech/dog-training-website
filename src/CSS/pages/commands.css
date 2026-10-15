@@ -249,6 +249,43 @@
   text-decoration: underline;
 }
 
+/* Display settings: command picker, "coming soon" tags, and the saved/unsaved line */
+.display-hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.display-command-row {
+  margin-bottom: 4px;
+}
+
+.display-command-row select {
+  text-transform: capitalize;
+}
+
+.display-soon {
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--clay);
+  color: var(--muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.display-status {
+  margin: 10px 0 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.display-status:empty {
+  display: none;
+}
+
 /* Command mastery */
 .mastery-hint {
   margin: 10px 0 0;

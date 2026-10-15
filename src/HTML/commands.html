@@ -18,6 +18,7 @@
     <script src="../JS/shared/accountNav.js" defer></script>
     <script src="../JS/shared/trainingData.js" defer></script>
     <script src="../JS/shared/mastery.js" defer></script>
+    <script src="../JS/shared/commandDisplay.js" defer></script>
     <script src="../JS/pages/commands.js" defer></script>
 </head>
 <body>
@@ -101,10 +102,15 @@
     <section class="page-section">
         <details open>
             <summary class="collapsible-toggle"><h2 class="section-title">Display Settings</h2></summary>
+            <p class="display-hint">Choose which fields show for a command on the Log page and the Today page.</p>
+            <div class="field-row display-command-row">
+                <label for="display-command">Command:</label>
+                <select id="display-command"></select>
+            </div>
             <div class="toggle-row">
-                <label for="score">Score Display:</label>
+                <label for="score">Score Display: <span class="display-soon">coming soon</span></label>
                 <label class="toggle">
-                    <input type="checkbox" id="score" class="toggle-input">
+                    <input type="checkbox" id="score" class="toggle-input" disabled>
                     <span class="toggle-track"><span class="toggle-thumb"></span></span>
                 </label>
             </div>
@@ -137,13 +143,14 @@
                 </label>
             </div>
             <div class="toggle-row">
-                <label for="toggle-weather">Weather Display:</label>
+                <label for="toggle-weather">Weather Display: <span class="display-soon">coming soon</span></label>
                 <label class="toggle">
-                    <input type="checkbox" id="toggle-weather" class="toggle-input">
+                    <input type="checkbox" id="toggle-weather" class="toggle-input" disabled>
                     <span class="toggle-track"><span class="toggle-thumb"></span></span>
                 </label>
             </div>
             <button id="save-settings" type="button" class="save-btn">Save Settings</button>
+            <p id="display-status" class="display-status" role="status"></p>
         </details>
     </section>
 

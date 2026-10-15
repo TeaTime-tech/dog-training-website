@@ -17,6 +17,7 @@
     <script src="../JS/shared/dogs.js" defer></script>
     <script src="../JS/shared/accountNav.js" defer></script>
     <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/shared/commandDisplay.js" defer></script>
     <script src="../JS/pages/log.js" defer></script>
 </head>
 <body>
@@ -66,10 +67,12 @@
             <input type="text" id="new-command" placeholder="Enter command name...">
             <button id="add-command" type="button" class="save-btn">Add Command</button>
         </div>
+        <p id="log-display-note" class="log-display-note" hidden>Some fields are hidden for this command. Change this in Display Settings on the <a href="commands.html">Commands page</a>.</p>
         <a class="home-link" href="commands.html">Go to Commands Page</a>
     </section>
 
-    <section class="page-section">
+    <!-- data-display-field: hidden when that field is turned off for the picked command (Commands > Display Settings) -->
+    <section class="page-section" data-display-field="repetitions">
         <h2 class="section-title">Repetitions</h2>
         <p class="subhead">How many times your dog has performed the command.</p>
         <div class="field-row">
@@ -91,7 +94,7 @@
         </div>
     </section>
 
-    <section class="page-section">
+    <section class="page-section" data-display-field="duration">
         <h2 class="section-title">Duration</h2>
         <p class="subhead">Log the duration of the command.</p>
         <div class="field-row">
@@ -115,7 +118,7 @@
         </div>
     </section>
 
-    <section class="page-section">
+    <section class="page-section" data-display-field="duration">
         <h2 class="section-title">Timer</h2>
         <p class="subhead">Use a timer to help track your command durations.</p>
         <div class="field-row">
@@ -130,7 +133,7 @@
         </div>
     </section>
 
-    <section class="page-section">
+    <section class="page-section" data-display-field="distractions">
         <h2 class="section-title">Distractions</h2>
         <p class="subhead">List of distractions during the training.</p>
         <div class="field-row">
@@ -152,7 +155,7 @@
         </div>
     </section>
 
-    <section class="page-section">
+    <section class="page-section" data-display-field="location">
         <h2 class="section-title">Location</h2>
         <p class="subhead">Track location(s) where the training took place.</p>
         <div class="field-row">

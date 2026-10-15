@@ -1,5 +1,5 @@
 /* log.html: the training session form (dog, option pickers, timer, session length, save).
-   Needs dogs.js and sessions.js loaded first. */
+   Needs dogs.js, sessions.js and commandDisplay.js loaded first. */
 
 /*pick which dog this session is for*/
 
@@ -302,6 +302,11 @@ if (saveForm) {
         };
         const logDog = getLogDog();
         if (logDog) session.dogId = logDog.id;
+        // fields hidden for this command aren't recorded, rather than saving whatever their box defaulted to
+        const display = getCommandDisplay(session.command);
+        ["repetitions", "duration", "distractions", "location"].forEach((field) => {
+            if (!display[field]) session[field] = "";
+        });
 
         const sessionHistory = getSessionHistory();
         sessionHistory.push(session);
@@ -424,3 +429,24 @@ setupRemoveOption("customDistractions", distractionSelect, removeDistractionButt
 setupRemoveOption("customLocations", locationSelect, removeLocationButton);
 setupRemoveOption("customDurations", durationSelect, removeDurationButton);
 setupRemoveOption("customRepetitions", repetitionsSelect, removeRepetitionButton);
+
+/*show only the fields turned on for the picked command (set in Commands > Display Settings)*/
+
+const displayFieldSections = document.querySelectorAll("[data-display-field]");
+const logDisplayNote = document.getElementById("log-display-note");
+
+// hide the sections for fields this command doesn't show
+function applyCommandDisplay() {
+    const display = getCommandDisplay(commandSelect.value);
+    let anyHidden = false;
+    displayFieldSections.forEach((section) => {
+        section.hidden = !display[section.dataset.displayField];
+        anyHidden = anyHidden || section.hidden;
+    });
+    if (logDisplayNote) logDisplayNote.hidden = !anyHidden;
+}
+
+if (commandSelect) {
+    commandSelect.addEventListener("change", applyCommandDisplay);
+    applyCommandDisplay();
+}

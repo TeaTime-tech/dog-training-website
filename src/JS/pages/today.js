@@ -120,8 +120,10 @@ if (todaySessionList) {
         commandLine.className = "today-session-command";
         commandLine.textContent = session.command || "";
 
-        const metaParts = [session.time, session.location];
-        if (session.distractions && session.distractions !== "none") {
+        // leave out fields turned off for this command (Commands > Display Settings)
+        const display = getCommandDisplay(session.command);
+        const metaParts = [session.time, display.location ? session.location : ""];
+        if (display.distractions && session.distractions && session.distractions !== "none") {
             metaParts.push(session.distractions);
         }
 
@@ -142,7 +144,7 @@ if (todaySessionList) {
         const chipsWrap = document.createElement("div");
         chipsWrap.className = "today-session-chips";
 
-        if (session.repetitions) {
+        if (display.repetitions && session.repetitions) {
             const repsChip = document.createElement("span");
             repsChip.className = "today-session-chip today-session-chip--reps";
             repsChip.textContent = session.repetitions === "N/A"
@@ -151,10 +153,12 @@ if (todaySessionList) {
             chipsWrap.appendChild(repsChip);
         }
 
-        const durationChip = document.createElement("span");
-        durationChip.className = "today-session-chip";
-        durationChip.textContent = formatDurationDisplay(session.duration);
-        chipsWrap.appendChild(durationChip);
+        if (display.duration) {
+            const durationChip = document.createElement("span");
+            durationChip.className = "today-session-chip";
+            durationChip.textContent = formatDurationDisplay(session.duration);
+            chipsWrap.appendChild(durationChip);
+        }
 
         const editButton = document.createElement("button");
         editButton.type = "button";
