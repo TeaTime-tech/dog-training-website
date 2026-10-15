@@ -98,6 +98,14 @@ if (todaySessionList) {
         return localStorage.getItem(TODAY_GOAL_TYPE_STORAGE_KEY) || TODAY_DEFAULT_GOAL_TYPE;
     }
 
+    // hide the rows inside a container whose data-display-field is turned off for a command
+    function applyDisplayToRows(container, command) {
+        const display = getCommandDisplay(command);
+        container.querySelectorAll("[data-display-field]").forEach((row) => {
+            row.hidden = !display[row.dataset.displayField];
+        });
+    }
+
     // build a read-only card for one session, with a checkbox and an Edit button
     function buildSessionViewCard(session, index) {
         const row = document.createElement("li");
@@ -222,9 +230,10 @@ if (todaySessionList) {
         notesInput.type = "text";
         notesInput.value = session.notes ?? "";
 
-        const addField = (labelText, field) => {
+        const addField = (labelText, field, displayField) => {
             const fieldRow = document.createElement("div");
             fieldRow.className = "field-row";
+            if (displayField) fieldRow.dataset.displayField = displayField;
             const label = document.createElement("label");
             label.textContent = labelText;
             fieldRow.appendChild(label);
@@ -233,9 +242,9 @@ if (todaySessionList) {
         };
 
         addField("Command:", commandSelectEdit);
-        addField("Repetitions:", repetitionsInput);
-        addField("Duration:", durationInput);
-        addField("Location:", locationInput);
+        addField("Repetitions:", repetitionsInput, "repetitions");
+        addField("Duration:", durationInput, "duration");
+        addField("Location:", locationInput, "location");
         addField("Date:", dateInputEdit);
         addField("Time:", timeInputEdit);
         addField("Notes:", notesInput);
@@ -249,12 +258,15 @@ if (todaySessionList) {
         saveButton.textContent = "Save";
         saveButton.addEventListener("click", () => {
             const currentHistory = getSessionHistory();
+            const before = currentHistory[index];
+            // hidden fields keep what they had; hiding a field shouldn't erase it
+            const display = getCommandDisplay(commandSelectEdit.value);
             currentHistory[index] = {
-                ...currentHistory[index],
+                ...before,
                 command: commandSelectEdit.value,
-                repetitions: repetitionsInput.value.trim(),
-                duration: durationInput.value.trim(),
-                location: locationInput.value.trim(),
+                repetitions: display.repetitions ? repetitionsInput.value.trim() : before.repetitions,
+                duration: display.duration ? durationInput.value.trim() : before.duration,
+                location: display.location ? locationInput.value.trim() : before.location,
                 date: dateInputEdit.value,
                 time: timeInputEdit.value,
                 notes: notesInput.value.trim(),
@@ -276,6 +288,10 @@ if (todaySessionList) {
         actions.appendChild(saveButton);
         actions.appendChild(cancelButton);
         card.appendChild(actions);
+
+        // hide the fields turned off for the picked command, and follow changes to the command
+        applyDisplayToRows(card, commandSelectEdit.value);
+        commandSelectEdit.addEventListener("change", () => applyDisplayToRows(card, commandSelectEdit.value));
 
         row.appendChild(card);
         return row;
@@ -624,9 +640,14 @@ if (todaySessionList) {
             const now = new Date();
             addSessionTimeInput.value = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
+            applyDisplayToRows(addSessionForm, addSessionCommandSelect.value);
             addSessionOverlay.hidden = false;
             addSessionCommandSelect.focus();
         };
+
+        addSessionCommandSelect.addEventListener("change", () => {
+            applyDisplayToRows(addSessionForm, addSessionCommandSelect.value);
+        });
 
         const closeAddSessionModal = () => {
             addSessionOverlay.hidden = true;
@@ -653,8 +674,10 @@ if (todaySessionList) {
         addSessionForm.addEventListener("submit", (event) => {
             event.preventDefault();
 
-            const repetitions = addSessionRepetitionsInput.value.trim();
-            const duration = addSessionDurationInput.value.trim();
+            // fields hidden for this command are saved blank
+            const display = getCommandDisplay(addSessionCommandSelect.value);
+            const repetitions = display.repetitions ? addSessionRepetitionsInput.value.trim() : "";
+            const duration = display.duration ? addSessionDurationInput.value.trim() : "";
 
             if (repetitions !== "" && !/^\d+$/.test(repetitions)) {
                 alert("Repetitions must be a whole number.");
@@ -922,6 +945,11 @@ if (todaySessionList) {
 
     // sessions from the account arrived; redraw unless a session is mid-edit
     window.addEventListener("sessionhistorysynced", (event) => {
+        if (event.detail.changed && editingSessionIndex === null) renderToday();
+    });
+
+    // display settings from the account arrived; redraw the cards unless a session is mid-edit
+    window.addEventListener("commanddisplaysynced", (event) => {
         if (event.detail.changed && editingSessionIndex === null) renderToday();
     });
 }

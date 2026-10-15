@@ -570,9 +570,19 @@ if (displayCommandSelect) {
         const display = Object.fromEntries(
             Object.entries(displayToggles).map(([field, toggle]) => [field, toggle ? toggle.checked : true])
         );
-        setCommandDisplay(displayedCommand, display);
+        const savedCommand = displayedCommand;
         displayChanged = false;
-        displayStatus.textContent = `Saved display settings for "${displayedCommand}".`;
+        displayStatus.textContent = `Saved display settings for "${savedCommand}".`;
+        setCommandDisplay(savedCommand, display).then((synced) => {
+            if (synced === false && displayedCommand === savedCommand && !displayChanged) {
+                displayStatus.textContent = `Saved display settings for "${savedCommand}" on this device only. Couldn't sync to your account.`;
+            }
+        });
+    });
+
+    // the account's settings arrived; show them unless the toggles have unsaved changes
+    window.addEventListener("commanddisplaysynced", (event) => {
+        if (event.detail.changed && !displayChanged && displayedCommand) showCommandDisplay(displayedCommand);
     });
 
     window.addEventListener("commandlistchanged", fillDisplayCommands);

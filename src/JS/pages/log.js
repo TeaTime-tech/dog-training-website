@@ -448,5 +448,8 @@ function applyCommandDisplay() {
 
 if (commandSelect) {
     commandSelect.addEventListener("change", applyCommandDisplay);
+    window.addEventListener("commanddisplaysynced", (event) => {
+        if (event.detail.changed) applyCommandDisplay();
+    });
     applyCommandDisplay();
 }

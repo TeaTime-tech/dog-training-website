@@ -27,6 +27,11 @@ async function logOut() {
     }
     // pages without trainingData.js skip this; the next account's goal sync drops the old goals instead
     if (typeof clearGoalsForLogOut === "function") clearGoalsForLogOut();
+    // send any display setting changes not uploaded yet, then forget them (the next account's sync also drops them)
+    if (typeof clearCommandDisplayForLogOut === "function") {
+        await syncCommandDisplay();
+        clearCommandDisplayForLogOut();
+    }
     // forget the selected dog so the next account never tags sessions with this account's dog
     localStorage.removeItem("currentDogId");
     if (supabaseClient) await supabaseClient.auth.signOut();

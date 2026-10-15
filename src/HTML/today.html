@@ -162,11 +162,12 @@
                     <label for="add-session-command">Command:</label>
                     <select id="add-session-command"></select>
                 </div>
-                <div class="field-row">
+                <!-- data-display-field rows hide when that field is turned off for the picked command -->
+                <div class="field-row" data-display-field="repetitions">
                     <label for="add-session-repetitions">Repetitions:</label>
                     <input type="text" id="add-session-repetitions" placeholder="e.g. 5">
                 </div>
-                <div class="field-row">
+                <div class="field-row" data-display-field="duration">
                     <label for="add-session-duration">Duration:</label>
                     <input type="text" id="add-session-duration" placeholder="e.g. 30">
                     <select id="add-session-duration-unit">
