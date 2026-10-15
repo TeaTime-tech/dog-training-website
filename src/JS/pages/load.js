@@ -5,19 +5,17 @@
 
 const VIEWING_DOG_STORAGE_KEY = "loadViewingDog";
 const VIEWING_ALL_DOGS = "all";
-const VIEWING_NO_DOG = "none";
 const viewingDogRow = document.getElementById("viewing-dog-row");
 const viewingDogSelect = document.getElementById("viewing-dog");
 let viewingDogFilter = VIEWING_ALL_DOGS;
 
-// true when a session belongs to the dog picked in "Switch dog"
+// true when a session belongs to the dog picked in "Switch dog" (every session when there are no dogs)
 function matchesViewingDog(session) {
     if (viewingDogFilter === VIEWING_ALL_DOGS) return true;
-    if (viewingDogFilter === VIEWING_NO_DOG) return !session.dogId;
     return session.dogId === viewingDogFilter;
 }
 
-// fill "Switch dog" with the account's dogs (plus "No dog" if older sessions have none), keeping the last choice
+// fill "Switch dog" with the account's dogs, starting on the last choice, else the current dog
 async function loadViewingDogOptions() {
     if (!viewingDogSelect) return;
     let dogs = [];
@@ -32,14 +30,10 @@ async function loadViewingDogOptions() {
         return;
     }
 
-    const options = [{ value: VIEWING_ALL_DOGS, label: "All dogs" }, ...dogs.map((dog) => ({ value: dog.id, label: dog.name }))];
-    if (getSessionHistory().some((session) => !session.dogId)) {
-        options.push({ value: VIEWING_NO_DOG, label: "Sessions with no dog" });
-    }
-    viewingDogSelect.replaceChildren(...options.map(({ value, label }) => {
+    viewingDogSelect.replaceChildren(...dogs.map((dog) => {
         const option = document.createElement("option");
-        option.value = value;
-        option.textContent = label;
+        option.value = dog.id;
+        option.textContent = dog.name;
         return option;
     }));
 
@@ -47,10 +41,13 @@ async function loadViewingDogOptions() {
     try {
         saved = localStorage.getItem(VIEWING_DOG_STORAGE_KEY);
     } catch (error) {
-        // storage blocked; start from "All dogs"
+        // storage blocked; start from the current dog
     }
     const previous = viewingDogFilter;
-    viewingDogFilter = options.some((option) => option.value === saved) ? saved : VIEWING_ALL_DOGS;
+    const startingDog = dogs.find((dog) => dog.id === saved)
+        || dogs.find((dog) => dog.id === getCurrentDogId())
+        || dogs[0];
+    viewingDogFilter = startingDog.id;
     viewingDogSelect.value = viewingDogFilter;
     viewingDogRow.hidden = false;
     if (viewingDogFilter !== previous) window.dispatchEvent(new CustomEvent("viewingdogchanged"));
@@ -67,7 +64,7 @@ if (viewingDogSelect) {
         window.dispatchEvent(new CustomEvent("viewingdogchanged"));
     });
     loadViewingDogOptions();
-    // a sync can bring in sessions with no dog, which adds that option
+    // pick up dogs added or removed since the page loaded
     window.addEventListener("sessionhistorysynced", (event) => {
         if (event.detail.changed) loadViewingDogOptions();
     });
