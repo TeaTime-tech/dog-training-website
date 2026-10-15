@@ -4,3 +4,10 @@
   font-weight: 600;
   color: var(--moss-dark);
 }
+
+/* the line under the Dog picker */
+.log-dog-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}

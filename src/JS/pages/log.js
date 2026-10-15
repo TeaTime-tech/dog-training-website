@@ -1,4 +1,47 @@
-/* log.html: the training session form (option pickers, timer, session length, save). */
+/* log.html: the training session form (dog, option pickers, timer, session length, save).
+   Needs dogs.js and sessions.js loaded first. */
+
+/*pick which dog this session is for*/
+
+const logDogSection = document.getElementById("log-dog-section");
+const logDogSelect = document.getElementById("log-dog");
+
+// fill "Switch dog" with the account's dogs and select the current one (or the first)
+async function loadLogDogOptions() {
+    let dogs = [];
+    try {
+        if (await getSignedInUser()) dogs = await getDogs();
+    } catch (error) {
+        console.error("Could not load dogs:", error);
+    }
+    if (dogs.length === 0) {
+        logDogSection.hidden = true;
+        return;
+    }
+
+    logDogSelect.replaceChildren(...dogs.map((dog) => {
+        const option = document.createElement("option");
+        option.value = dog.id;
+        option.textContent = dog.name;
+        return option;
+    }));
+    const current = dogs.find((dog) => dog.id === getCurrentDogId()) || dogs[0];
+    setCurrentDogId(current.id);
+    logDogSelect.value = current.id;
+    logDogSection.hidden = false;
+}
+
+// the dog picked for this session, or null when the picker isn't shown
+function getLogDog() {
+    if (!logDogSection || logDogSection.hidden || !logDogSelect.value) return null;
+    return { id: logDogSelect.value, name: logDogSelect.selectedOptions[0].textContent };
+}
+
+if (logDogSelect) {
+    // switching here also makes it the current dog, like on the My Dogs page
+    logDogSelect.addEventListener("change", () => setCurrentDogId(logDogSelect.value));
+    loadLogDogOptions();
+}
 
 /*add command to the select element*/
 
@@ -257,11 +300,13 @@ if (saveForm) {
             sessionTotalMinutes: getSessionTotalMinutes(),
             notes: document.getElementById("notes").value,
         };
+        const logDog = getLogDog();
+        if (logDog) session.dogId = logDog.id;
 
         const sessionHistory = getSessionHistory();
         sessionHistory.push(session);
 
-        saveMessage.textContent = "Session saved!";
+        saveMessage.textContent = logDog ? `Session saved for ${logDog.name}!` : "Session saved!";
         setSessionHistory(sessionHistory).then((synced) => {
             if (synced === false) {
                 saveMessage.textContent = "Session saved on this device only. Couldn't sync to your account.";
