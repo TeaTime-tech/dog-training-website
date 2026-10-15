@@ -1,4 +1,4 @@
-/* create.html: centered sign-up form */
+/* create.html: centered sign-up form. */
 
 body {
   display: grid;
@@ -8,7 +8,6 @@ h1,
 #inputSect {
   justify-self: center;
   text-align: center;
-
   padding: 1em;
 }
 

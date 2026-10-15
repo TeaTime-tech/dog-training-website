@@ -836,12 +836,12 @@ if (graphCommandSelect) {
     // build one stat tile (value + label) for the All Time summary
     const buildGraphStatTile = (value, label, variant) => {
         const tile = document.createElement("div");
-        tile.className = variant ? `graph-stat-tile graph-stat-tile--${variant}` : "graph-stat-tile";
+        tile.className = variant ? `stat-tile stat-tile--${variant}` : "stat-tile";
         const valueEl = document.createElement("span");
-        valueEl.className = "graph-stat-value";
+        valueEl.className = "stat-value";
         valueEl.textContent = value;
         const labelEl = document.createElement("span");
-        labelEl.className = "graph-stat-label";
+        labelEl.className = "stat-label";
         labelEl.textContent = label;
         tile.appendChild(valueEl);
         tile.appendChild(labelEl);
@@ -1086,12 +1086,12 @@ if (totalsTiles) {
     // one stat tile (value + label)
     const buildTotalsTile = (value, label, variant) => {
         const tile = document.createElement("div");
-        tile.className = `graph-stat-tile graph-stat-tile--${variant}`;
+        tile.className = `stat-tile stat-tile--${variant}`;
         const valueEl = document.createElement("span");
-        valueEl.className = "graph-stat-value";
+        valueEl.className = "stat-value";
         valueEl.textContent = value;
         const labelEl = document.createElement("span");
-        labelEl.className = "graph-stat-label";
+        labelEl.className = "stat-label";
         labelEl.textContent = label;
         tile.append(valueEl, labelEl);
         return tile;

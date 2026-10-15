@@ -1,10 +1,6 @@
-/* Fitbit-inspired layout for today.html, recolored to the site's white/moss theme */
+/* today.html: Fitbit-inspired hero ring, stat tiles, goal card, session cards, and pop-up forms. */
 
-body.today-page {
-  background: var(--bg);
-  font-family: 'Work Sans', sans-serif;
-}
-
+/* this page uses the body font for headings instead of Fraunces */
 .today-page h1,
 .today-page h2 {
   font-family: 'Work Sans', sans-serif;
@@ -55,7 +51,7 @@ body.today-page {
   width: max-content;
   background: var(--white);
   border-radius: 999px;
-  box-shadow: 0 8px 24px rgba(47, 64, 48, 0.25);
+  box-shadow: var(--shadow-pop);
 }
 
 .today-date-nav-controls[hidden] {
@@ -66,7 +62,6 @@ body.today-page {
   padding: 6px 10px;
   border: 1px solid var(--clay);
   border-radius: 8px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.875rem;
   background: var(--bg);
   color: var(--ink);
@@ -79,7 +74,6 @@ body.today-page {
   border-radius: 999px;
   background: var(--moss);
   color: var(--white);
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
@@ -102,7 +96,7 @@ body.today-page {
   border-radius: 20px;
   background: linear-gradient(135deg, var(--moss-dark) 0%, var(--ink) 100%);
   color: var(--white);
-  box-shadow: 0 8px 24px rgba(47, 64, 48, 0.3);
+  box-shadow: var(--shadow-raised);
 }
 
 .today-ring-wrap {
@@ -168,7 +162,6 @@ body.today-page {
   padding: 0;
   border: none;
   background: none;
-  font-family: inherit;
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -206,47 +199,10 @@ body.today-page {
   background: var(--clay);
 }
 
-/* Stat tiles, Fitbit-card style */
+/* Stat tiles (styles in base.css) */
 .stat-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
   margin: 16px 0 24px;
   max-width: 640px;
-}
-
-.stat-tile {
-  flex: 1 1 140px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px 20px;
-  min-width: 140px;
-  background: var(--white);
-  border-top: 4px solid var(--muted);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(47, 64, 48, 0.08);
-}
-
-.stat-tile--coral {
-  border-top-color: var(--brass);
-}
-
-.stat-tile--purple {
-  border-top-color: var(--moss);
-}
-
-.stat-value {
-  font-family: 'Work Sans', sans-serif;
-  font-size: 1.875rem;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--ink);
-}
-
-.stat-label {
-  font-size: 0.8125rem;
-  color: var(--muted);
 }
 
 /* Daily goal card */
@@ -256,7 +212,7 @@ body.today-page {
   max-width: 640px;
   background: var(--white);
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(47, 64, 48, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .today-goal-select-row {
@@ -270,7 +226,6 @@ body.today-page {
   padding: 8px 10px;
   border: 1px solid var(--clay);
   border-radius: 8px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.875rem;
   background: var(--bg);
   color: var(--ink);
@@ -309,7 +264,6 @@ body.today-page {
   padding: 8px 10px;
   border: 1px solid var(--clay);
   border-radius: 8px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.9375rem;
   background: var(--bg);
   color: var(--ink);
@@ -332,7 +286,7 @@ body.today-page {
   margin: 0 0 24px;
   background: var(--white);
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(47, 64, 48, 0.08);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
@@ -388,7 +342,7 @@ body.today-page {
   padding: 14px 18px;
   background: var(--white);
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(47, 64, 48, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .today-session-list {
@@ -479,8 +433,8 @@ body.today-page {
 }
 
 .today-session-chip--reps {
-  background: #F3E7D6;
-  color: #6B4E2A;
+  background: var(--brass-light);
+  color: var(--brass-dark);
 }
 
 .today-empty-state {
@@ -490,9 +444,7 @@ body.today-page {
   font-size: 0.875rem;
 }
 
-/* Edit-session pop-up */
-
-/* Popup modal (e.g. "+ Add Exercise" on today.html) */
+/* Pop-up forms ("+ Add Session", "+ Add Exercise") */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -516,7 +468,7 @@ body.today-page {
   padding: 24px;
   background: var(--white);
   border-radius: 16px;
-  box-shadow: 0 16px 40px rgba(47, 64, 48, 0.3);
+  box-shadow: var(--shadow-raised);
 }
 
 .modal-card .today-section-title {

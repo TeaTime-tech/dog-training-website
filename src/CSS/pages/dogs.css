@@ -1,4 +1,4 @@
-/* dogs.html */
+/* dogs.html: status line, dog list rows, rename box, and larger text. */
 
 .dogs-status {
   margin: 0 0 16px;
@@ -10,7 +10,7 @@
 }
 
 .dogs-status.dogs-error {
-  color: #A4472F;
+  color: var(--danger);
 }
 
 .dog-list {
@@ -65,7 +65,7 @@
 }
 
 .delete-dog-btn {
-  color: #A4472F;
+  color: var(--danger);
 }
 
 /* rename: the name becomes a text box with Save / Cancel */
@@ -74,20 +74,9 @@
   padding: 6px 10px;
   border: 1px solid var(--clay);
   border-radius: 8px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 1rem;
   background: var(--bg);
   color: var(--ink);
-}
-
-/* a label that screen readers announce but isn't shown */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
 }
 
 /* larger text on this page (these shared classes only change here, since this file loads only on dogs.html) */

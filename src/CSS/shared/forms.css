@@ -17,7 +17,6 @@
   padding: 8px 12px;
   border: 1px solid var(--clay);
   border-radius: 8px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.875rem;
   background: var(--bg);
   color: var(--ink);
@@ -45,7 +44,6 @@
   padding: 10px 12px;
   border: 1px solid var(--clay);
   border-radius: 8px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.9375rem;
   background: var(--bg);
   color: var(--ink);
@@ -69,26 +67,29 @@
   border: none;
   padding: 10px 20px;
   border-radius: 8px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
 }
 
-.save-btn:hover { background: var(--moss-dark); }
+.save-btn:hover {
+  background: var(--moss-dark);
+}
 
-.hide-btn, .restore-btn {
+.hide-btn,
+.restore-btn {
   background: none;
   border: none;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.8125rem;
   color: var(--muted);
   cursor: pointer;
   text-decoration: underline;
 }
 
-.restore-btn { color: var(--moss-dark); }
+.restore-btn {
+  color: var(--moss-dark);
+}
 
 /* On/off toggle switch */
 .toggle {
@@ -123,7 +124,6 @@
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.5625rem;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -168,7 +168,6 @@
   border: none;
   padding: 5px 12px;
   border-radius: 6px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -181,7 +180,6 @@
 .row-cancel-btn {
   background: none;
   border: none;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.75rem;
   color: var(--muted);
   cursor: pointer;

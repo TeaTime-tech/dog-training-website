@@ -66,14 +66,13 @@
   border: 1px solid var(--clay);
   border-radius: 10px;
   background: var(--white);
-  box-shadow: 0 8px 24px rgba(47, 64, 48, 0.12);
+  box-shadow: var(--shadow-pop);
 }
 
 .nav-dropdown-menu a {
   display: block;
   padding: 8px 10px;
   border-radius: 6px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--ink);
@@ -89,7 +88,6 @@
 .home-link {
   display: inline-block;
   margin-bottom: 16px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--moss-dark);

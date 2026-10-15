@@ -1,4 +1,4 @@
-/* commands.html */
+/* commands.html: visibility toggles, command tiles, CGC checklist, and mastery meters. */
 
 .toggle-row {
   display: flex;
@@ -25,7 +25,6 @@
   border-radius: 10px;
   background: var(--clay);
   color: var(--ink);
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.9375rem;
   font-weight: 600;
   text-transform: capitalize;
@@ -123,7 +122,6 @@
   border: none;
   padding: 5px 12px;
   border-radius: 999px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -143,7 +141,6 @@
   padding: 4px 0;
   background: none;
   border: none;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.8125rem;
   color: var(--muted);
   cursor: pointer;
@@ -227,7 +224,6 @@
   padding: 8px 10px;
   border: 1px solid var(--clay);
   border-radius: 8px;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.875rem;
   background: var(--white);
   color: var(--ink);
@@ -247,7 +243,6 @@
 .cgc-cancel-attempt-btn {
   background: none;
   border: none;
-  font-family: 'Work Sans', sans-serif;
   font-size: 0.8125rem;
   color: var(--muted);
   cursor: pointer;
