@@ -667,6 +667,69 @@ function clearPlotlyHover(plotEl) {
     });
 }
 
+/*graph styling shared by the command graph and the training & exercise time graph (load.html)*/
+
+// site palette, reused so the graphs match the rest of the app (Fitbit-style cards)
+const GRAPH_COLORS = {
+    ink: "#2F4030",
+    moss: "#6B8F5E",
+    brass: "#B8925A",
+    clay: "#E8DFC9",
+    muted: "#8A8271",
+    white: "#FFFDF8",
+};
+
+const GRAPH_AXIS_STYLE = {
+    gridcolor: GRAPH_COLORS.clay,
+    zeroline: false,
+    showline: false,
+    tickfont: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.muted, size: 12 },
+    title: { font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.muted, size: 12 } },
+};
+
+const GRAPH_LAYOUT_BASE = {
+    font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.ink },
+    paper_bgcolor: GRAPH_COLORS.white,
+    plot_bgcolor: GRAPH_COLORS.white,
+    margin: { t: 56, r: 24, b: 48, l: 56 },
+    bargap: 0.35,
+    bargroupgap: 0.15,
+    hoverlabel: {
+        bgcolor: GRAPH_COLORS.white,
+        bordercolor: GRAPH_COLORS.clay,
+        font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.ink },
+    },
+};
+
+const GRAPH_CONFIG = { responsive: true, displayModeBar: false };
+
+// build a bar trace (Daily) or a line trace (Monthly/Yearly) depending on the timeframe
+const buildGraphTrace = (traceType, name, x, y, color, yaxisId) => {
+    if (traceType === "bar") {
+        // offsetgroup forces bars to sit side by side even though they're on different y-axes
+        // ("group" barmode alone doesn't reliably space bars that span more than one y-axis)
+        return {
+            name,
+            x,
+            y,
+            type: "bar",
+            yaxis: yaxisId,
+            offsetgroup: yaxisId,
+            marker: { color, cornerradius: 6 },
+        };
+    }
+    return {
+        name,
+        x,
+        y,
+        type: "scatter",
+        mode: "lines+markers",
+        yaxis: yaxisId,
+        line: { color, width: 3, shape: "spline" },
+        marker: { color, size: 7 },
+    };
+};
+
 /*view command metrics over time as a graph (load.html)*/
 
 const graphCommandSelect = document.getElementById("graph-command");
@@ -769,67 +832,6 @@ if (graphCommandSelect) {
             labels: keys,
             repetitions: keys.map((key) => buckets.get(key).repetitions),
             durations: keys.map((key) => buckets.get(key).duration),
-        };
-    };
-
-    // site palette, reused here so the graph matches the rest of the app (Fitbit-style cards)
-    const GRAPH_COLORS = {
-        ink: "#2F4030",
-        moss: "#6B8F5E",
-        brass: "#B8925A",
-        clay: "#E8DFC9",
-        muted: "#8A8271",
-        white: "#FFFDF8",
-    };
-
-    const GRAPH_AXIS_STYLE = {
-        gridcolor: GRAPH_COLORS.clay,
-        zeroline: false,
-        showline: false,
-        tickfont: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.muted, size: 12 },
-        title: { font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.muted, size: 12 } },
-    };
-
-    const GRAPH_LAYOUT_BASE = {
-        font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.ink },
-        paper_bgcolor: GRAPH_COLORS.white,
-        plot_bgcolor: GRAPH_COLORS.white,
-        margin: { t: 56, r: 24, b: 48, l: 56 },
-        bargap: 0.35,
-        bargroupgap: 0.15,
-        hoverlabel: {
-            bgcolor: GRAPH_COLORS.white,
-            bordercolor: GRAPH_COLORS.clay,
-            font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.ink },
-        },
-    };
-
-    const GRAPH_CONFIG = { responsive: true, displayModeBar: false };
-
-    // build a bar trace (Daily) or a line trace (Monthly/Yearly) depending on the timeframe
-    const buildGraphTrace = (traceType, name, x, y, color, yaxisId) => {
-        if (traceType === "bar") {
-            // offsetgroup forces bars to sit side by side even though they're on different y-axes
-            // ("group" barmode alone doesn't reliably space bars that span more than one y-axis)
-            return {
-                name,
-                x,
-                y,
-                type: "bar",
-                yaxis: yaxisId,
-                offsetgroup: yaxisId,
-                marker: { color, cornerradius: 6 },
-            };
-        }
-        return {
-            name,
-            x,
-            y,
-            type: "scatter",
-            mode: "lines+markers",
-            yaxis: yaxisId,
-            line: { color, width: 3, shape: "spline" },
-            marker: { color, size: 7 },
         };
     };
 
@@ -1056,13 +1058,15 @@ if (totalsTiles) {
             const thisWeek = weekStart(today);
             for (let i = 11; i >= 0; i -= 1) {
                 const start = new Date(thisWeek.getFullYear(), thisWeek.getMonth(), thisWeek.getDate() - i * 7);
-                buckets.push({ key: localDateString(start), label: `Week of ${TOTALS_MONTH_NAMES[start.getMonth()]} ${start.getDate()}` });
+                buckets.push({ key: localDateString(start), label: `${TOTALS_MONTH_NAMES[start.getMonth()]} ${start.getDate()}` });
             }
         } else if (group === "monthly") {
-            // the last 12 months
+            // the last 12 months; the year is shown on the first month and on each January
             for (let i = 11; i >= 0; i -= 1) {
                 const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
-                buckets.push({ key: localDateString(month).slice(0, 7), label: `${TOTALS_MONTH_NAMES[month.getMonth()]} ${month.getFullYear()}` });
+                const showYear = i === 11 || month.getMonth() === 0;
+                const label = `${TOTALS_MONTH_NAMES[month.getMonth()]}${showYear ? ` ${month.getFullYear()}` : ""}`;
+                buckets.push({ key: localDateString(month).slice(0, 7), label });
             }
         } else {
             // every year from the first logged date to this year
@@ -1135,39 +1139,40 @@ if (totalsTiles) {
         const useHours = Math.max(0, ...shown) >= 3 * 3600;
         const toUnit = (seconds) => Math.round((seconds / (useHours ? 3600 : 60)) * 10) / 10;
 
+        // same bar/line look as the command graph, with hover showing "1 hr 30 min" instead of raw numbers
         const labels = buckets.map((bucket) => bucket.label);
-        const buildTrace = (name, seconds, color) => {
-            const base = {
-                name,
-                x: labels,
-                y: seconds.map(toUnit),
-                customdata: seconds.map(formatTotalTime),
-                hovertemplate: `${name}: %{customdata}<extra></extra>`,
-            };
-            return totalsChartTypeSelect.value === "line"
-                ? { ...base, type: "scatter", mode: "lines+markers", line: { color, width: 3, shape: "spline" }, marker: { color, size: 6 } }
-                : { ...base, type: "bar", marker: { color, cornerradius: 6 } };
-        };
+        const buildTimeTrace = (name, seconds, color) => ({
+            ...buildGraphTrace(totalsChartTypeSelect.value, name, labels, seconds.map(toUnit), color, "y1"),
+            // both traces share one y-axis, so give each its own slot to keep the bars side by side
+            offsetgroup: name,
+            customdata: seconds.map(formatTotalTime),
+            hovertemplate: `${name}: %{customdata}<extra></extra>`,
+        });
         const data = [];
-        if (show !== "exercise") data.push(buildTrace("Training time", trainingByBucket, "#6B8F5E"));
-        if (show !== "training") data.push(buildTrace("Exercise time", exerciseByBucket, "#B8925A"));
+        if (show !== "exercise") data.push(buildTimeTrace("Training time", trainingByBucket, GRAPH_COLORS.moss));
+        if (show !== "training") data.push(buildTimeTrace("Exercise time", exerciseByBucket, GRAPH_COLORS.brass));
 
-        const axisFont = { family: "Work Sans, sans-serif", color: "#8A8271", size: 12 };
+        const groupTitle = { daily: "Daily", weekly: "Weekly", monthly: "Monthly", yearly: "Yearly" }[group];
+        const showTitle = { both: "Training & Exercise Time", training: "Training Time", exercise: "Exercise Time" }[show];
+        const unitLabel = `Time (${useHours ? "hours" : "minutes"})`;
         const layout = {
-            font: { family: "Work Sans, sans-serif", color: "#2F4030" },
-            paper_bgcolor: "#FFFDF8",
-            plot_bgcolor: "#FFFDF8",
-            margin: { t: 24, r: 24, b: 72, l: 56 },
+            ...GRAPH_LAYOUT_BASE,
+            // weekly labels are each week's Monday
+            title: { text: `${groupTitle} ${showTitle}${group === "weekly" ? " (weeks start Monday)" : ""}` },
             barmode: "group",
-            bargap: 0.3,
             hovermode: "x unified",
-            hoverlabel: { bgcolor: "#FFFDF8", bordercolor: "#E8DFC9", font: { family: "Work Sans, sans-serif", color: "#2F4030" } },
-            xaxis: { type: "category", gridcolor: "transparent", tickfont: axisFont, tickangle: group === "yearly" ? 0 : -45 },
-            yaxis: { gridcolor: "#E8DFC9", zeroline: false, rangemode: "tozero", tickfont: axisFont, title: { text: `Time (${useHours ? "hours" : "minutes"})`, font: axisFont } },
-            legend: { orientation: "h", y: -0.35, font: { family: "Work Sans, sans-serif", color: "#8A8271" } },
+            xaxis: {
+                ...GRAPH_AXIS_STYLE,
+                gridcolor: "transparent",
+                type: "category",
+                // 30 daily labels don't fit, so show about every third day
+                ...(group === "daily" ? { nticks: 10 } : {}),
+            },
+            yaxis: { ...GRAPH_AXIS_STYLE, rangemode: "tozero", title: { ...GRAPH_AXIS_STYLE.title, text: unitLabel } },
+            legend: { orientation: "h", font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.muted } },
             showlegend: data.length > 1,
         };
-        Plotly.react(totalsChartEl, data, layout, { responsive: true, displayModeBar: false });
+        Plotly.react(totalsChartEl, data, layout, GRAPH_CONFIG);
     };
 
     // redraw the tiles and graph from the latest sessions (picked dog only) and exercises
