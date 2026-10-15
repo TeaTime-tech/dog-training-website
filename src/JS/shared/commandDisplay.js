@@ -8,7 +8,7 @@ const COMMAND_DISPLAY_PENDING_KEY = "commandDisplayPending";
 // the account id the cached settings belong to, so another account never inherits them
 const COMMAND_DISPLAY_OWNER_KEY = "commandDisplayOwner";
 
-// every field a command can show or hide; score and weather aren't logged yet, so their settings have no effect
+// every field a command can show or hide
 const COMMAND_DISPLAY_FIELDS = ["score", "repetitions", "duration", "location", "distractions", "weather"];
 
 // all saved settings, or {} if none are saved or storage is unreadable

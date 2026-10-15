@@ -95,7 +95,7 @@ if (loadButton) {
         dataTableBody.innerHTML = "";
         const row = document.createElement("tr");
         const cell = document.createElement("td");
-        cell.colSpan = 8;
+        cell.colSpan = 10;
         cell.textContent = message;
         row.appendChild(cell);
         dataTableBody.appendChild(row);
@@ -109,6 +109,8 @@ if (loadButton) {
             session.repetitions,
             formatDurationDisplay(session.duration),
             session.location,
+            session.weather,
+            session.score ? `${session.score}/10` : "",
             session.date,
             session.time,
             session.notes,
@@ -180,6 +182,20 @@ if (loadButton) {
         locationInput.type = "text";
         locationInput.value = session.location ?? "";
 
+        const weatherInput = document.createElement("input");
+        weatherInput.type = "text";
+        weatherInput.value = session.weather ?? "";
+
+        // "—" (no score) or 1-10
+        const scoreSelect = document.createElement("select");
+        ["", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].forEach((value) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value || "\u2014";
+            scoreSelect.appendChild(option);
+        });
+        scoreSelect.value = session.score ?? "";
+
         const dateInputEdit = document.createElement("input");
         dateInputEdit.type = "date";
         dateInputEdit.value = session.date ?? "";
@@ -197,6 +213,8 @@ if (loadButton) {
             repetitionsInput,
             durationInput,
             locationInput,
+            weatherInput,
+            scoreSelect,
             dateInputEdit,
             timeInputEdit,
             notesInput,
@@ -220,6 +238,8 @@ if (loadButton) {
                 repetitions: repetitionsInput.value.trim(),
                 duration: durationInput.value.trim(),
                 location: locationInput.value.trim(),
+                weather: weatherInput.value.trim(),
+                score: scoreSelect.value,
                 date: dateInputEdit.value,
                 time: timeInputEdit.value,
                 notes: notesInput.value.trim(),
@@ -586,6 +606,8 @@ if (seedTestDataButton) {
     const SEED_EXERCISE_DURATIONS = ["30", "45", "10:00", "15:00", "20:00"];
     const SEED_DISTRACTIONS = ["none", "other dogs", "people", "squirrels", "birds"];
     const SEED_LOCATIONS = ["home", "park", "street"];
+    const SEED_WEATHER = ["", "sunny", "cloudy", "rainy", "windy", "indoors"];
+    const SEED_SCORES = ["", "4", "5", "6", "7", "8", "9", "10"];
     const SEED_NOTES = ["", "", "Great focus today.", "Struggled with distractions.", "Fast response time.", "Needs more practice."];
     const SEED_EXERCISE_NAMES = ["Walk", "Fetch", "Tug of war", "Agility drill", "Swim", "Off-leash recall practice"];
     const SEED_EXERCISE_NOTES = ["", "", "Good energy.", "Tired quickly.", "Loved it."];
@@ -611,6 +633,8 @@ if (seedTestDataButton) {
             duration: randomItem(SEED_DURATIONS),
             distractions: randomItem(SEED_DISTRACTIONS),
             location: randomItem(SEED_LOCATIONS),
+            weather: randomItem(SEED_WEATHER),
+            score: randomItem(SEED_SCORES),
             date: randomRecentDateIso(21),
             time: randomTime(),
             sessionStartTime: "",

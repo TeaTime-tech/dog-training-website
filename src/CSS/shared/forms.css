@@ -157,7 +157,7 @@
   transform: translateX(24px);
 }
 
-/* a switch that can't be changed yet (still loading, or a "coming soon" setting) */
+/* a switch that can't be changed yet (e.g. while its setting loads) */
 .toggle-input:disabled + .toggle-track {
   opacity: 0.5;
   cursor: not-allowed;

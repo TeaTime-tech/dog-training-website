@@ -160,6 +160,11 @@ const removeLocationButton = document.getElementById("remove-location");
 
 /*add repetitions to the select element*/
 
+const weatherSelect = document.getElementById("weather");
+const newWeatherInput = document.getElementById("new-weather");
+const addWeatherButton = document.getElementById("add-weather");
+const removeWeatherButton = document.getElementById("remove-weather");
+
 const repetitionsSelect = document.getElementById("repitions");
 const newRepetitionInput = document.getElementById("new-repition");
 const addRepetitionButton = document.getElementById("add-repition");
@@ -293,6 +298,8 @@ if (saveForm) {
             duration: document.getElementById("duration").value,
             distractions: document.getElementById("distractions").value,
             location: document.getElementById("location").value,
+            weather: document.getElementById("weather").value,
+            score: document.getElementById("score").value,
             date: document.getElementById("date").value,
             time: document.getElementById("time").value,
             sessionStartTime: isManualDurationMode() ? "" : sessionStartTimeInput.value,
@@ -304,7 +311,7 @@ if (saveForm) {
         if (logDog) session.dogId = logDog.id;
         // fields hidden for this command aren't recorded, rather than saving whatever their box defaulted to
         const display = getCommandDisplay(session.command);
-        ["repetitions", "duration", "distractions", "location"].forEach((field) => {
+        ["repetitions", "duration", "distractions", "location", "weather", "score"].forEach((field) => {
             if (!display[field]) session[field] = "";
         });
 
@@ -424,11 +431,13 @@ setupAddOption("customDistractions", distractionSelect, newDistractionInput, add
 setupAddOption("customLocations", locationSelect, newLocationInput, addLocationButton);
 setupAddOption("customDurations", durationSelect, newDurationInput, addDurationButton);
 setupAddOption("customRepetitions", repetitionsSelect, newRepetitionInput, addRepetitionButton);
+setupAddOption("customWeather", weatherSelect, newWeatherInput, addWeatherButton);
 
 setupRemoveOption("customDistractions", distractionSelect, removeDistractionButton);
 setupRemoveOption("customLocations", locationSelect, removeLocationButton);
 setupRemoveOption("customDurations", durationSelect, removeDurationButton);
 setupRemoveOption("customRepetitions", repetitionsSelect, removeRepetitionButton);
+setupRemoveOption("customWeather", weatherSelect, removeWeatherButton);
 
 /*show only the fields turned on for the picked command (set in Commands > Display Settings)*/
 

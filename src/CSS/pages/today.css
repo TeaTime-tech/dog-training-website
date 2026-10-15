@@ -437,6 +437,11 @@
   color: var(--brass-dark);
 }
 
+.today-session-chip--score {
+  background: var(--moss);
+  color: var(--white);
+}
+
 .today-empty-state {
   padding: 24px;
   text-align: center;

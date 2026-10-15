@@ -98,6 +98,19 @@ if (todaySessionList) {
         return localStorage.getItem(TODAY_GOAL_TYPE_STORAGE_KEY) || TODAY_DEFAULT_GOAL_TYPE;
     }
 
+    // a "No score" / 1-10 dropdown set to a session's score
+    function buildScoreSelect(score) {
+        const select = document.createElement("select");
+        ["", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].forEach((value) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value || "No score";
+            select.appendChild(option);
+        });
+        select.value = score ?? "";
+        return select;
+    }
+
     // hide the rows inside a container whose data-display-field is turned off for a command
     function applyDisplayToRows(container, command) {
         const display = getCommandDisplay(command);
@@ -134,6 +147,9 @@ if (todaySessionList) {
         if (display.distractions && session.distractions && session.distractions !== "none") {
             metaParts.push(session.distractions);
         }
+        if (display.weather && session.weather) {
+            metaParts.push(session.weather);
+        }
 
         const metaLine = document.createElement("span");
         metaLine.className = "today-session-meta";
@@ -151,6 +167,13 @@ if (todaySessionList) {
 
         const chipsWrap = document.createElement("div");
         chipsWrap.className = "today-session-chips";
+
+        if (display.score && session.score) {
+            const scoreChip = document.createElement("span");
+            scoreChip.className = "today-session-chip today-session-chip--score";
+            scoreChip.textContent = `Score ${session.score}/10`;
+            chipsWrap.appendChild(scoreChip);
+        }
 
         if (display.repetitions && session.repetitions) {
             const repsChip = document.createElement("span");
@@ -218,6 +241,12 @@ if (todaySessionList) {
         locationInput.type = "text";
         locationInput.value = session.location ?? "";
 
+        const weatherInput = document.createElement("input");
+        weatherInput.type = "text";
+        weatherInput.value = session.weather ?? "";
+
+        const scoreSelect = buildScoreSelect(session.score);
+
         const dateInputEdit = document.createElement("input");
         dateInputEdit.type = "date";
         dateInputEdit.value = session.date ?? "";
@@ -245,6 +274,8 @@ if (todaySessionList) {
         addField("Repetitions:", repetitionsInput, "repetitions");
         addField("Duration:", durationInput, "duration");
         addField("Location:", locationInput, "location");
+        addField("Weather:", weatherInput, "weather");
+        addField("Score:", scoreSelect, "score");
         addField("Date:", dateInputEdit);
         addField("Time:", timeInputEdit);
         addField("Notes:", notesInput);
@@ -267,6 +298,8 @@ if (todaySessionList) {
                 repetitions: display.repetitions ? repetitionsInput.value.trim() : before.repetitions,
                 duration: display.duration ? durationInput.value.trim() : before.duration,
                 location: display.location ? locationInput.value.trim() : before.location,
+                weather: display.weather ? weatherInput.value.trim() : before.weather,
+                score: display.score ? scoreSelect.value : before.score,
                 date: dateInputEdit.value,
                 time: timeInputEdit.value,
                 notes: notesInput.value.trim(),
@@ -619,6 +652,8 @@ if (todaySessionList) {
         const addSessionDurationInput = document.getElementById("add-session-duration");
         const addSessionDurationUnitSelect = document.getElementById("add-session-duration-unit");
         const addSessionNotesInput = document.getElementById("add-session-notes");
+        const addSessionScoreSelect = document.getElementById("add-session-score");
+        const addSessionWeatherInput = document.getElementById("add-session-weather");
         const addSessionDateInput = document.getElementById("add-session-date");
         const addSessionTimeInput = document.getElementById("add-session-time");
 
@@ -635,6 +670,8 @@ if (todaySessionList) {
             addSessionDurationInput.value = "";
             addSessionDurationUnitSelect.value = "sec";
             addSessionNotesInput.value = "";
+            addSessionScoreSelect.value = "";
+            addSessionWeatherInput.value = "";
             addSessionDateInput.value = getViewedDateIso();
 
             const now = new Date();
@@ -700,6 +737,8 @@ if (todaySessionList) {
                 duration: storedDuration,
                 distractions: "none",
                 location: "",
+                score: display.score ? addSessionScoreSelect.value : "",
+                weather: display.weather ? addSessionWeatherInput.value.trim() : "",
                 date: addSessionDateInput.value,
                 time: addSessionTimeInput.value,
                 sessionStartTime: "",
