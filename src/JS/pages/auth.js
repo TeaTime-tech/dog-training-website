@@ -1,4 +1,4 @@
-/* Create-account and login forms (create.html, login.html). Needs supabaseClient.js and tasklists.js loaded first. */
+/* Create-account and login forms (create.html, login.html). Needs supabaseClient.js, dogs.js and tasklists.js loaded first. */
 
 const authMessage = document.getElementById("auth-message");
 
@@ -15,6 +15,12 @@ async function finishSignIn(user) {
         await ensureDefaultTaskLists(user.id);
     } catch (error) {
         console.error("Could not seed default task lists:", error);
+    }
+    // select one of the account's dogs (dogs are added on the settings page)
+    try {
+        await ensureFirstDog();
+    } catch (error) {
+        console.error("Could not select a dog:", error);
     }
     window.location.href = "index.html";
 }

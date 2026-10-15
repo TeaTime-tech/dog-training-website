@@ -39,11 +39,32 @@ async function createDog(name) {
     return data;
 }
 
+// change a dog's name and return the updated dog
+async function renameDog(dogId, name) {
+    const trimmed = String(name || "").trim();
+    if (!trimmed) throw new Error("Please enter your dog's name.");
+    if (!supabaseClient) throw new Error("Can't reach your account right now. Please try again later.");
+    const { data, error } = await supabaseClient.from("dogs").update({ name: trimmed }).eq("id", dogId).select().single();
+    if (error) throw error;
+    return data;
+}
+
+// remove a dog from the account; the database also deletes its training sessions (on delete cascade)
+async function deleteDog(dogId) {
+    if (!supabaseClient) throw new Error("Can't reach your account right now. Please try again later.");
+    const { error } = await supabaseClient.from("dogs").delete().eq("id", dogId);
+    if (error) throw error;
+    if (getCurrentDogId() === dogId) setCurrentDogId(null);
+}
+
 // make sure the account has a dog and one is selected; creates firstDogName's dog if there are none
 async function ensureFirstDog(firstDogName) {
     const dogs = await getDogs();
     if (dogs.length === 0) {
-        if (!firstDogName || !firstDogName.trim()) return null;
+        if (!firstDogName || !firstDogName.trim()) {
+            setCurrentDogId(null);
+            return null;
+        }
         const dog = await createDog(firstDogName);
         setCurrentDogId(dog.id);
         return dog;

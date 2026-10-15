@@ -1,0 +1,90 @@
+/* dogs.html */
+
+.dogs-status {
+  margin: 0 0 16px;
+  font-size: 15px;
+}
+
+.dogs-status:empty {
+  display: none;
+}
+
+.dogs-status.dogs-error {
+  color: #A4472F;
+}
+
+.dog-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dog-list-empty {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* one row per dog: name on the left, actions on the right */
+.dog-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid var(--clay);
+}
+
+.dog-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.dog-name {
+  flex: 1 1 140px;
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.dog-row-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.current-dog-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--clay);
+  color: var(--moss-dark);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.delete-dog-btn {
+  color: #A4472F;
+}
+
+/* rename: the name becomes a text box with Save / Cancel */
+.dog-rename-input {
+  flex: 1 1 160px;
+  padding: 6px 10px;
+  border: 1px solid var(--clay);
+  border-radius: 8px;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* a label that screen readers announce but isn't shown */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

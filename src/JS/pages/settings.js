@@ -1,4 +1,4 @@
-/* settings.html: account and app settings. Needs supabaseClient.js, dogs.js, accountNav.js and mastery.js loaded first. */
+/* settings.html: account and app settings. Needs supabaseClient.js, accountNav.js and mastery.js loaded first. */
 
 // the old local-only password check is gone; drop its leftover hash
 localStorage.removeItem("userPasswordAuth");
@@ -131,70 +131,6 @@ document.getElementById("change-password").addEventListener("click", () => withA
     showStatus(accountStatus, "Password updated.");
 }));
 
-/* my dogs: pick which dog new sessions are logged for, and add dogs to the account */
-
-const dogsStatus = document.getElementById("dogs-status");
-const dogFields = document.getElementById("dog-fields");
-const currentDogSelect = document.getElementById("current-dog");
-const newDogNameInput = document.getElementById("new-dog-name");
-
-// fill the dog dropdown with the account's dogs and select the current one (or the first)
-async function loadDogSettings(user) {
-    if (!user) {
-        showStatus(dogsStatus, "Log in to add your dogs.");
-        return;
-    }
-    try {
-        const dogs = await getDogs();
-        const current = dogs.find((dog) => dog.id === getCurrentDogId()) || dogs[0] || null;
-        setCurrentDogId(current ? current.id : null);
-
-        currentDogSelect.replaceChildren(...dogs.map((dog) => {
-            const option = document.createElement("option");
-            option.value = dog.id;
-            option.textContent = dog.name;
-            return option;
-        }));
-        if (current) currentDogSelect.value = current.id;
-        currentDogSelect.disabled = dogs.length === 0;
-        dogFields.disabled = false;
-        showStatus(dogsStatus, current
-            ? `New sessions are logged for ${current.name}.`
-            : "Add your first dog below so sessions are logged for them.");
-    } catch (error) {
-        console.error("Could not load dogs:", error);
-        showStatus(dogsStatus, `Couldn't load your dogs: ${error.message}`);
-    }
-}
-
-currentDogSelect.addEventListener("change", () => {
-    setCurrentDogId(currentDogSelect.value);
-    const name = currentDogSelect.selectedOptions[0].textContent;
-    showStatus(dogsStatus, `New sessions are logged for ${name}.`);
-});
-
-// add the typed dog, select it, and refresh the list
-async function addDog() {
-    dogFields.disabled = true;
-    try {
-        const dog = await createDog(newDogNameInput.value);
-        setCurrentDogId(dog.id);
-        newDogNameInput.value = "";
-        await loadDogSettings(await getSignedInUser());
-        showStatus(dogsStatus, `Added ${dog.name}. New sessions are logged for ${dog.name}.`);
-    } catch (error) {
-        console.error("Could not add dog:", error);
-        showStatus(dogsStatus, `Couldn't add dog: ${error.message}`);
-    } finally {
-        dogFields.disabled = false;
-    }
-}
-
-document.getElementById("add-dog").addEventListener("click", addDog);
-newDogNameInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") addDog();
-});
-
 /* mastery decay: the same account setting as the toggle on the commands page */
 
 const masteryDecayToggle = document.getElementById("mastery-decay-toggle");
@@ -304,7 +240,4 @@ document.getElementById("export-data").addEventListener("click", async () => {
     showStatus(exportStatus, user ? "Downloaded." : "Downloaded this browser's data. Log in to include your cloud data too.");
 });
 
-loadAccountSettings().then((user) => {
-    loadMasteryDecaySetting(user);
-    loadDogSettings(user);
-});
+loadAccountSettings().then(loadMasteryDecaySetting);
