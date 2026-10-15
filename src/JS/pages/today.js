@@ -17,8 +17,8 @@ function getSavedGoal(storageKey, defaultGoal) {
     return Number.isFinite(stored) && stored > 0 ? stored : defaultGoal;
 }
 
-// wire up a "Save Goal" button to validate and persist a daily goal value
-function setupGoalEditor(storageKey, defaultGoal, input, button, unitNoun, onSave) {
+// wire up a "Save Goal" button to validate and persist a daily goal value (saveGoal also syncs it to the account)
+function setupGoalEditor(goalType, storageKey, defaultGoal, input, button, unitNoun, onSave) {
     if (!input || !button) {
         return;
     }
@@ -33,7 +33,7 @@ function setupGoalEditor(storageKey, defaultGoal, input, button, unitNoun, onSav
             return;
         }
 
-        localStorage.setItem(storageKey, String(newGoal));
+        saveGoal(goalType, newGoal);
         input.value = newGoal;
         if (onSave) {
             onSave();
@@ -780,9 +780,9 @@ if (todaySessionList) {
         });
     }
 
-    setupGoalEditor(TODAY_GOAL_STORAGE_KEY, TODAY_DEFAULT_SESSION_GOAL, todayGoalInput, todayGoalSaveButton, "session", renderToday);
-    setupGoalEditor(TODAY_MINUTES_GOAL_STORAGE_KEY, TODAY_DEFAULT_MINUTES_GOAL, todayGoalMinutesInput, todayGoalMinutesSaveButton, "minute", renderToday);
-    setupGoalEditor(TODAY_COMMANDS_GOAL_STORAGE_KEY, TODAY_DEFAULT_COMMANDS_GOAL, todayGoalCommandsInput, todayGoalCommandsSaveButton, "command", renderToday);
+    setupGoalEditor("sessions", TODAY_GOAL_STORAGE_KEY, TODAY_DEFAULT_SESSION_GOAL, todayGoalInput, todayGoalSaveButton, "session", renderToday);
+    setupGoalEditor("minutes", TODAY_MINUTES_GOAL_STORAGE_KEY, TODAY_DEFAULT_MINUTES_GOAL, todayGoalMinutesInput, todayGoalMinutesSaveButton, "minute", renderToday);
+    setupGoalEditor("commands", TODAY_COMMANDS_GOAL_STORAGE_KEY, TODAY_DEFAULT_COMMANDS_GOAL, todayGoalCommandsInput, todayGoalCommandsSaveButton, "command", renderToday);
 
     // show only the goal row matching the dropdown's selected goal type
     const todayGoalTypeSelect = document.getElementById("today-goal-type");
@@ -792,25 +792,46 @@ if (todaySessionList) {
         commands: document.getElementById("today-goal-row-commands"),
     };
 
-    if (todayGoalTypeSelect) {
-        const showGoalRow = (type) => {
-            Object.entries(todayGoalRowsByType).forEach(([rowType, row]) => {
-                if (row) {
-                    row.hidden = rowType !== type;
-                }
-            });
-        };
+    const showGoalRow = (type) => {
+        Object.entries(todayGoalRowsByType).forEach(([rowType, row]) => {
+            if (row) {
+                row.hidden = rowType !== type;
+            }
+        });
+    };
 
+    if (todayGoalTypeSelect) {
         const savedGoalType = localStorage.getItem(TODAY_GOAL_TYPE_STORAGE_KEY) || TODAY_DEFAULT_GOAL_TYPE;
         todayGoalTypeSelect.value = savedGoalType;
         showGoalRow(savedGoalType);
 
         todayGoalTypeSelect.addEventListener("change", () => {
-            localStorage.setItem(TODAY_GOAL_TYPE_STORAGE_KEY, todayGoalTypeSelect.value);
+            saveActiveGoalType(todayGoalTypeSelect.value);
             showGoalRow(todayGoalTypeSelect.value);
             renderToday();
         });
     }
+
+    // goals from the account arrived; refresh the goal fields, then redraw unless a session is mid-edit
+    window.addEventListener("goalssynced", (event) => {
+        if (!event.detail.changed) return;
+        const goalFields = [
+            [todayGoalInput, TODAY_GOAL_STORAGE_KEY, TODAY_DEFAULT_SESSION_GOAL],
+            [todayGoalMinutesInput, TODAY_MINUTES_GOAL_STORAGE_KEY, TODAY_DEFAULT_MINUTES_GOAL],
+            [todayGoalCommandsInput, TODAY_COMMANDS_GOAL_STORAGE_KEY, TODAY_DEFAULT_COMMANDS_GOAL],
+        ];
+        goalFields.forEach(([input, storageKey, defaultGoal]) => {
+            if (input) {
+                input.value = getSavedGoal(storageKey, defaultGoal);
+            }
+        });
+        if (todayGoalTypeSelect) {
+            const goalType = localStorage.getItem(TODAY_GOAL_TYPE_STORAGE_KEY) || TODAY_DEFAULT_GOAL_TYPE;
+            todayGoalTypeSelect.value = goalType;
+            showGoalRow(goalType);
+        }
+        if (editingSessionIndex === null) renderToday();
+    });
 
     // switch which date's sessions/exercises/stats are shown
     if (todayViewDateInput) {

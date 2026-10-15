@@ -19,12 +19,14 @@ function fillAccountLink(link, user) {
     link.append(emailSpan);
 }
 
-// upload pending sessions and clear this browser's copy (if sessions.js is loaded), sign out, then go home
+// upload pending sessions and clear this browser's sessions and goals (if loaded), sign out, then go home
 async function logOut() {
     if (typeof clearSessionsForLogOut === "function") {
         const cleared = await clearSessionsForLogOut();
         if (!cleared && !confirm("Some training sessions haven't synced to your account yet. They'll stay on this device. Log out anyway?")) return;
     }
+    // pages without trainingData.js skip this; the next account's goal sync drops the old goals instead
+    if (typeof clearGoalsForLogOut === "function") clearGoalsForLogOut();
     if (supabaseClient) await supabaseClient.auth.signOut();
     window.location.href = "index.html";
 }
