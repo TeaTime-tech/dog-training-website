@@ -95,7 +95,7 @@ async function saveGoal(goalType, target, dogId = null) {
         const row = { target, is_active: true, updated_at: new Date().toISOString() };
         const { error } = existing
             ? await supabaseClient.from("training_goals").update(row).eq("id", existing.id)
-            : await supabaseClient.from("training_goals").insert({ goal_type: goalType, period: "daily", dog_id: dogId, ...row });
+            : await supabaseClient.from("training_goals").insert({ account_id: user.id, goal_type: goalType, period: "daily", dog_id: dogId, ...row });
         if (error) throw error;
     } catch (error) {
         console.error("Could not save goal:", error);

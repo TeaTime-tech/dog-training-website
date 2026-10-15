@@ -33,8 +33,10 @@ async function getDogs() {
 async function createDog(name) {
     const trimmed = String(name || "").trim();
     if (!trimmed) throw new Error("Please enter your dog's name.");
-    if (!supabaseClient) throw new Error("Can't reach your account right now. Please try again later.");
-    const { data, error } = await supabaseClient.from("dogs").insert({ name: trimmed }).select().single();
+    const user = await getSignedInUser();
+    if (!user) throw new Error("Please log in to add a dog.");
+    // send account_id explicitly; the row-level security check needs it to match the signed-in user
+    const { data, error } = await supabaseClient.from("dogs").insert({ account_id: user.id, name: trimmed }).select().single();
     if (error) throw error;
     return data;
 }
