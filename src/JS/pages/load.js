@@ -627,21 +627,6 @@ if (graphCommandSelect) {
     graphTimeframeSelect.addEventListener("change", updateGraphPickerVisibility);
     updateGraphPickerVisibility();
 
-    const parseDurationValue = (value) => {
-        if (typeof value !== "string" || value === "") {
-            return null;
-        }
-        if (value.includes(":")) {
-            const [minutes, seconds] = value.split(":").map(Number);
-            if (Number.isNaN(minutes) || Number.isNaN(seconds)) {
-                return null;
-            }
-            return minutes * 60 + seconds;
-        }
-        const seconds = Number(value);
-        return Number.isNaN(seconds) ? null : seconds;
-    };
-
     // bucket key for one session, depending on the chosen "Group by":
     // Day -> time of day (within the picked day), Month -> exact date (within the picked month),
     // Yearly -> month (within the picked year), All Time -> a single bucket
@@ -658,6 +643,8 @@ if (graphCommandSelect) {
         return "All time";
     };
 
+    const GRAPH_MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
     // sum repetitions/duration per bucket so multiple sessions in the same bucket combine into one bar
     const groupSessionsByTimeframe = (matches, timeframe) => {
         const buckets = new Map();
@@ -669,8 +656,24 @@ if (graphCommandSelect) {
             }
             const bucket = buckets.get(key);
             bucket.repetitions += Number(session.repetitions) || 0;
-            bucket.duration += parseDurationValue(session.duration) || 0;
+            bucket.duration += parseStoredDurationSeconds(session.duration) || 0;
         });
+
+        // Yearly always shows all 12 months so the whole year lines up: empty months are 0,
+        // and months that haven't happened yet are left blank so lines don't drop to 0
+        if (timeframe === "yearly") {
+            const year = graphYearPicker.value || graphTodayIso.slice(0, 4);
+            const monthKeys = GRAPH_MONTH_NAMES.map((_, i) => `${year}-${String(i + 1).padStart(2, "0")}`);
+            const valueFor = (key, field) => {
+                if (key > graphTodayIso.slice(0, 7)) return null;
+                return buckets.has(key) ? buckets.get(key)[field] : 0;
+            };
+            return {
+                labels: GRAPH_MONTH_NAMES,
+                repetitions: monthKeys.map((key) => valueFor(key, "repetitions")),
+                durations: monthKeys.map((key) => valueFor(key, "duration")),
+            };
+        }
 
         const keys = Array.from(buckets.keys()).sort();
         return {
@@ -817,46 +820,73 @@ if (graphCommandSelect) {
             yearly: `${graphYearPicker.value || graphTodayIso.slice(0, 4)}`,
         }[selectedTimeframe];
 
+        // a year of sessions adds up to a lot of seconds, so Yearly plots duration in minutes
+        const durationInMinutes = selectedTimeframe === "yearly";
+        const durationLabel = durationInMinutes ? "Duration (minutes)" : "Duration (seconds)";
+        const durationValues = durationInMinutes
+            ? durations.map((seconds) => (seconds === null ? null : Math.round((seconds / 60) * 10) / 10))
+            : durations;
+
+        // hover shows "Repetitions: 12" and "Duration: 4 min 30 sec" rather than raw axis numbers
+        const repetitionsHover = (trace) => ({ ...trace, hovertemplate: "Repetitions: %{y}<extra></extra>" });
+        const durationHover = (trace) => ({
+            ...trace,
+            customdata: durations.map((seconds) => (seconds === null ? "" : formatDurationDisplay(String(seconds)))),
+            hovertemplate: "Duration: %{customdata}<extra></extra>",
+        });
+
+        // Yearly labels are month names, which Plotly would otherwise try to read as dates
+        const xaxis = {
+            ...GRAPH_AXIS_STYLE,
+            gridcolor: "transparent",
+            ...(selectedTimeframe === "yearly" ? { type: "category" } : {}),
+        };
+
         let data;
         let layout;
 
         if (selectedMetric === "both") {
             data = [
-                buildGraphTrace(traceType, "Repetitions", dates, repetitions, GRAPH_COLORS.moss, "y1"),
-                buildGraphTrace(traceType, "Duration (seconds)", dates, durations, GRAPH_COLORS.brass, "y2"),
+                repetitionsHover(buildGraphTrace(traceType, "Repetitions", dates, repetitions, GRAPH_COLORS.moss, "y1")),
+                durationHover(buildGraphTrace(traceType, durationLabel, dates, durationValues, GRAPH_COLORS.brass, "y2")),
             ];
             layout = {
                 ...GRAPH_LAYOUT_BASE,
+                // room on the right for the second axis's title
+                margin: { ...GRAPH_LAYOUT_BASE.margin, r: 64 },
                 title: { text: `${timeframeTitle} Repetitions & Duration: ${selectedCommand}` },
                 barmode: traceType === "bar" ? "group" : undefined,
-                xaxis: { ...GRAPH_AXIS_STYLE, gridcolor: "transparent" },
-                yaxis: { ...GRAPH_AXIS_STYLE, title: { ...GRAPH_AXIS_STYLE.title, text: "Repetitions" } },
+                // hovering a month (or day/time) shows both values together
+                hovermode: "x unified",
+                xaxis,
+                yaxis: { ...GRAPH_AXIS_STYLE, rangemode: "tozero", title: { ...GRAPH_AXIS_STYLE.title, text: "Repetitions" } },
                 yaxis2: {
                     ...GRAPH_AXIS_STYLE,
                     gridcolor: "transparent",
-                    title: { ...GRAPH_AXIS_STYLE.title, text: "Duration (seconds)" },
+                    rangemode: "tozero",
+                    title: { ...GRAPH_AXIS_STYLE.title, text: durationLabel },
                     overlaying: "y",
                     side: "right",
                 },
                 legend: { orientation: "h", font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.muted } },
             };
         } else {
-            const metricLabel = selectedMetric === "duration" ? "Duration (seconds)" : "Repetitions";
-            data = [
-                buildGraphTrace(
-                    traceType,
-                    metricLabel,
-                    dates,
-                    selectedMetric === "duration" ? durations : repetitions,
-                    GRAPH_COLORS.moss,
-                    "y1"
-                ),
-            ];
+            const showDuration = selectedMetric === "duration";
+            const metricLabel = showDuration ? durationLabel : "Repetitions";
+            const trace = buildGraphTrace(
+                traceType,
+                metricLabel,
+                dates,
+                showDuration ? durationValues : repetitions,
+                GRAPH_COLORS.moss,
+                "y1"
+            );
+            data = [showDuration ? durationHover(trace) : repetitionsHover(trace)];
             layout = {
                 ...GRAPH_LAYOUT_BASE,
                 title: { text: `${timeframeTitle} ${metricLabel}: ${selectedCommand}` },
-                xaxis: { ...GRAPH_AXIS_STYLE, gridcolor: "transparent" },
-                yaxis: { ...GRAPH_AXIS_STYLE, title: { ...GRAPH_AXIS_STYLE.title, text: metricLabel } },
+                xaxis,
+                yaxis: { ...GRAPH_AXIS_STYLE, rangemode: "tozero", title: { ...GRAPH_AXIS_STYLE.title, text: metricLabel } },
             };
         }
 

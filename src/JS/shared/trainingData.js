@@ -56,6 +56,10 @@ function parseStoredDurationSeconds(value) {
         }
         return minutesPart * 60 + secondsPart;
     }
+    // the built-in "1" option means 1 minute (see formatDurationDisplay)
+    if (value === "1") {
+        return 60;
+    }
     const seconds = Number(value);
     return Number.isNaN(seconds) ? null : seconds;
 }
