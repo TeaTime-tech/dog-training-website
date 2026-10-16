@@ -5,14 +5,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding-top: 8px;
+  gap: 1.25rem;
+  padding-top: 0.5rem;
 }
 
 .top-nav-links {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 1.25rem;
 }
 
 .top-nav .home-link {
@@ -25,7 +25,7 @@
 }
 
 .nav-username + .nav-email {
-  margin-left: 6px;
+  margin-left: 0.375rem;
   font-weight: 400;
   opacity: 0.75;
 }
@@ -46,7 +46,7 @@
 
 .nav-dropdown-toggle::after {
   content: '\25BE';
-  margin-left: 4px;
+  margin-left: 0.25rem;
   font-size: 0.6875rem;
 }
 
@@ -56,23 +56,23 @@
 
 .nav-dropdown-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 0.5rem);
   left: 0;
   z-index: 20;
   display: flex;
   flex-direction: column;
-  min-width: 180px;
-  padding: 8px;
+  min-width: 11.25rem;
+  padding: 0.5rem;
   border: 1px solid var(--clay);
-  border-radius: 10px;
+  border-radius: 0.625rem;
   background: var(--white);
   box-shadow: var(--shadow-pop);
 }
 
 .nav-dropdown-menu a {
   display: block;
-  padding: 8px 10px;
-  border-radius: 6px;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--ink);
@@ -87,7 +87,7 @@
 /* Home link */
 .home-link {
   display: inline-block;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--moss-dark);

@@ -4,8 +4,8 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 12px;
+  gap: 0.625rem;
+  margin-top: 0.75rem;
 }
 
 .field-row[hidden] {
@@ -14,20 +14,20 @@
 
 .field-row input,
 .field-row select {
-  padding: 8px 12px;
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--clay);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   font-size: 0.875rem;
   background: var(--bg);
   color: var(--ink);
 }
 
 .page-section > .save-btn {
-  margin-top: 14px;
+  margin-top: 0.875rem;
 }
 
 .field {
-  margin-bottom: 14px;
+  margin-bottom: 0.875rem;
 }
 
 .field label {
@@ -35,29 +35,29 @@
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--muted);
-  margin-bottom: 5px;
+  margin-bottom: 0.3125rem;
 }
 
 .field input,
 .field textarea {
   width: 100%;
-  padding: 10px 12px;
+  padding: 0.625rem 0.75rem;
   border: 1px solid var(--clay);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   font-size: 0.9375rem;
   background: var(--bg);
   color: var(--ink);
 }
 
 .field textarea {
-  min-height: 70px;
+  min-height: 4.375rem;
   resize: vertical;
 }
 
 .field input:focus,
 .field textarea:focus {
   outline: 2px solid var(--moss);
-  outline-offset: 1px;
+  outline-offset: 0.0625rem;
 }
 
 .save-btn {
@@ -65,8 +65,8 @@
   background: var(--moss);
   color: var(--white);
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
@@ -111,8 +111,8 @@
 .toggle-track {
   position: relative;
   display: inline-block;
-  width: 52px;
-  height: 28px;
+  width: 3.25rem;
+  height: 1.75rem;
   background: var(--clay);
   border-radius: 999px;
   transition: background 0.2s ease;
@@ -121,7 +121,7 @@
 .toggle-track::before {
   content: "OFF";
   position: absolute;
-  right: 8px;
+  right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
   font-size: 0.5625rem;
@@ -132,13 +132,13 @@
 
 .toggle-thumb {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 24px;
-  height: 24px;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1.5rem;
+  height: 1.5rem;
   background: var(--white);
   border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease;
 }
 
@@ -148,13 +148,13 @@
 
 .toggle-input:checked + .toggle-track::before {
   content: "ON";
-  left: 8px;
+  left: 0.5rem;
   right: auto;
   color: var(--white);
 }
 
 .toggle-input:checked + .toggle-track .toggle-thumb {
-  transform: translateX(24px);
+  transform: translateX(1.5rem);
 }
 
 /* a switch that can't be changed yet (e.g. while its setting loads) */
@@ -165,15 +165,15 @@
 
 .toggle-input:focus-visible + .toggle-track {
   outline: 2px solid var(--moss);
-  outline-offset: 2px;
+  outline-offset: 0.125rem;
 }
 
 .row-save-btn {
   background: var(--moss);
   color: var(--white);
   border: none;
-  padding: 5px 12px;
-  border-radius: 6px;
+  padding: 0.3125rem 0.75rem;
+  border-radius: 0.375rem;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;

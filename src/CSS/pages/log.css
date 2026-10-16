@@ -7,14 +7,14 @@
 
 /* the line under the Dog picker */
 .log-dog-note {
-  margin: 10px 0 0;
+  margin: 0.625rem 0 0;
   color: var(--muted);
   font-size: 0.875rem;
 }
 
 /* shown under Command when that command hides some fields */
 .log-display-note {
-  margin: 12px 0 0;
+  margin: 0.75rem 0 0;
   color: var(--muted);
   font-size: 0.875rem;
 }
