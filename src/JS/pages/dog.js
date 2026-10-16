@@ -78,12 +78,31 @@ const CHART_SECTIONS = [
         id: "behavior",
         title: "Behavior",
         fields: [
-            { key: "temperament", label: "Temperament", type: "textarea", maxLength: 500, placeholder: "Calm, playful, shy with strangers..." },
-            { key: "triggers", label: "Fears & triggers", type: "textarea", maxLength: 500, placeholder: "Thunder, bikes, other dogs on leash..." },
+            {
+                key: "temperament", label: "Temperament & personality", type: "chips", notesKey: "temperamentNotes",
+                options: ["Calm", "Playful", "Energetic", "Affectionate", "Gentle", "Curious", "Confident", "Independent",
+                    "Eager to please", "Stubborn", "Shy", "Anxious", "Protective", "Vocal", "Friendly with dogs", "Friendly with people"],
+            },
+            {
+                key: "triggers", label: "Fears & triggers", type: "chips", notesKey: "triggersNotes",
+                options: ["Thunder", "Fireworks", "Loud noises", "Vacuum", "Doorbell", "Strangers", "Men", "Children", "Other dogs",
+                    "Dogs on leash", "Cars & traffic", "Bikes & skateboards", "Car rides", "Vet visits", "Nail trims", "Baths",
+                    "Being left alone", "Hats & uniforms", "Stairs"],
+            },
             { key: "reactivity", label: "Reactivity", type: "select", options: ["None", "Mild", "Moderate", "Severe"] },
             { key: "toys", label: "Favorite toys", maxLength: 150 },
-            { key: "rewards", label: "Best rewards", maxLength: 150, placeholder: "What motivates them most" },
-            { key: "trainingGoals", label: "Training goals", type: "textarea", maxLength: 500, wide: true },
+            {
+                key: "rewards", label: "Best rewards", type: "chips", notesKey: "rewardsNotes",
+                options: ["Small treats", "Chicken", "Cheese", "Hot dog", "Peanut butter", "Kibble", "Ball & fetch", "Tug",
+                    "Squeaky toy", "Praise", "Petting", "Sniffing time", "Playing with dogs", "Going outside", "Car rides"],
+            },
+            {
+                key: "trainingGoals", label: "Training goals", type: "chips", notesKey: "trainingGoalsNotes",
+                options: ["House training", "Crate training", "Loose-leash walking", "Reliable recall", "Sit & stay",
+                    "Leave it & drop it", "No jumping on people", "Calm greetings", "Less barking", "Settle on a mat",
+                    "Less reactivity", "Alone time without stress", "Handling for vet & grooming", "Tricks",
+                    "Canine Good Citizen", "Agility", "Therapy dog"],
+            },
         ],
     },
 ];
@@ -150,9 +169,91 @@ function makeChartControl(field, value, id) {
     return control;
 }
 
-// a labelled field: weight gets a number box plus lb/kg
+// one bubble that toggles on and off; custom ones (added by hand) look the same
+function makeChip(value, selected) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "dog-chart-chip";
+    chip.dataset.value = value;
+    chip.textContent = value;
+    chip.setAttribute("aria-pressed", String(selected));
+    return chip;
+}
+
+// a "pick any" group of bubbles, an "add your own" box, and a notes box for anything else.
+// saves as an array of the picked bubbles; older charts that saved plain text show it in the notes box
+function makeChipField(field, profile, wrapper) {
+    const saved = profile[field.key];
+    const picked = Array.isArray(saved) ? saved : [];
+    const legacyText = typeof saved === "string" ? saved : "";
+
+    const labelId = `chart-${field.key}-label`;
+    const label = document.createElement("p");
+    label.className = "dog-chart-chips-label";
+    label.id = labelId;
+    label.textContent = field.label;
+
+    const chips = document.createElement("div");
+    chips.className = "dog-chart-chips";
+    chips.dataset.chips = field.key;
+    const custom = picked.filter((value) => !field.options.some((option) => option.toLowerCase() === value.toLowerCase()));
+    chips.append(
+        ...field.options.map((option) => makeChip(option, picked.some((value) => value.toLowerCase() === option.toLowerCase()))),
+        ...custom.map((value) => makeChip(value, true)),
+    );
+    chips.addEventListener("click", (event) => {
+        const chip = event.target.closest(".dog-chart-chip");
+        if (!chip) return;
+        chip.setAttribute("aria-pressed", String(chip.getAttribute("aria-pressed") !== "true"));
+        markChartDirty();
+    });
+
+    // type your own and press Enter to add it as a picked bubble
+    const addInput = document.createElement("input");
+    addInput.type = "text";
+    addInput.className = "dog-chart-chip-add";
+    addInput.dataset.chipAdd = field.key;
+    addInput.maxLength = 40;
+    addInput.placeholder = "+ Add your own, then press Enter";
+    addInput.setAttribute("aria-label", `Add your own to ${field.label.toLowerCase()}`);
+    addInput.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        addChipFromInput(field.key);
+    });
+
+    const notes = makeChartControl({ key: field.notesKey, type: "textarea", maxLength: 500, placeholder: "Anything else worth noting..." },
+        profile[field.notesKey] || legacyText, `chart-${field.notesKey}`);
+    notes.rows = 2;
+    notes.setAttribute("aria-label", `${field.label} notes`);
+
+    wrapper.setAttribute("role", "group");
+    wrapper.setAttribute("aria-labelledby", labelId);
+    wrapper.append(label, chips, addInput, notes);
+}
+
+// turn the "add your own" text into a picked bubble (or pick the matching one if it's already there)
+function addChipFromInput(key) {
+    const addInput = chartSectionsEl.querySelector(`[data-chip-add="${key}"]`);
+    const chips = chartSectionsEl.querySelector(`[data-chips="${key}"]`);
+    const value = addInput.value.trim().replace(/\s+/g, " ");
+    if (!value) return;
+    const existing = Array.from(chips.children).find((chip) => chip.dataset.value.toLowerCase() === value.toLowerCase());
+    if (existing) existing.setAttribute("aria-pressed", "true");
+    else chips.append(makeChip(value, true));
+    addInput.value = "";
+    markChartDirty();
+}
+
+// a labelled field: weight gets a number box plus lb/kg, chips get bubbles
 function makeChartField(field, dog) {
     const profile = dog.profile || {};
+    if (field.type === "chips") {
+        const wrapper = document.createElement("div");
+        wrapper.className = "field dog-chart-field dog-chart-field--wide dog-chart-chip-field";
+        makeChipField(field, profile, wrapper);
+        return wrapper;
+    }
     const wrapper = document.createElement("div");
     wrapper.className = field.wide || field.type === "textarea" ? "field dog-chart-field dog-chart-field--wide" : "field dog-chart-field";
     const id = `chart-${field.key}`;
@@ -321,6 +422,15 @@ function readChart() {
     const profile = {};
     CHART_SECTIONS.forEach((section) => {
         section.fields.filter((field) => !field.column).forEach((field) => {
+            if (field.type === "chips") {
+                addChipFromInput(field.key); // text typed but not added yet still counts
+                const picked = Array.from(chartSectionsEl.querySelectorAll(`[data-chips="${field.key}"] .dog-chart-chip[aria-pressed="true"]`))
+                    .map((chip) => chip.dataset.value);
+                if (picked.length) profile[field.key] = picked;
+                const notes = valueOf(field.notesKey);
+                if (notes) profile[field.notesKey] = notes;
+                return;
+            }
             const value = valueOf(field.key);
             if (value) profile[field.key] = value;
         });

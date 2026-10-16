@@ -96,6 +96,66 @@
   flex-shrink: 0;
 }
 
+/* pick-any bubbles (Behavior): outlined when off, filled green with a check when picked */
+.dog-chart-chips-label {
+  margin: 0 0 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.dog-chart-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4375rem;
+  margin-bottom: 0.5rem;
+}
+
+.dog-chart-chip {
+  padding: 0.3125rem 0.8125rem;
+  border: 1px solid var(--clay);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.dog-chart-chip:hover {
+  border-color: var(--moss);
+}
+
+.dog-chart-chip[aria-pressed="true"] {
+  border-color: var(--moss);
+  background: var(--moss);
+  color: var(--white);
+}
+
+/* a check mark on picked bubbles, so "on" doesn't rely on color alone */
+.dog-chart-chip[aria-pressed="true"]::before {
+  content: "\2713\00a0";
+}
+
+.dog-chart-field .dog-chart-chip-add {
+  width: auto;
+  min-width: 16rem;
+  max-width: 100%;
+  margin-bottom: 0.5rem;
+  border-style: dashed;
+  background: transparent;
+  font-size: 0.875rem;
+}
+
+.dog-chart-chip-field textarea {
+  min-height: 3rem;
+}
+
+/* a dashed line between the bubble groups */
+.dog-chart-field + .dog-chart-chip-field {
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--clay);
+}
+
 .dog-chart-hint {
   margin: 0.25rem 0 0;
   font-size: 0.8125rem;
