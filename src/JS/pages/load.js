@@ -727,6 +727,66 @@ const GRAPH_LAYOUT_BASE = {
 
 const GRAPH_CONFIG = { responsive: true, displayModeBar: false };
 
+/*chart text and spacing grow with the page: base.css scales the root font size on big screens, and Plotly sizes are in
+  px, so every chart is drawn through plotChart, which multiplies its sizes by the same amount*/
+
+const plottedCharts = new Set();
+
+// how much bigger the page is than the 16px phone size
+function chartScale() {
+    return (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16) / 16;
+}
+
+// a copy of a layout or trace list with font sizes, margins, marker sizes, line widths and bar corners scaled.
+// data values (x, y, base...) are left alone
+function scaleChartSizes(value, scale, key = "", parentKey = "") {
+    if (Array.isArray(value)) return value.map((item) => scaleChartSizes(item, scale, key, parentKey));
+    if (value && typeof value === "object") {
+        return Object.fromEntries(Object.entries(value).map(([childKey, child]) => [childKey, scaleChartSizes(child, scale, childKey, key)]));
+    }
+    if (typeof value !== "number") return value;
+    const isSize = ["size", "width", "cornerradius"].includes(key) && ["font", "tickfont", "marker", "line"].includes(parentKey);
+    const isMargin = parentKey === "margin" && ["t", "r", "b", "l", "pad"].includes(key);
+    return isSize || isMargin ? Math.round(value * scale * 10) / 10 : value;
+}
+
+// fill in the font sizes Plotly would otherwise default to, so they scale too
+function withDefaultChartFonts(layout) {
+    const font = (base, size) => ({ ...(base || {}), size: (base && base.size) || size });
+    const filled = { ...layout, font: font(layout.font, 12), hoverlabel: { ...(layout.hoverlabel || {}), font: font(layout.hoverlabel && layout.hoverlabel.font, 13) } };
+    if (layout.title) {
+        const title = typeof layout.title === "string" ? { text: layout.title } : layout.title;
+        filled.title = { ...title, font: font(title.font, 17) };
+    }
+    if (layout.legend) filled.legend = { ...layout.legend, font: font(layout.legend.font, 12) };
+    return filled;
+}
+
+// draw (or redraw) a chart at the page's current size; returns Plotly's promise
+function plotChart(chartEl, data, layout, config = GRAPH_CONFIG) {
+    chartEl.chartBase = { data, layout: withDefaultChartFonts(layout), config };
+    plottedCharts.add(chartEl);
+    const scale = chartScale();
+    return Plotly.react(chartEl, scaleChartSizes(data, scale), scaleChartSizes(chartEl.chartBase.layout, scale), config);
+}
+
+// when the window changes size enough to change the page's scale, redraw every chart at the new size
+let lastChartScale = chartScale();
+let chartResizeTimer = null;
+window.addEventListener("resize", () => {
+    clearTimeout(chartResizeTimer);
+    chartResizeTimer = setTimeout(() => {
+        const scale = chartScale();
+        if (scale === lastChartScale) return;
+        lastChartScale = scale;
+        plottedCharts.forEach((chartEl) => {
+            if (!chartEl.isConnected || !chartEl.chartBase) return;
+            const { data, layout, config } = chartEl.chartBase;
+            Plotly.react(chartEl, scaleChartSizes(data, scale), scaleChartSizes(layout, scale), config);
+        });
+    }, 150);
+});
+
 // build a bar trace (Daily) or a line trace (Monthly/Yearly) depending on the timeframe
 const buildGraphTrace = (traceType, name, x, y, color, yaxisId) => {
     if (traceType === "bar") {
@@ -1013,7 +1073,7 @@ if (graphCommandSelect) {
             };
         }
 
-        Plotly.newPlot("tester", data, layout, GRAPH_CONFIG);
+        plotChart(document.getElementById("tester"), data, layout);
     });
 }
 
@@ -1196,7 +1256,7 @@ if (totalsTiles) {
             legend: { orientation: "h", font: { family: "Newsreader, serif", color: GRAPH_COLORS.muted } },
             showlegend: data.length > 1,
         };
-        Plotly.react(totalsChartEl, data, layout, GRAPH_CONFIG);
+        plotChart(totalsChartEl, data, layout);
     };
 
     // redraw the tiles and graph from the latest sessions (picked dog only) and exercises
@@ -1421,7 +1481,7 @@ if (ganttChartEl) {
             },
         };
 
-        Plotly.newPlot(ganttChartEl, data, layout, { responsive: true, displayModeBar: false }).then(() => {
+        plotChart(ganttChartEl, data, layout).then(() => {
             if (typeof ganttChartEl.removeAllListeners === "function") {
                 ganttChartEl.removeAllListeners("plotly_hover");
                 ganttChartEl.removeAllListeners("plotly_unhover");

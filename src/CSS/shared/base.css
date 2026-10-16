@@ -34,12 +34,14 @@ body {
   line-height: 1.5;
 }
 
-/* form controls don't inherit the page font by default */
+/* form controls don't inherit the page font by default, and browsers give them a fixed ~13px size that wouldn't
+   scale with the page; classes that set their own font-size still win */
 button,
 input,
 select,
 textarea {
   font-family: inherit;
+  font-size: 0.875rem;
 }
 
 /* a label that screen readers announce but isn't shown */

@@ -48,4 +48,4 @@ Pages reference assets relatively (`../CSS/...`, `../JS/...`). Folder names HTML
 - LF line endings, UTF-8 without BOM.
 - Colors and shadows come from the tokens in `base.css` (`--moss`, `--danger`, `--shadow-card`, ...); add a token rather than a new hex value. Stat tiles (`.stat-row`/`.stat-tile`) and `.visually-hidden` are shared in `base.css`, as are pop-ups (`.modal-overlay` > `.modal-card`, shown by toggling the overlay's `hidden`).
 - Font sizes are in `rem` (1rem = 16px on phones). `base.css` raises the root size on screens 900px+ wide to `clamp(18px, 1.4vw, 36px)` (about 27px on a 1920px monitor). Spacing, widths, radii and shadows are in `rem` too, so the whole page scales like browser zoom; use `rem` for new sizes (borders stay 1px) or they won't scale.
-- Fonts: Newsreader (Google Fonts) for everything: headings, body, form controls and charts. Use no other font. Charts: Plotly from CDN (`load.html`).
+- Fonts: Newsreader (Google Fonts) for everything: headings, body, form controls and charts. Use no other font. Charts: Plotly from CDN (`load.html`); draw them with `plotChart()` in load.js so their text and margins scale with the page.
