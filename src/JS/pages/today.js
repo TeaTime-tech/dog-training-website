@@ -1,4 +1,5 @@
-/* today.html: today's training summary, daily goals, and session list. */
+/* today.html: today's training summary, daily goals, and session list, for the dog you're training (when signed in
+   with dogs; pills in the hero switch dogs, like the home page medallion and My Dogs). */
 
 /*today's training summary (today.html)*/
 
@@ -331,6 +332,64 @@ if (todaySessionList) {
     }
 
     // render the progress ring, stats, and session list for the viewed date
+    // the account's dogs once loaded (empty when signed out or there are none: then every session counts)
+    let todayDogs = [];
+    const todayDogChips = document.getElementById("today-dog-chips");
+
+    // true when a session belongs to the dog you're training, so Today matches the home page and View Logs
+    const isTodayDogSession = (session) => todayDogs.length === 0 || session.dogId === getCurrentDogId();
+
+    // one pill per dog in the hero; the picked one is filled. Picking one makes it the dog you're training
+    const renderTodayDogChips = () => {
+        if (!todayDogChips) return;
+        todayDogChips.hidden = todayDogs.length === 0;
+        todayDogChips.replaceChildren(...todayDogs.map((dog) => {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "today-dog-chip";
+            chip.setAttribute("role", "radio");
+            const picked = dog.id === getCurrentDogId();
+            chip.setAttribute("aria-checked", String(picked));
+            chip.tabIndex = picked ? 0 : -1;
+            chip.textContent = dog.name;
+            chip.addEventListener("click", () => {
+                if (dog.id === getCurrentDogId()) return;
+                if (editingSessionIndex !== null && !confirm("Switch dogs and discard the session you're editing?")) return;
+                editingSessionIndex = null;
+                setCurrentDogId(dog.id);
+                renderTodayDogChips();
+                renderToday();
+                todayDogChips.querySelector('[aria-checked="true"]').focus();
+            });
+            return chip;
+        }));
+    };
+
+    if (todayDogChips) {
+        // arrow keys move between dogs, like radio buttons
+        todayDogChips.addEventListener("keydown", (event) => {
+            const step = ["ArrowRight", "ArrowDown"].includes(event.key) ? 1 : ["ArrowLeft", "ArrowUp"].includes(event.key) ? -1 : 0;
+            if (!step || todayDogs.length < 2) return;
+            event.preventDefault();
+            const chips = Array.from(todayDogChips.children);
+            const index = chips.findIndex((chip) => chip.getAttribute("aria-checked") === "true");
+            chips[(index + step + chips.length) % chips.length].click();
+        });
+    }
+
+    // load the account's dogs (making sure one is picked), then redraw for that dog
+    const loadTodayDogs = async () => {
+        try {
+            todayDogs = (await getSignedInUser()) ? await getDogs() : [];
+        } catch (error) {
+            console.error("Could not load dogs:", error);
+            todayDogs = [];
+        }
+        if (todayDogs.length && !todayDogs.some((dog) => dog.id === getCurrentDogId())) setCurrentDogId(todayDogs[0].id);
+        renderTodayDogChips();
+        if (editingSessionIndex === null) renderToday();
+    };
+
     function renderToday() {
         const viewedDateIso = getViewedDateIso();
         const isViewingToday = viewedDateIso === getTodayIso();
@@ -346,7 +405,7 @@ if (todaySessionList) {
         const sessionHistory = getSessionHistory();
         const todaysSessions = sessionHistory
             .map((session, index) => ({ session, index }))
-            .filter(({ session }) => session.date === viewedDateIso)
+            .filter(({ session }) => session.date === viewedDateIso && isTodayDogSession(session))
             .sort((a, b) => (b.session.time || "").localeCompare(a.session.time || ""));
 
         const distinctCommandCount = new Set(todaysSessions.map(({ session }) => session.command)).size;
@@ -981,6 +1040,7 @@ if (todaySessionList) {
     }
 
     renderToday();
+    if (typeof supabaseClient !== "undefined" && supabaseClient) loadTodayDogs();
 
     // sessions from the account arrived; redraw unless a session is mid-edit
     window.addEventListener("sessionhistorysynced", (event) => {
