@@ -31,6 +31,7 @@
                 <a href="log.html">Log</a>
                 <a href="load.html">View Logs</a>
                 <a href="dogs.html">My Dogs</a>
+                <a href="dog.html">Dog Profile</a>
                 <a href="settings.html">Settings</a>
             </div>
         </details>
@@ -43,6 +44,12 @@
     <a class="dog-chart-back" href="dogs.html">&larr; My Dogs</a>
     <h1 id="dog-chart-name">Dog Chart</h1>
     <p id="dog-chart-meta" class="subhead">Everything about your dog in one place: basics, health, daily care and behavior.</p>
+
+    <!-- dog.js shows this when the account has more than one dog -->
+    <div id="dog-chart-picker-row" class="field-row dog-chart-picker-row" hidden>
+        <label for="dog-chart-picker">Dog:</label>
+        <select id="dog-chart-picker"></select>
+    </div>
 
     <p id="dog-chart-status" class="dog-chart-status" role="status">Loading...</p>
 

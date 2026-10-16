@@ -13,6 +13,10 @@
   text-decoration: underline;
 }
 
+.dog-chart-picker-row {
+  margin: 0 0 1rem;
+}
+
 .dog-chart-status {
   margin: 0 0 1rem;
   font-size: 1rem;

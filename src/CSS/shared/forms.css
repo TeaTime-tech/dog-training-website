@@ -26,6 +26,11 @@
   margin-top: 0.875rem;
 }
 
+/* two buttons side by side at the bottom of a card (e.g. View My Dogs + Dog Profile on the home page) */
+.page-section > .save-btn + .save-btn {
+  margin-left: 0.5rem;
+}
+
 .field {
   margin-bottom: 0.875rem;
 }

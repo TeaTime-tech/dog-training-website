@@ -504,6 +504,20 @@ window.addEventListener("beforeunload", (event) => {
     event.returnValue = "";
 });
 
+// with two or more dogs, a dropdown to open another dog's chart (the page asks first if there are unsaved changes)
+function renderDogPicker(dogs) {
+    const row = document.getElementById("dog-chart-picker-row");
+    const picker = document.getElementById("dog-chart-picker");
+    if (dogs.length < 2) return;
+    picker.replaceChildren(...dogs.map((dog) => new Option(dog.name, dog.id)));
+    picker.value = chartDog.id;
+    picker.addEventListener("change", () => {
+        window.location.href = `dog.html?id=${encodeURIComponent(picker.value)}`;
+        picker.value = chartDog.id; // stays put if leaving is cancelled
+    });
+    row.hidden = false;
+}
+
 // load the dog named in the link (?id=...), or the dog you're training when there isn't one
 async function loadDogChart() {
     if (!supabaseClient || !(await getSignedInUser())) {
@@ -524,6 +538,7 @@ async function loadDogChart() {
             showChartStatus(["That dog isn't on your account. Pick one from ", dogsLink, "."], true);
             return;
         }
+        renderDogPicker(dogs);
         renderChartHeader(chartDog);
         renderChart(chartDog);
         showChartStatus([]);
