@@ -41,8 +41,8 @@ async function createDog(name) {
     return data;
 }
 
-// save a dog's name and profile (breed, birthday "YYYY-MM-DD", notes) and return the updated dog
-async function updateDog(dogId, { name, breed, birthday, notes }) {
+// save a dog's name and profile (breed, birthday "YYYY-MM-DD", notes, and optionally the dog chart object) and return the updated dog
+async function updateDog(dogId, { name, breed, birthday, notes, profile }) {
     const trimmed = String(name || "").trim();
     if (!trimmed) throw new Error("Please enter your dog's name.");
     if (birthday && birthday > localDateString()) throw new Error("Birthday can't be in the future.");
@@ -53,10 +53,15 @@ async function updateDog(dogId, { name, breed, birthday, notes }) {
         birthday: birthday || null,
         notes: String(notes || "").trim() || null,
     };
+    if (profile !== undefined) changes.profile = profile;
     const { data, error } = await supabaseClient.from("dogs").update(changes).eq("id", dogId).select().single();
-    // PGRST204: a column is missing, so supabase/dog_profiles.sql hasn't been run yet
+    // PGRST204: a column is missing, so a setup file hasn't been run yet
     if (error && error.code === "PGRST204") {
-        throw new Error("Dog profiles aren't set up yet. Run supabase/dog_profiles.sql in Supabase.");
+        const file = /profile/.test(error.message || "") ? "dog_chart.sql" : "dog_profiles.sql";
+        throw new Error(`Dog profiles aren't set up yet. Run supabase/${file} in Supabase.`);
+    }
+    if (error && error.code === "23514") {
+        throw new Error("Some entries are too long to save. Try shortening the longer notes.");
     }
     if (error) throw error;
     return data;

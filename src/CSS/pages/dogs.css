@@ -132,6 +132,12 @@
   padding: 0;
 }
 
+/* link to the dog's full chart page, styled like the card's buttons */
+.dog-chart-link {
+  display: inline-block;
+  text-decoration: none;
+}
+
 .delete-dog-btn {
   color: var(--danger);
 }

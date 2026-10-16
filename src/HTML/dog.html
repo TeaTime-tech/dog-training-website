@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Chart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&display=swap" rel="stylesheet">
+    <!-- shared styles, then this page's styles -->
+    <link rel="stylesheet" href="../CSS/shared/base.css">
+    <link rel="stylesheet" href="../CSS/shared/nav.css">
+    <link rel="stylesheet" href="../CSS/shared/forms.css">
+    <link rel="stylesheet" href="../CSS/pages/dog.css">
+    <!-- shared scripts, then this page's script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../JS/shared/supabaseClient.js" defer></script>
+    <script src="../JS/shared/commandList.js" defer></script>
+    <script src="../JS/shared/dogs.js" defer></script>
+    <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/shared/accountNav.js" defer></script>
+    <script src="../JS/pages/dog.js" defer></script>
+</head>
+<body>
+    <div class="top-nav">
+        <details class="nav-dropdown">
+            <summary class="home-link nav-dropdown-toggle">Directory</summary>
+            <div class="nav-dropdown-menu">
+                <a href="index.html">Home</a>
+                <a href="today.html">Today</a>
+                <a href="commands.html">Commands</a>
+                <a href="log.html">Log</a>
+                <a href="load.html">View Logs</a>
+                <a href="dogs.html">My Dogs</a>
+                <a href="settings.html">Settings</a>
+            </div>
+        </details>
+        <div class="top-nav-links">
+            <a class="home-link" href="create.html">Create Account</a>
+            <a class="home-link" href="login.html">Login</a>
+        </div>
+    </div>
+
+    <a class="dog-chart-back" href="dogs.html">&larr; My Dogs</a>
+    <h1 id="dog-chart-name">Dog Chart</h1>
+    <p id="dog-chart-meta" class="subhead">Everything about your dog in one place: basics, health, daily care and behavior.</p>
+
+    <p id="dog-chart-status" class="dog-chart-status" role="status">Loading...</p>
+
+    <!-- dog.js builds the chart's sections from CHART_SECTIONS once the dog has loaded -->
+    <form id="dog-chart-form" class="dog-chart-form" hidden novalidate>
+        <div id="dog-chart-sections"></div>
+        <!-- stays on screen at the bottom while scrolling, so saving is always one click away -->
+        <div class="dog-chart-savebar">
+            <span id="dog-chart-save-status" class="dog-chart-save-status" role="status"></span>
+            <button type="submit" id="dog-chart-save" class="save-btn">Save Chart</button>
+        </div>
+    </form>
+</body>
+</html>

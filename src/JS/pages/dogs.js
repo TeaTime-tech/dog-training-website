@@ -253,7 +253,13 @@ function renderDogCard(dog) {
 
     const actions = document.createElement("div");
     actions.className = "dog-card-actions";
+    // the full chart (health, care, behavior) lives on its own page
+    const chartLink = document.createElement("a");
+    chartLink.className = "row-save-btn dog-chart-link";
+    chartLink.href = `dog.html?id=${encodeURIComponent(dog.id)}`;
+    chartLink.textContent = "Open dog chart";
     actions.append(
+        chartLink,
         makeRowButton("Edit profile", "restore-btn", () => startEdit(dog)),
         makeRowButton("Delete", "hide-btn delete-dog-btn", () => removeDog(dog)),
     );

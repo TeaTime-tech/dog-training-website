@@ -1,0 +1,225 @@
+/* dog.html: one dog's chart, a form in four collapsible cards with a save bar that sticks to the bottom of the screen. */
+
+.dog-chart-back {
+  display: inline-block;
+  margin: 0.5rem 0 0.25rem;
+  color: var(--moss-dark);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dog-chart-back:hover {
+  text-decoration: underline;
+}
+
+.dog-chart-status {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+}
+
+.dog-chart-status:empty {
+  display: none;
+}
+
+.dog-chart-status a {
+  color: var(--moss-dark);
+  font-weight: 600;
+}
+
+.dog-chart-error {
+  color: var(--danger);
+}
+
+/* the cards are as wide as the page so two columns of fields fit */
+.dog-chart-section {
+  max-width: none;
+}
+
+.dog-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .dog-chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dog-chart-field--wide {
+  grid-column: 1 / -1;
+}
+
+.dog-chart-field label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.dog-chart-field input,
+.dog-chart-field select,
+.dog-chart-field textarea,
+.dog-chart-list-cell input,
+.dog-chart-list-cell select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--clay);
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.dog-chart-field textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+.dog-chart-field input:focus,
+.dog-chart-field select:focus,
+.dog-chart-field textarea:focus,
+.dog-chart-list-cell input:focus {
+  outline: 2px solid var(--moss);
+  outline-offset: 1px;
+}
+
+.dog-chart-weight {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dog-chart-weight select {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.dog-chart-hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+/* vaccinations and medications: one row per entry, with a remove button */
+.dog-chart-list {
+  margin-top: 0.5rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--clay);
+}
+
+.dog-chart-list-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.dog-chart-list-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 0.625rem;
+  align-items: end;
+  margin-bottom: 0.625rem;
+}
+
+@media (max-width: 640px) {
+  .dog-chart-list-row {
+    grid-template-columns: 1fr 1fr auto;
+    padding-bottom: 0.625rem;
+    border-bottom: 1px dashed var(--clay);
+  }
+
+  .dog-chart-list-cell:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.dog-chart-list-cell label {
+  display: block;
+  margin-bottom: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.dog-chart-remove {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font-size: 1.375rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dog-chart-remove:hover,
+.dog-chart-remove:focus-visible {
+  background: var(--brass-light);
+  color: var(--danger);
+}
+
+.dog-chart-add {
+  padding: 0.375rem 0.875rem;
+  border: 1px dashed var(--moss);
+  border-radius: 999px;
+  background: none;
+  color: var(--moss-dark);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dog-chart-add:hover {
+  border-style: solid;
+  background: var(--moss);
+  color: var(--white);
+}
+
+/* vaccines due within 30 days (brass) or overdue (red), at the top of Health & Vet */
+.dog-chart-alerts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+}
+
+.dog-chart-alerts[hidden] {
+  display: none;
+}
+
+.dog-chart-alert {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--brass-light);
+  color: var(--brass-dark);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.dog-chart-alert--overdue {
+  background: var(--danger);
+  color: var(--white);
+}
+
+/* save bar: sticks to the bottom of the screen while the chart scrolls */
+.dog-chart-savebar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin: 0 -1.25rem;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--clay);
+  background: var(--bg);
+  box-shadow: var(--shadow-card);
+}
+
+.dog-chart-save-status {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
