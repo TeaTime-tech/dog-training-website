@@ -108,6 +108,30 @@
   cursor: not-allowed;
 }
 
+/* destructive action: outlined in red, filled on hover (Delete, Clear History) */
+.danger-btn {
+  display: inline-block;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--danger);
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.danger-btn:hover:not(:disabled) {
+  background: var(--danger);
+  color: var(--white);
+}
+
+.danger-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .hide-btn,
 .restore-btn {
   background: none;

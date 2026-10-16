@@ -46,13 +46,17 @@
         </div>
     </div>
 
-    <h1>Command Selection</h1>
+    <div class="page-header">
+        <h1>Commands</h1>
+        <a class="save-btn page-header-action" href="log.html">+ Log a Session</a>
+    </div>
 
     <section class="page-section">
         <details open>
             <summary class="collapsible-toggle"><h2 class="section-title">Commands</h2></summary>
             <!-- commands.js adds a tile for each command that isn't hidden -->
             <div id="command-buttons" class="command-tiles"></div>
+            <p class="command-tiles-hint">Click a command to log it, add notes, rename it or delete it.</p>
             <!-- commands.js shows this when the tiles wrap onto more than three lines -->
             <div id="command-pager" class="mastery-pager command-pager" hidden>
                 <button type="button" id="command-prev" class="mastery-pager-arrow" aria-label="Previous commands">&lsaquo;</button>
@@ -71,7 +75,7 @@
                 <button type="button" id="command-actions-notes" class="command-actions-notes" title="Click to edit notes"></button>
                 <button type="button" id="command-log" class="save-btn">Log Session</button>
                 <button type="button" id="command-edit-notes" class="secondary-btn">Edit Notes</button>
-                <button type="button" id="command-delete" class="command-delete-btn">Delete</button>
+                <button type="button" id="command-delete" class="danger-btn">Delete</button>
                 <button type="button" id="command-actions-close" class="hide-btn">Cancel</button>
                 <p id="command-actions-status" class="command-actions-status" role="status"></p>
             </div>
@@ -87,13 +91,6 @@
                 </div>
                 <button id="add-command" type="button" class="save-btn">Add Command</button>
                 <button id="open-command-suggestions" type="button" class="secondary-btn" aria-haspopup="dialog" hidden>Suggestions <span id="command-suggestions-count" class="command-suggestions-count"></span></button>
-            </div>
-            <div class="field-row">
-                <label for="delete-command">Remove a command:</label>
-                <select id="delete-command">
-                    <option value="">Select a command</option>
-                </select>
-                <button id="delete-command-button" type="button" class="hide-btn">Delete Command</button>
             </div>
         </details>
     </section>
@@ -140,68 +137,66 @@
     <section class="page-section">
         <details open>
             <summary class="collapsible-toggle"><h2 class="section-title">Display Settings</h2></summary>
-            <p class="display-hint">Choose which fields show for a command on the Log page and the Today page, and whether its mastery can decay.</p>
+            <p class="display-hint">Pick a command, then choose which fields it shows on the Log and Today pages, and whether its mastery can decay.</p>
             <div class="field-row display-command-row">
-                <label for="display-command">Command:</label>
+                <label for="display-command">Command</label>
                 <select id="display-command"></select>
             </div>
-            <div class="toggle-row">
-                <label for="score">Score Display:</label>
-                <label class="toggle">
-                    <input type="checkbox" id="score" class="toggle-input">
-                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                </label>
-            </div>
-            <div class="toggle-row">
-                <label for="toggle-repetitions">Repetitions Display:</label>
-                <label class="toggle">
-                    <input type="checkbox" id="toggle-repetitions" class="toggle-input">
-                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                </label>
-            </div>
-            <div class="toggle-row">
-                <label for="toggle-duration">Duration Display:</label>
-                <label class="toggle">
-                    <input type="checkbox" id="toggle-duration" class="toggle-input">
-                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                </label>
-            </div>
-            <div class="toggle-row">
-                <label for="toggle-location">Location Display:</label>
-                <label class="toggle">
-                    <input type="checkbox" id="toggle-location" class="toggle-input">
-                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                </label>
-            </div>
-            <div class="toggle-row">
-                <label for="toggle-distractions">Distractions Display:</label>
-                <label class="toggle">
-                    <input type="checkbox" id="toggle-distractions" class="toggle-input">
-                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                </label>
-            </div>
-            <div class="toggle-row">
-                <label for="toggle-weather">Weather Display:</label>
-                <label class="toggle">
-                    <input type="checkbox" id="toggle-weather" class="toggle-input">
-                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                </label>
-            </div>
-            <div class="toggle-row">
-                <label for="toggle-mastery-decay">Mastery Decay:</label>
-                <label class="toggle">
-                    <input type="checkbox" id="toggle-mastery-decay" class="toggle-input">
-                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                </label>
+            <!-- each tile: a field shown for this command on Log and Today (Mastery decay: on Commands) -->
+            <div class="display-grid">
+                <div class="display-tile">
+                    <label for="score">Score</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="score" class="toggle-input">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+                <div class="display-tile">
+                    <label for="toggle-repetitions">Repetitions</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="toggle-repetitions" class="toggle-input">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+                <div class="display-tile">
+                    <label for="toggle-duration">Duration</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="toggle-duration" class="toggle-input">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+                <div class="display-tile">
+                    <label for="toggle-location">Location</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="toggle-location" class="toggle-input">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+                <div class="display-tile">
+                    <label for="toggle-distractions">Distractions</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="toggle-distractions" class="toggle-input">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+                <div class="display-tile">
+                    <label for="toggle-weather">Weather</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="toggle-weather" class="toggle-input">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+                <div class="display-tile">
+                    <label for="toggle-mastery-decay">Mastery decay</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="toggle-mastery-decay" class="toggle-input">
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
             </div>
             <button id="save-settings" type="button" class="save-btn">Save Settings</button>
             <p id="display-status" class="display-status" role="status"></p>
         </details>
-    </section>
-
-    <section class="page-section">
-        <p>Ready to practice? Log your training session.</p>
-        <a class="save-btn" href="log.html">Log Training Session</a>
     </section>
 
     <section class="page-section">
@@ -212,7 +207,7 @@
                 <label for="clear-history-command">Command:</label>
                 <!-- commands.js lists each command that has logged sessions -->
                 <select id="clear-history-command"></select>
-                <button type="button" id="clear-history-button" class="command-delete-btn">Clear History</button>
+                <button type="button" id="clear-history-button" class="danger-btn">Clear History</button>
             </div>
             <p id="clear-history-status" class="clear-history-status" role="status"></p>
         </details>

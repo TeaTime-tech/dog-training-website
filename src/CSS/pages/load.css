@@ -1,19 +1,6 @@
 /* load.html: header with the dog picker, summary tiles, tables with a date filter and pagination, the Progress card
    with chart tabs, and the timeline hover badge. */
 
-/* header: title, dog picker, and + Log a Session on one line (wraps on phones) */
-.load-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem 1.25rem;
-  margin-bottom: 1rem;
-}
-
-.load-header h1 {
-  margin: 0;
-}
-
 .load-dog {
   display: flex;
   align-items: center;
@@ -82,11 +69,6 @@
   font-size: 0.9375rem;
   background: var(--bg);
   color: var(--ink);
-}
-
-.load-log-btn {
-  margin-left: auto;
-  text-decoration: none;
 }
 
 /* summary: four tiles in a row (two on phones) */

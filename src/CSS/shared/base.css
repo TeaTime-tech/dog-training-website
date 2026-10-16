@@ -65,6 +65,24 @@ a:hover {
   white-space: nowrap;
 }
 
+/* page header: the h1 with the page's main action on the right (View Logs, Commands); wraps on phones */
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.page-header-action {
+  margin-left: auto;
+  text-decoration: none;
+}
+
 /* Section cards */
 .page-section {
   max-width: none;

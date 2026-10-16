@@ -13,6 +13,12 @@
   border-bottom: none;
 }
 
+.command-tiles-hint {
+  margin: 0.625rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
 .command-tiles {
   display: flex;
   flex-wrap: wrap;
@@ -293,22 +299,6 @@
 .command-actions-name {
   font-weight: 600;
   text-transform: capitalize;
-}
-
-.command-delete-btn {
-  padding: 0.625rem 1.25rem;
-  border: 1px solid var(--danger);
-  border-radius: 0.5rem;
-  background: none;
-  color: var(--danger);
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.command-delete-btn:hover {
-  background: var(--danger);
-  color: var(--white);
 }
 
 /* Clear Command History card */
@@ -608,7 +598,30 @@
   margin-top: 0.75rem;
 }
 
-/* Display settings: command picker and the saved/unsaved line */
+/* Display settings: command picker, a grid of field toggles, and the saved/unsaved line */
+.display-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.display-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--clay);
+  border-radius: 0.625rem;
+  background: var(--bg);
+}
+
+.display-tile label:first-child {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
 .display-hint {
   margin: 0;
   font-size: 0.8125rem;

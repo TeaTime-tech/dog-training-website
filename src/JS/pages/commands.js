@@ -7,8 +7,6 @@
 const commandButtonsContainer = document.getElementById("command-buttons");
 
 if (commandButtonsContainer) {
-    const hideCommandSelect = document.getElementById("delete-command");
-    const hideCommandButton = document.getElementById("delete-command-button");
     const commandPager = document.getElementById("command-pager");
     const commandPrevButton = document.getElementById("command-prev");
     const commandNextButton = document.getElementById("command-next");
@@ -93,21 +91,6 @@ if (commandButtonsContainer) {
             (button) => button.value.toLowerCase() === name.toLowerCase()
         );
 
-    const hasHideOption = (name) =>
-        Array.from(hideCommandSelect.options).some(
-            (option) => option.value.toLowerCase() === name.toLowerCase()
-        );
-
-    const addHideOption = (name) => {
-        if (hasHideOption(name)) {
-            return;
-        }
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        hideCommandSelect.appendChild(option);
-    };
-
     const renderCommandButton = (name) => {
         if (!hasCommandButton(name)) {
             const button = document.createElement("button");
@@ -116,10 +99,9 @@ if (commandButtonsContainer) {
             button.textContent = name;
             commandButtonsContainer.appendChild(button);
         }
-        addHideOption(name);
     };
 
-    // a tile (and Remove option) for every built-in and added command this account hasn't removed
+    // a tile for every built-in and added command this account hasn't removed
     const renderAllCommandTiles = () => {
         const hiddenCommands = getHiddenCommands();
         [...BUILT_IN_COMMANDS, ...getCustomCommands()]
@@ -348,7 +330,7 @@ if (commandButtonsContainer) {
 
     renderCommandSuggestions();
 
-    // after confirming, hide a command: remove its tile and dropdown option and remember it in hiddenCommands
+    // after confirming, hide a command: remove its tile and remember it in hiddenCommands
     const hideCommand = (name) => {
         if (!confirm(`Are you sure you want to hide the command "${name}"? It won't be deleted and can be restored later.`)) {
             return;
@@ -366,12 +348,6 @@ if (commandButtonsContainer) {
             paginateCommandTiles();
         }
 
-        const option = Array.from(hideCommandSelect.options).find(
-            (option) => option.value.toLowerCase() === name.toLowerCase()
-        );
-        if (option) {
-            option.remove();
-        }
 
         const hidden = getHiddenCommands();
         if (!hidden.includes(name.toLowerCase())) {
@@ -379,14 +355,9 @@ if (commandButtonsContainer) {
             saveHiddenCommands(hidden);
         }
 
-        hideCommandSelect.value = "";
         renderCommandSuggestions();
         window.dispatchEvent(new CustomEvent("commandlistchanged"));
     };
-
-    hideCommandButton.addEventListener("click", () => {
-        if (hideCommandSelect.value) hideCommand(hideCommandSelect.value);
-    });
 
     // clicking a tile opens Log / Delete choices for that command; clicking it again closes them
     commandButtonsContainer.addEventListener("click", (event) => {
@@ -517,16 +488,11 @@ if (commandButtonsContainer) {
         if (isBuiltIn && !sameWord && !hidden.includes(oldKey)) hidden.push(oldKey);
         saveCommandLists(customNames, hidden);
 
-        // tile and Remove dropdown keep their place, under the new name
+        // the tile keeps its place, under the new name
         const tile = Array.from(commandButtonsContainer.children).find((button) => button.value.toLowerCase() === oldKey);
         if (tile) {
             tile.value = newName;
             tile.textContent = newName;
-        }
-        const option = Array.from(hideCommandSelect.options).find((item) => item.value.toLowerCase() === oldKey);
-        if (option) {
-            option.value = newName;
-            option.textContent = newName;
         }
         paginateCommandTiles();
         renderCommandSuggestions();
@@ -598,7 +564,6 @@ if (commandButtonsContainer) {
         if (!event.detail.changed) return;
         closeCommandActions();
         commandButtonsContainer.replaceChildren();
-        Array.from(hideCommandSelect.options).filter((option) => option.value).forEach((option) => option.remove());
         renderAllCommandTiles();
         renderCommandSuggestions();
         window.dispatchEvent(new CustomEvent("commandlistchanged"));
