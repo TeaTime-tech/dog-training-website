@@ -22,30 +22,40 @@
     <script src="../JS/shared/accountNav.js" defer></script>
 </head>
 <body>
-    <details class="nav-dropdown">
-        <summary class="home-link nav-dropdown-toggle">Directory</summary>
-        <div class="nav-dropdown-menu">
-            <a href="index.html">Home</a>
-            <a href="today.html">Today</a>
-            <a href="commands.html">Commands</a>
-            <a href="log.html">Log</a>
-            <a href="load.html">View Logs</a>
-            <a href="dogs.html">My Dogs</a>
-            <a href="dog.html">Dog Profile</a>
-            <a href="settings.html">Settings</a>
-        </div>
-    </details>
-    <h1>Login</h1>
-    <form id="login-form">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" autocomplete="email" required>
-        <br><br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" autocomplete="current-password" required>
-        <br><br>
-        <button type="submit">Login</button>
-        <p id="auth-message" role="status"></p>
-        <p>Don't have an account? <a href="create.html">Create one here</a>.</p>
-    </form>
+    <div class="top-nav">
+        <details class="nav-dropdown">
+            <summary class="home-link nav-dropdown-toggle">Directory</summary>
+            <div class="nav-dropdown-menu">
+                <a href="index.html">Home</a>
+                <a href="today.html">Today</a>
+                <a href="commands.html">Commands</a>
+                <a href="log.html">Log</a>
+                <a href="load.html">View Logs</a>
+                <a href="dogs.html">My Dogs</a>
+                <a href="dog.html">Dog Profile</a>
+                <a href="settings.html">Settings</a>
+            </div>
+        </details>
+    </div>
+
+    <main class="auth-page">
+        <section class="page-section auth-card">
+            <h1>Log In</h1>
+            <p class="subhead">Welcome back. Your sessions, commands and dogs are waiting.</p>
+            <form id="login-form" class="auth-form">
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" autocomplete="email" required>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="save-btn auth-submit">Log In</button>
+                <p id="auth-message" role="status"></p>
+            </form>
+            <p class="auth-switch">Don't have an account? <a href="create.html">Create one</a></p>
+        </section>
+    </main>
 </body>
 </html>

@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="../CSS/shared/nav.css">
     <link rel="stylesheet" href="../CSS/shared/forms.css">
     <link rel="stylesheet" href="../CSS/pages/auth.css">
-    <link rel="stylesheet" href="../CSS/pages/create.css">
     <!-- shared scripts, then this page's script -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JS/shared/supabaseClient.js" defer></script>
@@ -23,31 +22,45 @@
     <script src="../JS/pages/auth.js" defer></script>
 </head>
 <body>
-    <details class="nav-dropdown">
-        <summary class="home-link nav-dropdown-toggle">Directory</summary>
-        <div class="nav-dropdown-menu">
-            <a href="index.html">Home</a>
-            <a href="today.html">Today</a>
-            <a href="commands.html">Commands</a>
-            <a href="log.html">Log</a>
-            <a href="load.html">View Logs</a>
-            <a href="dogs.html">My Dogs</a>
-            <a href="dog.html">Dog Profile</a>
-            <a href="settings.html">Settings</a>
-        </div>
-    </details>
-    <h1>Create an Account</h1>
-    <form id="inputSect">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" autocomplete="username" required>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" autocomplete="email" required>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" autocomplete="new-password" minlength="6" required>
-        <button type="submit">Create Account</button>
-        <p id="auth-message" role="status"></p>
-        <p>Already have an account? <a href="login.html">Login here</a>.</p>
-        
-    </form>
+    <div class="top-nav">
+        <details class="nav-dropdown">
+            <summary class="home-link nav-dropdown-toggle">Directory</summary>
+            <div class="nav-dropdown-menu">
+                <a href="index.html">Home</a>
+                <a href="today.html">Today</a>
+                <a href="commands.html">Commands</a>
+                <a href="log.html">Log</a>
+                <a href="load.html">View Logs</a>
+                <a href="dogs.html">My Dogs</a>
+                <a href="dog.html">Dog Profile</a>
+                <a href="settings.html">Settings</a>
+            </div>
+        </details>
+    </div>
+
+    <main class="auth-page">
+        <section class="page-section auth-card">
+            <h1>Create an Account</h1>
+            <p class="subhead">Save your training to your account so it's on every device.</p>
+            <form id="inputSect" class="auth-form">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" autocomplete="username" required>
+                </div>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" autocomplete="email" required>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="new-password" minlength="6" required aria-describedby="password-hint">
+                    <p id="password-hint" class="auth-hint">At least 6 characters.</p>
+                </div>
+                <button type="submit" class="save-btn auth-submit">Create Account</button>
+                <p id="auth-message" role="status"></p>
+            </form>
+            <p class="auth-switch">Already have an account? <a href="login.html">Log in</a></p>
+        </section>
+    </main>
 </body>
 </html>

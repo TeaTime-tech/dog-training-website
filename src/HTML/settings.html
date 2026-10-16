@@ -43,159 +43,92 @@
 </div>
 <h1>Settings</h1>
 
-<h3>Account and Profile</h3>
-    <!-- settings.js enables these once someone is signed in -->
-    <p id="account-status" class="subhead" role="status">Loading your account...</p>
-    <fieldset id="account-fields" disabled>
-        <div>
-            <label for="display-name">Display Name:</label>
-            <input type="text" id="display-name" placeholder="Enter display name...">
-            <button id="change-display-name" type="button">Change Display Name</button>
-        </div>
-        <div>
-            <label for="email-change">Change Email:</label>
-            <input type="email" id="email-change" placeholder="Enter new email...">
-            <button id="change-email" type="button">Change Email</button>
-        </div>
-        <div>
-            <label for="current-password-change">Current Password:</label>
-            <input type="password" id="current-password-change" placeholder="Enter current password..." autocomplete="current-password">
-        </div>
-        <div>
-            <label for="password-change">New Password:</label>
-            <input type="password" id="password-change" placeholder="Enter new password..." autocomplete="new-password">
-            <button id="change-password" type="button">Change Password</button>
-        </div>
-    </fieldset>
+    <section class="page-section settings-card">
+        <h2 class="section-title">Account and Profile</h2>
+        <!-- settings.js enables these once someone is signed in -->
+        <p id="account-status" class="subhead settings-note" role="status">Loading your account...</p>
+        <fieldset id="account-fields" class="settings-fields" disabled>
+            <div class="settings-row">
+                <label for="display-name">Display name</label>
+                <input type="text" id="display-name" placeholder="Enter display name...">
+                <button id="change-display-name" type="button" class="settings-btn">Change Display Name</button>
+            </div>
+            <div class="settings-row">
+                <label for="email-change">Email</label>
+                <input type="email" id="email-change" placeholder="Enter new email...">
+                <button id="change-email" type="button" class="settings-btn">Change Email</button>
+            </div>
+            <div class="settings-row">
+                <label for="current-password-change">Current password</label>
+                <input type="password" id="current-password-change" placeholder="Enter current password..." autocomplete="current-password">
+            </div>
+            <div class="settings-row">
+                <label for="password-change">New password</label>
+                <input type="password" id="password-change" placeholder="Enter new password..." autocomplete="new-password">
+                <button id="change-password" type="button" class="settings-btn">Change Password</button>
+            </div>
+        </fieldset>
+    </section>
 
-<h3>My Dogs</h3>
-    <p class="subhead">Add, rename or delete dogs and choose which one you're training on the <a href="dogs.html">My Dogs</a> page.</p>
+    <section class="page-section settings-card">
+        <h2 class="section-title">My Dogs</h2>
+        <p class="settings-note">Add, rename or delete dogs and choose which one you're training on the <a href="dogs.html">My Dogs</a> page.</p>
+    </section>
 
-<h3>Training</h3>
-    <div>
-        <label for="mastery-decay-toggle">Show mastery decay:</label>
-        <label class="toggle">
-            <input type="checkbox" id="mastery-decay-toggle" class="toggle-input" checked disabled>
-            <span class="toggle-track"><span class="toggle-thumb"></span></span>
-        </label>
-    </div>
-    <p id="mastery-decay-status" class="subhead" role="status"></p>
-
-<h3>Units</h3>
-    <div>
-        <label for="weight-unit">Weight Unit:</label>
-        <select id="weight-unit">
-            <option value="kg">Kilograms(kg)</option>
-            <option value="lb">Pounds(lb)</option>
-        </select>
-    </div>
-    <div>
-        <label for="distance-unit">Distance Unit:</label>
-        <select id="distance-unit">
-            <option value="m">Meters(m)</option>
-            <option value="ft">Feet(ft)</option>
-        </select>
-    </div>
-    <div>
-        <button id="save-settings" type="button">Save Settings</button>
-    </div>
-
-<h3>Data</h3>
-    <div>
-        <label for="export-data">Export My Data:</label>
-        <button id="export-data" type="button">Export</button>
-    </div>
-    <p id="export-status" class="subhead" role="status"></p>
-
-<h3>Coming Soon</h3>
-    <p class="subhead">These settings aren't set up yet.</p>
-    <fieldset disabled>
-        <div>
-            <label for="profile-picture">Profile Picture:</label>
-            <input type="file" id="profile-picture" accept="image/*">
-        </div>
-        <div>
-            <label for="language">Language:</label>
-            <select id="language">
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-            </select>
-        </div>
-        <div>
-            <label for="date-format">Date format:</label>
-            <select id="date-format">
-                <option value="dd/mm/yyyy">Day/Month/Year</option>
-                <option value="mm/dd/yyyy">Month/Day/Year</option>
-            </select>
-        </div>
-        <div>
-            <label for="theme">Theme:</label>
-            <select id="theme">
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-            </select>
-        </div>
-        <div>
-            <label for="email-notifications">Email Notifications:</label>
+    <section class="page-section settings-card">
+        <h2 class="section-title">Training</h2>
+        <div class="toggle-row settings-toggle-row">
+            <label for="mastery-decay-toggle">Show mastery decay</label>
             <label class="toggle">
-                <input type="checkbox" id="email-notifications" class="toggle-input">
+                <input type="checkbox" id="mastery-decay-toggle" class="toggle-input" checked disabled>
                 <span class="toggle-track"><span class="toggle-thumb"></span></span>
             </label>
         </div>
-        <div>
-            <label for="vaccination-and-health-reminder">Vaccination and Health Reminders:</label>
-            <label class="toggle">
-                <input type="checkbox" id="vaccination-and-health-reminder" class="toggle-input">
-                <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-        </div>
-        <div>
-            <label for="privacy">Privacy Settings:</label>
-            <select id="privacy">
-                <option value="public">Public</option>
-                <option value="friends">Friends Only</option>
-                <option value="private">Private</option>
-            </select>
-        </div>
-        <div>
-            <label for="show-display-name">Show my name on shared commands</label>
-            <label class="toggle">
-                <input type="checkbox" id="show-display-name" class="toggle-input">
-                <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-        </div>
-        <div>
-            <label for="trainer-sharing">Share my training plans with other users:</label>
-            <label class="toggle">
-                <input type="checkbox" id="trainer-sharing" class="toggle-input">
-                <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-            <input type="email" id="trainer-email" placeholder="Enter trainer's email...">
-        </div>
-        <div>
-            <label for="subscription">Subscription Plan:</label>
-            <select id="subscription">
-                <option value="free">Free</option>
-                <option value="premium">Premium</option>
-                <option value="pro">Pro</option>
-            </select>
-            <button id="renew-subscription" type="button">Renew</button>
-        </div>
-        <div>
-            <label for="delete-data">Delete My Data:</label>
-            <button id="delete-data" type="button">Delete</button>
-        </div>
-        <div>
-            <label for="help">Help and Support:</label>
-            <button id="help" type="button">Get Help</button>
-        </div>
-        <div>
-            <label for="feedback">Feedback:</label>
-            <textarea id="feedback" placeholder="Enter your feedback..."></textarea>
-            <button id="submit-feedback" type="button">Submit Feedback</button>
-        </div>
-    </fieldset>
+        <p id="mastery-decay-status" class="subhead settings-note" role="status"></p>
+    </section>
 
+    <section class="page-section settings-card">
+        <h2 class="section-title">Units</h2>
+        <div class="settings-row">
+            <label for="weight-unit">Weight</label>
+            <select id="weight-unit">
+                <option value="kg">Kilograms (kg)</option>
+                <option value="lb">Pounds (lb)</option>
+            </select>
+        </div>
+        <div class="settings-row">
+            <label for="distance-unit">Distance</label>
+            <select id="distance-unit">
+                <option value="m">Meters (m)</option>
+                <option value="ft">Feet (ft)</option>
+            </select>
+        </div>
+        <button id="save-settings" type="button" class="save-btn">Save Settings</button>
+    </section>
+
+    <section class="page-section settings-card">
+        <h2 class="section-title">Data</h2>
+        <p class="settings-note">Download everything you've logged as a file.</p>
+        <button id="export-data" type="button" class="settings-btn">Export My Data</button>
+        <p id="export-status" class="subhead settings-note" role="status"></p>
+    </section>
+
+    <section class="page-section settings-card">
+        <h2 class="section-title">Coming Soon</h2>
+        <p class="settings-note">These settings are on the way:</p>
+        <ul class="settings-coming-soon">
+            <li>Profile picture</li>
+            <li>Language</li>
+            <li>Date format</li>
+            <li>Light and dark theme</li>
+            <li>Email notifications</li>
+            <li>Vaccination and health reminders</li>
+            <li>Privacy settings</li>
+            <li>Sharing training plans with a trainer</li>
+            <li>Subscription plans</li>
+            <li>Delete my data</li>
+            <li>Help, support and feedback</li>
+        </ul>
+    </section>
 </body>
 </html>

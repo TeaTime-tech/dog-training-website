@@ -44,6 +44,16 @@ textarea {
   font-size: 0.875rem;
 }
 
+/* links in text: the site's dark green instead of browser blue/purple (classes like .save-btn set their own look) */
+a {
+  color: var(--moss-dark);
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  color: var(--ink);
+}
+
 /* a label that screen readers announce but isn't shown */
 .visually-hidden {
   position: absolute;

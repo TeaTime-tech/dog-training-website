@@ -1,11 +1,71 @@
-/* create.html and login.html: sign-up / login status line. */
+/* create.html and login.html: a centered card with the form, and the sign-up / login status line. */
+
+.auth-page {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 26rem;
+  margin: 0;
+  padding: 1.75rem 1.75rem 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.auth-card h1 {
+  margin-bottom: 0.25rem;
+}
+
+.auth-card .subhead {
+  margin-bottom: 1.25rem;
+}
+
+.auth-form .field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.auth-form .field input {
+  font-size: 1rem;
+}
+
+.auth-hint {
+  margin: 0.3125rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+}
 
 /* sign-up / login status line */
 #auth-message {
   min-height: 1.5em;
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
   color: var(--muted);
+  text-align: center;
 }
 
 #auth-message.auth-error {
   color: var(--danger);
+}
+
+.auth-switch {
+  margin: 0.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--clay);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+.auth-switch a {
+  font-weight: 600;
 }
