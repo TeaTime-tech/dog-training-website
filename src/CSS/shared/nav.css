@@ -1,18 +1,42 @@
 /* Shared by every page: top nav bar, Directory dropdown, and home links. */
 
-/* Top-right account nav */
+/* Top bar: the site name and Directory on the left, account links on the right, a thin line underneath */
 .top-nav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  padding-top: 0.5rem;
+  gap: 0.5rem 1.25rem;
+  margin-bottom: 1rem;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--clay);
 }
 
 .top-nav-links {
   display: flex;
   align-items: center;
   gap: 1.25rem;
+  margin-left: auto;
+}
+
+/* site name with a small paw; links home */
+.nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  color: var(--ink);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav-brand:hover {
+  color: var(--moss-dark);
+}
+
+.nav-brand svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: var(--brass);
 }
 
 .top-nav .home-link {
@@ -82,6 +106,13 @@
 
 .nav-dropdown-menu a:hover {
   background: var(--bg);
+}
+
+/* the page you're on (accountNav.js marks it) */
+.nav-dropdown-menu a[aria-current="page"] {
+  background: var(--brass-light);
+  color: var(--brass-dark);
+  font-weight: 700;
 }
 
 /* Home link */

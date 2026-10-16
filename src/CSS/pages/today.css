@@ -86,7 +86,7 @@
   flex-wrap: wrap;
   margin: 1.25rem 0 1.5rem;
   padding: 1.5rem;
-  max-width: 40rem;
+  max-width: none;
   border-radius: 1.25rem;
   background: linear-gradient(135deg, var(--moss-dark) 0%, var(--ink) 100%);
   color: var(--white);
@@ -196,14 +196,14 @@
 /* Stat tiles (styles in base.css) */
 .stat-row {
   margin: 1rem 0 1.5rem;
-  max-width: 40rem;
+  max-width: none;
 }
 
 /* Daily goal card */
 .today-goal-card {
   margin: 0 0 1.5rem;
   padding: 1.125rem 1.25rem;
-  max-width: 40rem;
+  max-width: none;
   background: var(--white);
   border-radius: 0.875rem;
   box-shadow: var(--shadow-card);
@@ -270,13 +270,13 @@
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
-  max-width: 40rem;
+  max-width: none;
   margin: 0.5rem 0 0.75rem;
 }
 
 /* Single white card wrapping a section's logged-item rows and its "+ Add" row */
 .today-section-card {
-  max-width: 40rem;
+  max-width: none;
   margin: 0 0 1.5rem;
   background: var(--white);
   border-radius: 0.875rem;
@@ -304,7 +304,7 @@
 
 /* Collapsible Daily Goal / Session Log / Exercise Log sections */
 .today-section {
-  max-width: 40rem;
+  max-width: none;
   margin: 0 0 1.5rem;
 }
 

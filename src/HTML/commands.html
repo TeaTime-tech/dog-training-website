@@ -26,6 +26,7 @@
 </head>
 <body>
     <div class="top-nav">
+        <a class="nav-brand" href="index.html" aria-label="Tea Time Dog Training home"><svg viewBox="0 0 120 112" aria-hidden="true" focusable="false"><ellipse cx="18" cy="46" rx="12" ry="15" transform="rotate(-25 18 46)"/><ellipse cx="42" cy="18" rx="12.5" ry="16" transform="rotate(-8 42 18)"/><ellipse cx="78" cy="18" rx="12.5" ry="16" transform="rotate(8 78 18)"/><ellipse cx="102" cy="46" rx="12" ry="15" transform="rotate(25 102 46)"/><path d="M60 52c-14 0-22 9-31 21-7 9-11 15-11 22 0 9 7 15 16 15 10 0 15-5 26-5s16 5 26 5c9 0 16-6 16-15 0-7-4-13-11-22-9-12-17-21-31-21Z"/></svg><span>Tea Time</span></a>
         <details class="nav-dropdown">
             <summary class="home-link nav-dropdown-toggle">Directory</summary>
             <div class="nav-dropdown-menu">
@@ -69,7 +70,7 @@
                 <!-- the notes themselves; clicking them opens the notes editor -->
                 <button type="button" id="command-actions-notes" class="command-actions-notes" title="Click to edit notes"></button>
                 <button type="button" id="command-log" class="save-btn">Log Session</button>
-                <button type="button" id="command-edit-notes" class="command-notes-btn">Edit Notes</button>
+                <button type="button" id="command-edit-notes" class="secondary-btn">Edit Notes</button>
                 <button type="button" id="command-delete" class="command-delete-btn">Delete</button>
                 <button type="button" id="command-actions-close" class="hide-btn">Cancel</button>
                 <p id="command-actions-status" class="command-actions-status" role="status"></p>
@@ -85,7 +86,7 @@
                     <ul id="command-search-menu" class="command-search-menu" role="listbox" aria-label="Suggested commands" hidden></ul>
                 </div>
                 <button id="add-command" type="button" class="save-btn">Add Command</button>
-                <button id="open-command-suggestions" type="button" class="command-notes-btn" aria-haspopup="dialog" hidden>Suggestions <span id="command-suggestions-count" class="command-suggestions-count"></span></button>
+                <button id="open-command-suggestions" type="button" class="secondary-btn" aria-haspopup="dialog" hidden>Suggestions <span id="command-suggestions-count" class="command-suggestions-count"></span></button>
             </div>
             <div class="field-row">
                 <label for="delete-command">Remove a command:</label>
@@ -123,7 +124,7 @@
         <details open>
             <summary class="collapsible-toggle"><h2 class="section-title">Programs and Goals</h2></summary>
             <div class="cgc-header">
-                <button type="button" id="cgc-toggle">Canine Good Citizen (CGC)</button>
+                <button type="button" id="cgc-toggle" class="secondary-btn">Canine Good Citizen (CGC)</button>
                 <div class="cgc-progress">
                     <progress id="cgc-progress-bar" max="10" value="0"></progress>
                     <span id="cgc-progress-label">0/10</span>

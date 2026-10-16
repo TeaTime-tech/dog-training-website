@@ -1,25 +1,184 @@
-/* log.html: session length display, the Dog picker note, and the hidden-fields note. */
+/* log.html: three cards (Session, How It Went, Length & Notes) with fields in a two-column grid. Each pick-list field
+   tucks its "add a new option" box behind a small "+ Add option" toggle. */
+
+.log-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.125rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .log-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.log-field--wide {
+  grid-column: 1 / -1;
+}
+
+/* hidden by log.js (no dogs yet, or a field this command doesn't show) */
+.log-field[hidden] {
+  display: none;
+}
+
+.log-field > label,
+.log-toggle-row > label:first-child {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.log-hint {
+  margin: 0.125rem 0 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+/* the control and its small buttons on one line */
+.log-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.625rem;
+}
+
+.log-control[hidden] {
+  display: none;
+}
+
+.log-control select,
+.log-control input,
+.log-add-row input {
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--clay);
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.log-control select {
+  flex: 1 1 9rem;
+}
+
+.log-control input[type="date"],
+.log-control input[type="time"] {
+  flex: 1 1 9rem;
+}
+
+.log-control input[type="number"] {
+  width: 4.5rem;
+}
+
+#notes {
+  flex: 1 1 14rem;
+}
+
+.log-control select:focus,
+.log-control input:focus,
+.log-add-row input:focus {
+  outline: 2px solid var(--moss);
+  outline-offset: 1px;
+}
+
+.log-control .hide-btn {
+  padding: 0;
+}
+
+/* "+ Add option": a small link that opens an input and Add button */
+.log-add {
+  margin-top: 0.375rem;
+}
+
+.log-add > summary {
+  display: inline-block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--moss-dark);
+  cursor: pointer;
+  list-style: none;
+}
+
+.log-add > summary::-webkit-details-marker {
+  display: none;
+}
+
+.log-add > summary:hover {
+  text-decoration: underline;
+}
+
+.log-add[open] > summary {
+  margin-bottom: 0.375rem;
+}
+
+.log-add-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.log-add-row input {
+  flex: 1 1 auto;
+}
+
+.log-timer #timer {
+  width: 6rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.log-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.log-card #notes-form {
+  margin-top: 1.125rem;
+}
 
 .total-time-display {
+  margin: 0.5rem 0 0;
   font-weight: 600;
   color: var(--moss-dark);
 }
 
-/* the line under the Dog picker */
-.log-dog-note {
-  margin: 0.625rem 0 0;
-  color: var(--muted);
-  font-size: 0.875rem;
-}
-
-/* shown under Command when that command hides some fields */
+/* shown under the Session card when the command hides some fields */
 .log-display-note {
-  margin: 0.75rem 0 0;
+  margin: 1rem 0 0;
   color: var(--muted);
   font-size: 0.875rem;
 }
 
 .log-display-note a {
-  color: var(--moss-dark);
   font-weight: 600;
+}
+
+/* the main action: a big Save at the end, with the link to past sessions beside it */
+.log-save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--clay);
+}
+
+.log-save .save-btn {
+  padding: 0.75rem 1.75rem;
+  font-size: 1rem;
+}
+
+#save-message {
+  margin: 0;
+  font-weight: 600;
+  color: var(--moss-dark);
+}
+
+.log-save .home-link {
+  margin: 0 0 0 auto;
 }

@@ -71,32 +71,9 @@ fieldset:disabled {
   outline-offset: 1px;
 }
 
-/* the per-row buttons: outlined, so the card's main Save button stands out */
-.settings-btn {
-  padding: 0.5rem 0.875rem;
-  min-width: 0;
-  border: 1px solid var(--moss);
-  border-radius: 0.5rem;
-  background: none;
-  color: var(--moss-dark);
-  font-size: 0.875rem;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
 /* in a row, the buttons share one column width so the boxes before them line up */
-.settings-row .settings-btn {
+.settings-row .secondary-btn {
   width: 100%;
-}
-
-.settings-btn:hover:not(:disabled) {
-  background: var(--moss);
-  color: var(--white);
-}
-
-.settings-btn:disabled {
-  cursor: not-allowed;
 }
 
 .settings-card > .save-btn {

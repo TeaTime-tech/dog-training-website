@@ -577,22 +577,6 @@
   font-style: italic;
 }
 
-.command-notes-btn {
-  padding: 0.625rem 1.25rem;
-  border: 1px solid var(--moss);
-  border-radius: 0.5rem;
-  background: none;
-  color: var(--moss-dark);
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.command-notes-btn:hover {
-  background: var(--moss);
-  color: var(--white);
-}
-
 .command-actions-status {
   flex-basis: 100%;
   margin: 0;

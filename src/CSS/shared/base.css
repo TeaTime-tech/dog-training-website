@@ -3,11 +3,12 @@
 :root {
   --bg: #F5F1E8;
   --ink: #2F4030;
-  --moss: #6B8F5E;
-  --moss-dark: #547247;
+  /* moss is dark enough for white button text (4.8:1); muted for small grey text (5.2:1 on the page) */
+  --moss: #5A7A4E;
+  --moss-dark: #4A6640;
   --brass: #B8925A;
   --clay: #E8DFC9;
-  --muted: #8A8271;
+  --muted: #6B6456;
   --white: #FFFDF8;
   --brass-light: #F3E7D6;
   --brass-dark: #6B4E2A;
@@ -66,7 +67,7 @@ a:hover {
 
 /* Section cards */
 .page-section {
-  max-width: 35rem;
+  max-width: none;
   margin: 0 0 1.5rem;
   padding: 1.125rem 1.25rem;
   border: 1px solid var(--clay);
@@ -78,6 +79,17 @@ a:hover {
   margin: 0 0 0.875rem;
   font-size: 1.1875rem;
   font-weight: 600;
+}
+
+/* a short brass bar under each card title, for a touch of warmth */
+.section-title::after {
+  content: "";
+  display: block;
+  width: 1.75rem;
+  height: 0.1875rem;
+  margin-top: 0.375rem;
+  border-radius: 999px;
+  background: var(--brass);
 }
 
 header {

@@ -23,6 +23,7 @@
 </head>
 <body>
     <div class="top-nav">
+        <a class="nav-brand" href="index.html" aria-label="Tea Time Dog Training home"><svg viewBox="0 0 120 112" aria-hidden="true" focusable="false"><ellipse cx="18" cy="46" rx="12" ry="15" transform="rotate(-25 18 46)"/><ellipse cx="42" cy="18" rx="12.5" ry="16" transform="rotate(-8 42 18)"/><ellipse cx="78" cy="18" rx="12.5" ry="16" transform="rotate(8 78 18)"/><ellipse cx="102" cy="46" rx="12" ry="15" transform="rotate(25 102 46)"/><path d="M60 52c-14 0-22 9-31 21-7 9-11 15-11 22 0 9 7 15 16 15 10 0 15-5 26-5s16 5 26 5c9 0 16-6 16-15 0-7-4-13-11-22-9-12-17-21-31-21Z"/></svg><span>Tea Time</span></a>
         <details class="nav-dropdown">
             <summary class="home-link nav-dropdown-toggle">Directory</summary>
             <div class="nav-dropdown-menu">
@@ -44,266 +45,258 @@
 
     <h1>Log Training Session</h1>
 
-    <!-- log.js fills this with the account's dogs and shows it once there are any -->
-    <section class="page-section" id="log-dog-section" hidden>
-        <h2 class="section-title">Dog</h2>
-        <div class="field-row">
-            <label for="log-dog">Switch dog:</label>
-            <select id="log-dog"></select>
-        </div>
-        <p class="log-dog-note">This session is logged for the selected dog.</p>
-    </section>
-
-    <section class="page-section">
-        <h2 class="section-title">Command</h2>
-        <div class="field-row">
-            <label for="command">Select a command:</label>
-            <select id="command" name="command">
-                <option value="sit">Sit</option>
-                <option value="stay">Stay</option>
-                <option value="come">Come</option>
-                <option value="down">Down</option>
-                <option value="leave it">Leave it</option>
-                <option value="drop it">Drop it</option>
-                <option value="heel">Heel</option>
-                <option value="wait">Wait</option>
-                <option value="off">Off</option>
-                <option value="place">Place</option>
-                <option value="watch me">Watch me</option>
-                <option value="touch">Touch</option>
-                <option value="shake">Shake</option>
-                <option value="quiet">Quiet</option>
-                <option value="roll over">Roll over</option>
-            </select>
-        </div>
-        <div class="field-row">
-            <label for="new-command">Add a new command:</label>
-            <input type="text" id="new-command" placeholder="Enter command name...">
-            <button id="add-command" type="button" class="save-btn">Add Command</button>
+    <!-- the session in three cards: what and when, how it went (fields the command hides drop out), and length + notes -->
+    <section class="page-section log-card">
+        <h2 class="section-title">Session</h2>
+        <div class="log-grid">
+            <!-- log.js fills this with the account's dogs and shows it once there are any -->
+            <div class="log-field" id="log-dog-section" hidden>
+                <label for="log-dog">Dog</label>
+                <p class="log-hint">This session is logged for the selected dog.</p>
+                <div class="log-control">
+                    <select id="log-dog"></select>
+                </div>
+            </div>
+            <div class="log-field">
+                <label for="command">Command</label>
+                <p class="log-hint">Manage commands on the <a href="commands.html">Commands page</a>.</p>
+                <div class="log-control">
+                    <select id="command" name="command">
+                        <option value="sit">Sit</option>
+                        <option value="stay">Stay</option>
+                        <option value="come">Come</option>
+                        <option value="down">Down</option>
+                        <option value="leave it">Leave it</option>
+                        <option value="drop it">Drop it</option>
+                        <option value="heel">Heel</option>
+                        <option value="wait">Wait</option>
+                        <option value="off">Off</option>
+                        <option value="place">Place</option>
+                        <option value="watch me">Watch me</option>
+                        <option value="touch">Touch</option>
+                        <option value="shake">Shake</option>
+                        <option value="quiet">Quiet</option>
+                        <option value="roll over">Roll over</option>
+                    </select>
+                </div>
+                <details class="log-add">
+                    <summary>+ Add command</summary>
+                    <div class="log-add-row">
+                        <label class="visually-hidden" for="new-command">New command</label>
+                        <input type="text" id="new-command" placeholder="Enter command name...">
+                        <button id="add-command" type="button" class="secondary-btn">Add</button>
+                    </div>
+                </details>
+            </div>
+            <div class="log-field">
+                <label for="date">When</label>
+                <p class="log-hint">The day and time you trained.</p>
+                <div class="log-control">
+                    <input type="date" id="date" name="date">
+                    <label class="visually-hidden" for="time">Time</label>
+                    <input type="time" id="time" name="time">
+                </div>
+            </div>
         </div>
         <p id="log-display-note" class="log-display-note" hidden>Some fields are hidden for this command. Change this in Display Settings on the <a href="commands.html">Commands page</a>.</p>
-        <a class="home-link" href="commands.html">Go to Commands Page</a>
     </section>
 
-    <!-- data-display-field: hidden when that field is turned off for the picked command (Commands > Display Settings) -->
-    <section class="page-section" data-display-field="repetitions">
-        <h2 class="section-title">Repetitions</h2>
-        <p class="subhead">How many times your dog has performed the command.</p>
-        <div class="field-row">
-            <label for="repitions">Select a number:</label>
-            <select id="repitions" name="repitions">
-                <option value="N/A">N/A</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-            <button id="remove-repition" type="button" class="hide-btn">Remove Selected</button>
-        </div>
-        <div class="field-row">
-            <label for="new-repition">Add a new repetition:</label>
-            <input type="text" id="new-repition" placeholder="Enter repetition count...">
-            <button id="add-repition" type="button" class="save-btn">Add Repetition</button>
-        </div>
-    </section>
-
-    <section class="page-section" data-display-field="duration">
-        <h2 class="section-title">Duration</h2>
-        <p class="subhead">Log the duration of the command.</p>
-        <div class="field-row">
-            <label for="duration">Select a duration:</label>
-            <select id="duration" name="duration">
-                <option value="N/A">N/A</option>
-                <option value="5">5 sec</option>
-                <option value="10">10 sec</option>
-                <option value="15">15 sec</option>
-                <option value="20">20 sec</option>
-                <option value="30">30 sec</option>
-                <option value="1">1 min</option>
-                <option value="1:30">1 min 30 sec</option>
-            </select>
-            <button id="remove-duration" type="button" class="hide-btn">Remove Selected</button>
-        </div>
-        <div class="field-row">
-            <label for="new-duration">Add a new duration:</label>
-            <input type="text" id="new-duration" placeholder="Enter duration...">
-            <button id="add-duration" type="button" class="save-btn">Add Duration</button>
-        </div>
-    </section>
-
-    <section class="page-section" data-display-field="duration">
-        <h2 class="section-title">Timer</h2>
-        <p class="subhead">Use a timer to help track your command durations.</p>
-        <div class="field-row">
-            <label for="timer">Timer:</label>
-            <input type="text" id="timer" placeholder="00:00" readonly>
-            <button id="timer-start" type="button" class="save-btn">Start</button>
-            <button id="timer-stop" type="button" class="hide-btn">Stop</button>
-            <button id="timer-reset" type="button" class="hide-btn">Reset</button>
-        </div>
-        <div class="field-row">
-            <button id="timer-direction" type="button" class="hide-btn">Mode: Countdown</button>
-        </div>
-    </section>
-
-    <section class="page-section" data-display-field="distractions">
-        <h2 class="section-title">Distractions</h2>
-        <p class="subhead">List of distractions during the training.</p>
-        <div class="field-row">
-            <label for="distractions">Select a distraction:</label>
-            <select id="distractions" name="distractions">
-                <option value="none">None</option>
-                <option value="other dogs">Other dogs</option>
-                <option value="people">People</option>
-                <option value="squirrels">Squirrels</option>
-                <option value="birds">Birds</option>
-                <option value="other">Other</option>
-            </select>
-            <button id="remove-distraction" type="button" class="hide-btn">Remove Selected</button>
-        </div>
-        <div class="field-row">
-            <label for="new-distraction">Add a new distraction:</label>
-            <input type="text" id="new-distraction" placeholder="Enter distraction...">
-            <button id="add-distraction" type="button" class="save-btn">Add Distraction</button>
-        </div>
-    </section>
-
-    <section class="page-section" data-display-field="location">
-        <h2 class="section-title">Location</h2>
-        <p class="subhead">Track location(s) where the training took place.</p>
-        <div class="field-row">
-            <label for="location">Select a location:</label>
-            <select id="location" name="location">
-                <option value="home">Home</option>
-                <option value="park">Park</option>
-                <option value="street">Street</option>
-                <!-- keep this at the very end-->
-                <option value="other">Other</option>
-            </select>
-            <button id="remove-location" type="button" class="hide-btn">Remove Selected</button>
-        </div>
-        <div class="field-row">
-            <label for="new-location">Add a new location:</label>
-            <input type="text" id="new-location" placeholder="Enter location...">
-            <button id="add-location" type="button" class="save-btn">Add Location</button>
-        </div>
-    </section>
-
-    <section class="page-section" data-display-field="weather">
-        <h2 class="section-title">Weather</h2>
-        <p class="subhead">The weather during the training.</p>
-        <div class="field-row">
-            <label for="weather">Select the weather:</label>
-            <select id="weather" name="weather">
-                <option value="">Not recorded</option>
-                <option value="sunny">Sunny</option>
-                <option value="cloudy">Cloudy</option>
-                <option value="rainy">Rainy</option>
-                <option value="windy">Windy</option>
-                <option value="snowy">Snowy</option>
-                <option value="hot">Hot</option>
-                <option value="cold">Cold</option>
-                <option value="indoors">Indoors</option>
-                <!-- keep this at the very end-->
-                <option value="other">Other</option>
-            </select>
-            <button id="remove-weather" type="button" class="hide-btn">Remove Selected</button>
-        </div>
-        <div class="field-row">
-            <label for="new-weather">Add a new weather type:</label>
-            <input type="text" id="new-weather" placeholder="Enter weather...">
-            <button id="add-weather" type="button" class="save-btn">Add Weather</button>
-        </div>
-    </section>
-
-    <section class="page-section" data-display-field="score">
-        <h2 class="section-title">Score</h2>
-        <p class="subhead">How well the session went, from 1 (poor) to 10 (perfect).</p>
-        <div class="field-row">
-            <label for="score">Select a score:</label>
-            <select id="score" name="score">
-                <option value="">No score</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-            </select>
-        </div>
-    </section>
-
-    <section class="page-section">
-        <h2 class="section-title">Date/Time</h2>
-        <p class="subhead">Here is the date and time of the training session.</p>
-        <div class="field-row">
-            <label for="date">Select a date:</label>
-            <input type="date" id="date" name="date">
-        </div>
-        <div class="field-row">
-            <label for="time">Select a time:</label>
-            <input type="time" id="time" name="time">
+    <section class="page-section log-card">
+        <h2 class="section-title">How It Went</h2>
+        <!-- data-display-field: hidden when that field is turned off for the picked command (Commands > Display Settings) -->
+        <div class="log-grid">
+            <div class="log-field" data-display-field="repetitions">
+                <label for="repitions">Repetitions</label>
+                <p class="log-hint">How many times your dog performed the command.</p>
+                <div class="log-control">
+                    <select id="repitions" name="repitions">
+                    <option value="N/A">N/A</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    </select>
+                    <button id="remove-repition" type="button" class="hide-btn">Remove selected</button>
+                </div>
+                <details class="log-add">
+                    <summary>+ Add option</summary>
+                    <div class="log-add-row">
+                        <label class="visually-hidden" for="new-repition">New repetition count</label>
+                        <input type="text" id="new-repition" placeholder="Enter repetition count...">
+                        <button id="add-repition" type="button" class="secondary-btn">Add</button>
+                    </div>
+                </details>
+            </div>
+            <div class="log-field" data-display-field="duration">
+                <label for="duration">Duration</label>
+                <p class="log-hint">How long the command was held.</p>
+                <div class="log-control">
+                    <select id="duration" name="duration">
+                    <option value="N/A">N/A</option>
+                    <option value="5">5 sec</option>
+                    <option value="10">10 sec</option>
+                    <option value="15">15 sec</option>
+                    <option value="20">20 sec</option>
+                    <option value="30">30 sec</option>
+                    <option value="1">1 min</option>
+                    <option value="1:30">1 min 30 sec</option>
+                    </select>
+                    <button id="remove-duration" type="button" class="hide-btn">Remove selected</button>
+                </div>
+                <details class="log-add">
+                    <summary>+ Add option</summary>
+                    <div class="log-add-row">
+                        <label class="visually-hidden" for="new-duration">New duration</label>
+                        <input type="text" id="new-duration" placeholder="Enter duration...">
+                        <button id="add-duration" type="button" class="secondary-btn">Add</button>
+                    </div>
+                </details>
+            </div>
+            <div class="log-field log-field--wide" data-display-field="duration">
+                <label for="timer">Timer</label>
+                <p class="log-hint">Time the command as you train.</p>
+                <div class="log-control log-timer">
+                    <input type="text" id="timer" placeholder="00:00" readonly>
+                    <button id="timer-start" type="button" class="save-btn">Start</button>
+                    <button id="timer-stop" type="button" class="hide-btn">Stop</button>
+                    <button id="timer-reset" type="button" class="hide-btn">Reset</button>
+                    <button id="timer-direction" type="button" class="hide-btn">Mode: Countdown</button>
+                </div>
+            </div>
+            <div class="log-field" data-display-field="distractions">
+                <label for="distractions">Distractions</label>
+                <p class="log-hint">What was going on around you.</p>
+                <div class="log-control">
+                    <select id="distractions" name="distractions">
+                    <option value="none">None</option>
+                    <option value="other dogs">Other dogs</option>
+                    <option value="people">People</option>
+                    <option value="squirrels">Squirrels</option>
+                    <option value="birds">Birds</option>
+                    <option value="other">Other</option>
+                    </select>
+                    <button id="remove-distraction" type="button" class="hide-btn">Remove selected</button>
+                </div>
+                <details class="log-add">
+                    <summary>+ Add option</summary>
+                    <div class="log-add-row">
+                        <label class="visually-hidden" for="new-distraction">New distraction</label>
+                        <input type="text" id="new-distraction" placeholder="Enter distraction...">
+                        <button id="add-distraction" type="button" class="secondary-btn">Add</button>
+                    </div>
+                </details>
+            </div>
+            <div class="log-field" data-display-field="location">
+                <label for="location">Location</label>
+                <p class="log-hint">Where the training took place.</p>
+                <div class="log-control">
+                    <select id="location" name="location">
+                    <option value="home">Home</option>
+                    <option value="park">Park</option>
+                    <option value="street">Street</option>
+                    <!-- keep this at the very end-->
+                    <option value="other">Other</option>
+                    </select>
+                    <button id="remove-location" type="button" class="hide-btn">Remove selected</button>
+                </div>
+                <details class="log-add">
+                    <summary>+ Add option</summary>
+                    <div class="log-add-row">
+                        <label class="visually-hidden" for="new-location">New location</label>
+                        <input type="text" id="new-location" placeholder="Enter location...">
+                        <button id="add-location" type="button" class="secondary-btn">Add</button>
+                    </div>
+                </details>
+            </div>
+            <div class="log-field" data-display-field="weather">
+                <label for="weather">Weather</label>
+                <p class="log-hint">The weather during the training.</p>
+                <div class="log-control">
+                    <select id="weather" name="weather">
+                    <option value="">Not recorded</option>
+                    <option value="sunny">Sunny</option>
+                    <option value="cloudy">Cloudy</option>
+                    <option value="rainy">Rainy</option>
+                    <option value="windy">Windy</option>
+                    <option value="snowy">Snowy</option>
+                    <option value="hot">Hot</option>
+                    <option value="cold">Cold</option>
+                    <option value="indoors">Indoors</option>
+                    <!-- keep this at the very end-->
+                    <option value="other">Other</option>
+                    </select>
+                    <button id="remove-weather" type="button" class="hide-btn">Remove selected</button>
+                </div>
+                <details class="log-add">
+                    <summary>+ Add option</summary>
+                    <div class="log-add-row">
+                        <label class="visually-hidden" for="new-weather">New weather type</label>
+                        <input type="text" id="new-weather" placeholder="Enter weather...">
+                        <button id="add-weather" type="button" class="secondary-btn">Add</button>
+                    </div>
+                </details>
+            </div>
+            <div class="log-field" data-display-field="score">
+                <label for="score">Score</label>
+                <p class="log-hint">From 1 (poor) to 10 (perfect).</p>
+                <div class="log-control">
+                    <select id="score" name="score">
+                    <option value="">No score</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </section>
 
-    <section class="page-section">
-        <h2 class="section-title">Session Duration</h2>
-        <p class="subhead">Track the total time spent on this training session.</p>
-
-        <div class="field-row">
-            <label for="session-duration-mode-toggle">Log duration without the clock:</label>
-            <label class="toggle">
-                <input type="checkbox" id="session-duration-mode-toggle" class="toggle-input">
-                <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
+    <section class="page-section log-card">
+        <h2 class="section-title">Length &amp; Notes</h2>
+        <div class="log-field">
+            <div class="log-toggle-row">
+                <label for="session-duration-mode-toggle">Log the length without the clock</label>
+                <label class="toggle">
+                    <input type="checkbox" id="session-duration-mode-toggle" class="toggle-input">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
+            <div class="log-control" id="session-clock-fields">
+                <label for="session-start-time">From</label>
+                <input type="time" id="session-start-time" name="session-start-time">
+                <label for="session-end-time">to</label>
+                <input type="time" id="session-end-time" name="session-end-time">
+            </div>
+            <div class="log-control" id="session-manual-fields" hidden>
+                <label for="session-duration-hours">Hours</label>
+                <input type="number" id="session-duration-hours" min="0" max="23" value="0">
+                <label for="session-duration-minutes">Minutes</label>
+                <input type="number" id="session-duration-minutes" min="0" max="59" value="0">
+            </div>
+            <p class="total-time-display" id="session-total-time-label">Total time: &mdash;</p>
         </div>
 
-        <div class="field-row" id="session-clock-fields">
-            <label for="session-start-time">From:</label>
-            <input type="time" id="session-start-time" name="session-start-time">
-            <label for="session-end-time">To:</label>
-            <input type="time" id="session-end-time" name="session-end-time">
-        </div>
-
-        <div class="field-row" id="session-manual-fields" hidden>
-            <label for="session-duration-hours">Hours:</label>
-            <input type="number" id="session-duration-hours" min="0" max="23" value="0">
-            <label for="session-duration-minutes">Minutes:</label>
-            <input type="number" id="session-duration-minutes" min="0" max="59" value="0">
-        </div>
-
-        <div class="field-row">
-            <span class="total-time-display" id="session-total-time-label">Total time: &mdash;</span>
-        </div>
-    </section>
-
-    <section class="page-section">
-        <h2 class="section-title">Notes</h2>
-        <form id="notes-form">
-            <div class="field-row">
-                <label for="notes">Notes:</label>
-                <input type="text" id="notes" placeholder="Enter notes here...">
+        <form id="notes-form" class="log-field">
+            <label for="notes">Notes</label>
+            <div class="log-control">
+                <input type="text" id="notes" placeholder="Anything worth remembering about this session...">
                 <button type="reset" class="hide-btn">Clear</button>
             </div>
         </form>
-    </section>
 
-    <section class="page-section">
-        <h2 class="section-title">Save</h2>
-        <form id="saveForm">
-            <button type="submit" id="triggerBtn" class="save-btn">Save</button>
+        <form id="saveForm" class="log-save">
+            <button type="submit" id="triggerBtn" class="save-btn">Save Session</button>
             <p id="save-message" hidden>Session saved!</p>
+            <a class="home-link" href="load.html">Logged sessions &rarr;</a>
         </form>
     </section>
-
-    <div style="text-align:right">
-        <a class="home-link" href="load.html">Logged sessions &rarr;</a>
-    </div>
-
 </body>
 </html>

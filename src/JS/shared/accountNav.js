@@ -48,6 +48,16 @@ async function logOut() {
     window.location.href = "index.html";
 }
 
+// mark the Directory menu link for the page you're on
+function markCurrentNavLink() {
+    const page = window.location.pathname.split("/").pop() || "index.html";
+    document.querySelectorAll(".nav-dropdown-menu a").forEach((link) => {
+        if (link.getAttribute("href") === page) link.setAttribute("aria-current", "page");
+    });
+}
+
+markCurrentNavLink();
+
 // swap the nav's create/login links for account info when someone is signed in
 async function updateAccountNav() {
     const createLink = document.querySelector('.top-nav a[href="create.html"]');

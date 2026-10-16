@@ -696,10 +696,10 @@ function clearPlotlyHover(plotEl) {
 // site palette, reused so the graphs match the rest of the app (Fitbit-style cards)
 const GRAPH_COLORS = {
     ink: "#2F4030",
-    moss: "#6B8F5E",
+    moss: "#5A7A4E",
     brass: "#B8925A",
     clay: "#E8DFC9",
-    muted: "#8A8271",
+    muted: "#6B6456",
     white: "#FFFDF8",
 };
 
@@ -1286,9 +1286,9 @@ const ganttChartEl = document.getElementById("gantt-chart");
 if (ganttChartEl) {
     const GANTT_COLORS = {
         ink: "#2F4030",
-        moss: "#6B8F5E",
+        moss: "#5A7A4E",
         clay: "#E8DFC9",
-        muted: "#8A8271",
+        muted: "#6B6456",
         white: "#FFFDF8",
     };
     const GANTT_DAY_MS = 24 * 60 * 60 * 1000; // each practiced day is drawn one day wide
