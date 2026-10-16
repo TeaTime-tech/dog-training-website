@@ -217,7 +217,7 @@ if (todaySessionList) {
         card.className = "today-session-card today-session-card--editing";
 
         const commandSelectEdit = document.createElement("select");
-        const commandNames = getAllCommandNames();
+        const commandNames = getVisibleCommandNames();
         if (session.command && !commandNames.includes(session.command)) {
             commandNames.push(session.command);
         }
@@ -659,7 +659,7 @@ if (todaySessionList) {
 
         const openAddSessionModal = () => {
             addSessionCommandSelect.innerHTML = "";
-            getAllCommandNames().forEach((name) => {
+            getVisibleCommandNames().forEach((name) => {
                 const option = document.createElement("option");
                 option.value = name;
                 option.textContent = name;

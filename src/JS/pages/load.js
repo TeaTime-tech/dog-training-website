@@ -158,7 +158,7 @@ if (loadButton) {
         const row = document.createElement("tr");
 
         const commandSelectEdit = document.createElement("select");
-        const commandNames = getAllCommandNames();
+        const commandNames = getVisibleCommandNames();
         if (session.command && !commandNames.includes(session.command)) {
             commandNames.push(session.command);
         }

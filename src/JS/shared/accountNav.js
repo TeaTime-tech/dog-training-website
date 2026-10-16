@@ -32,6 +32,16 @@ async function logOut() {
         await syncCommandDisplay();
         clearCommandDisplayForLogOut();
     }
+    // same for the account's added/removed commands, so the next person (or no account) starts from the defaults
+    if (typeof clearCommandListForLogOut === "function") {
+        await syncCommandList();
+        clearCommandListForLogOut();
+    }
+    // same for command notes
+    if (typeof clearCommandNotesForLogOut === "function") {
+        await syncCommandNotes();
+        clearCommandNotesForLogOut();
+    }
     // forget the selected dog so the next account never tags sessions with this account's dog
     localStorage.removeItem("currentDogId");
     if (supabaseClient) await supabaseClient.auth.signOut();

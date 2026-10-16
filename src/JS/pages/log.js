@@ -1,5 +1,5 @@
 /* log.html: the training session form (dog, option pickers, timer, session length, save).
-   Needs dogs.js, sessions.js and commandDisplay.js loaded first. */
+   Needs commandList.js, dogs.js, sessions.js and commandDisplay.js loaded first. */
 
 /*pick which dog this session is for*/
 
@@ -390,8 +390,21 @@ function setupAddOption(storageKey, selectElement, inputElement, button) {
 
         const savedNames = JSON.parse(localStorage.getItem(storageKey)) || [];
         savedNames.push(name);
-        localStorage.setItem(storageKey, JSON.stringify(savedNames));
+        if (storageKey === "customCommands") {
+            // commands are kept per account; adding one this account removed brings it back
+            saveCommandLists(savedNames, getHiddenCommands().filter((hidden) => hidden !== name.toLowerCase()));
+        } else {
+            localStorage.setItem(storageKey, JSON.stringify(savedNames));
+        }
     });
+}
+
+// take commands this account removed out of the command dropdown
+function removeHiddenCommandOptions() {
+    const hidden = getHiddenCommands();
+    Array.from(commandSelect.options)
+        .filter((option) => hidden.includes(option.value.toLowerCase()))
+        .forEach((option) => option.remove());
 }
 
 // wire up a "Remove" button to delete a custom option (built-in options can't be removed)
@@ -427,11 +440,29 @@ function setupRemoveOption(storageKey, selectElement, button) {
 }
 
 setupAddOption("customCommands", commandSelect, newCommandInput, addCommandButton);
+if (commandSelect) {
+    removeHiddenCommandOptions();
+    // the account's list arrived: add its commands and drop the ones it removed
+    window.addEventListener("commandlistsynced", (event) => {
+        if (!event.detail.changed) return;
+        loadSavedOptions("customCommands", commandSelect);
+        removeHiddenCommandOptions();
+    });
+}
 setupAddOption("customDistractions", distractionSelect, newDistractionInput, addDistractionButton);
 setupAddOption("customLocations", locationSelect, newLocationInput, addLocationButton);
 setupAddOption("customDurations", durationSelect, newDurationInput, addDurationButton);
 setupAddOption("customRepetitions", repetitionsSelect, newRepetitionInput, addRepetitionButton);
 setupAddOption("customWeather", weatherSelect, newWeatherInput, addWeatherButton);
+
+// preselect the command from the link when coming from a tile on the Commands page (log.html?command=sit)
+const linkedCommand = new URLSearchParams(window.location.search).get("command");
+if (commandSelect && linkedCommand) {
+    if (!findOptionByValue(commandSelect, linkedCommand)) {
+        addOptionToSelect(commandSelect, linkedCommand);
+    }
+    commandSelect.value = findOptionByValue(commandSelect, linkedCommand).value;
+}
 
 setupRemoveOption("customDistractions", distractionSelect, removeDistractionButton);
 setupRemoveOption("customLocations", locationSelect, removeLocationButton);

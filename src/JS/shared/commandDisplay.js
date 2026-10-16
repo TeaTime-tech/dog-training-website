@@ -1,4 +1,5 @@
-/* Per-command display settings: which fields show for each command on the Log form and Today page.
+/* Per-command display settings: which fields show for each command on the Log form and Today page,
+   and whether Command Mastery shows decay for it.
    Cached in localStorage ("commandDisplaySettings", keyed by lowercase command name) and synced with the
    signed-in account's account_settings.command_display. Needs supabaseClient.js loaded first. */
 
@@ -8,8 +9,8 @@ const COMMAND_DISPLAY_PENDING_KEY = "commandDisplayPending";
 // the account id the cached settings belong to, so another account never inherits them
 const COMMAND_DISPLAY_OWNER_KEY = "commandDisplayOwner";
 
-// every field a command can show or hide
-const COMMAND_DISPLAY_FIELDS = ["score", "repetitions", "duration", "location", "distractions", "weather"];
+// every field a command can show or hide; masteryDecay is only used by Command Mastery on the Commands page
+const COMMAND_DISPLAY_FIELDS = ["score", "repetitions", "duration", "location", "distractions", "weather", "masteryDecay"];
 
 // all saved settings, or {} if none are saved or storage is unreadable
 function readAllCommandDisplay() {
@@ -32,6 +33,24 @@ function setCommandDisplay(command, display) {
     all[String(command || "").toLowerCase()] = Object.fromEntries(
         COMMAND_DISPLAY_FIELDS.map((field) => [field, display[field] !== false])
     );
+    try {
+        localStorage.setItem(COMMAND_DISPLAY_STORAGE_KEY, JSON.stringify(all));
+        localStorage.setItem(COMMAND_DISPLAY_PENDING_KEY, "1");
+    } catch (error) {
+        console.error("Could not save display settings:", error);
+    }
+    window.dispatchEvent(new CustomEvent("commanddisplaysaved", { detail: { command } }));
+    return syncCommandDisplay();
+}
+
+// move a renamed command's settings to its new name, then send them to the account (nothing to do if it had none)
+function renameCommandDisplay(oldName, newName) {
+    const all = readAllCommandDisplay();
+    const oldKey = String(oldName || "").toLowerCase();
+    const newKey = String(newName || "").toLowerCase();
+    if (!(oldKey in all) || oldKey === newKey) return Promise.resolve(null);
+    all[newKey] = all[oldKey];
+    delete all[oldKey];
     try {
         localStorage.setItem(COMMAND_DISPLAY_STORAGE_KEY, JSON.stringify(all));
         localStorage.setItem(COMMAND_DISPLAY_PENDING_KEY, "1");

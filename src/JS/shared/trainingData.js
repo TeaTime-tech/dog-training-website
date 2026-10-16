@@ -1,10 +1,29 @@
 /* Shared helpers for reading training data out of localStorage. Used by log, load, and today pages. */
 
-// combine built-in and custom command names, de-duplicated
+// the most commonly trained commands, offered to every account
+const BUILT_IN_COMMANDS = ["sit", "stay", "come", "down", "leave it", "drop it", "heel", "wait", "off", "place", "watch me", "touch", "shake", "quiet", "roll over"];
+
+// more commands people often teach, offered as suggestions when adding a command
+const SUGGESTED_COMMANDS = [
+    "spin", "bow", "high five", "wave", "paw", "play dead", "crawl", "back up", "find it", "take it",
+    "give", "hold", "bring it", "go to bed", "kennel", "let's go", "look", "jump", "under", "through",
+    "sit pretty", "middle", "stand", "speak", "settle", "gentle", "go potty",
+];
+
+// combine built-in and custom command names, de-duplicated ignoring case (includes removed ones, for history)
 function getAllCommandNames() {
-    const builtInCommands = ["sit", "stay", "come"];
-    const savedCommands = JSON.parse(localStorage.getItem("customCommands")) || [];
-    return [...new Set([...builtInCommands, ...savedCommands])];
+    const savedCommands = getCustomCommands();
+    const names = [];
+    [...BUILT_IN_COMMANDS, ...savedCommands].forEach((name) => {
+        if (!names.some((existing) => existing.toLowerCase() === name.toLowerCase())) names.push(name);
+    });
+    return names;
+}
+
+// the commands this account can pick when logging: every command minus the ones it removed
+function getVisibleCommandNames() {
+    const hidden = getHiddenCommands();
+    return getAllCommandNames().filter((name) => !hidden.includes(name.toLowerCase()));
 }
 
 /*format a stored duration value (e.g. "5", "1", "1:30") as "X sec"/"X min Y sec"*/

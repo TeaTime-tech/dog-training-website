@@ -14,11 +14,13 @@
     <!-- shared scripts, then this page's script -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JS/shared/supabaseClient.js" defer></script>
+    <script src="../JS/shared/commandList.js" defer></script>
     <script src="../JS/shared/sessions.js" defer></script>
     <script src="../JS/shared/accountNav.js" defer></script>
     <script src="../JS/shared/trainingData.js" defer></script>
     <script src="../JS/shared/mastery.js" defer></script>
     <script src="../JS/shared/commandDisplay.js" defer></script>
+    <script src="../JS/shared/commandNotes.js" defer></script>
     <script src="../JS/pages/commands.js" defer></script>
 </head>
 <body>
@@ -46,15 +48,42 @@
     <section class="page-section">
         <details open>
             <summary class="collapsible-toggle"><h2 class="section-title">Commands</h2></summary>
-            <div id="command-buttons" class="command-tiles">
-                <button type="button" value="sit">Sit</button>
-                <button type="button" value="stay">Stay</button>
-                <button type="button" value="come">Come</button>
+            <!-- commands.js adds a tile for each command that isn't hidden -->
+            <div id="command-buttons" class="command-tiles"></div>
+            <!-- commands.js shows this when the tiles wrap onto more than three lines -->
+            <div id="command-pager" class="mastery-pager command-pager" hidden>
+                <button type="button" id="command-prev" class="mastery-pager-arrow" aria-label="Previous commands">&lsaquo;</button>
+                <span id="command-page-label" class="mastery-page-label" aria-live="polite"></span>
+                <button type="button" id="command-next" class="mastery-pager-arrow" aria-label="Next commands">&rsaquo;</button>
+            </div>
+            <!-- commands.js shows this when a tile is clicked -->
+            <div id="command-actions" class="command-actions" hidden>
+                <div class="command-actions-header">
+                    <span id="command-actions-name" class="command-actions-name"></span>
+                    <button type="button" id="command-rename" class="command-rename-btn" aria-label="Rename command" title="Rename">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                    </button>
+                </div>
+                <!-- the notes themselves; clicking them opens the notes editor -->
+                <button type="button" id="command-actions-notes" class="command-actions-notes" title="Click to edit notes"></button>
+                <button type="button" id="command-log" class="save-btn">Log Session</button>
+                <button type="button" id="command-edit-notes" class="command-notes-btn">Edit Notes</button>
+                <button type="button" id="command-delete" class="command-delete-btn">Delete</button>
+                <button type="button" id="command-actions-close" class="hide-btn">Cancel</button>
+                <p id="command-actions-status" class="command-actions-status" role="status"></p>
             </div>
             <div class="field-row">
                 <label for="new-command">Add a new command:</label>
-                <input type="text" id="new-command" placeholder="Enter command name...">
+                <!-- search-style box; commands.js fills the dropdown with matching suggestions as you type -->
+                <div class="command-search" id="command-search">
+                    <svg class="command-search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <input type="text" id="new-command" class="command-search-input" placeholder="Search or type a command" autocomplete="off"
+                        role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="command-search-menu">
+                    <button type="button" id="new-command-clear" class="command-search-clear" aria-label="Clear" hidden>&times;</button>
+                    <ul id="command-search-menu" class="command-search-menu" role="listbox" aria-label="Suggested commands" hidden></ul>
+                </div>
                 <button id="add-command" type="button" class="save-btn">Add Command</button>
+                <button id="open-command-suggestions" type="button" class="command-notes-btn" aria-haspopup="dialog" hidden>Suggestions <span id="command-suggestions-count" class="command-suggestions-count"></span></button>
             </div>
             <div class="field-row">
                 <label for="delete-command">Remove a command:</label>
@@ -76,7 +105,7 @@
                     <span class="toggle-track"><span class="toggle-thumb"></span></span>
                 </label>
             </div>
-            <p class="subhead mastery-hint">With decay on, skills slip a level after time away from practice. Faded segments show levels to win back. Commands are listed from least practiced to mastered.</p>
+            <p class="subhead mastery-hint">With decay on, skills slip a level after time away from practice (turn it off for single commands in Display Settings). Faded segments show levels to win back. Commands are listed from least practiced to mastered.</p>
             <p id="mastery-status" class="mastery-status" role="status"></p>
             <ul id="mastery-list" class="mastery-list"></ul>
             <!-- commands.js shows this when there are more commands than fit on one page -->
@@ -108,7 +137,7 @@
     <section class="page-section">
         <details open>
             <summary class="collapsible-toggle"><h2 class="section-title">Display Settings</h2></summary>
-            <p class="display-hint">Choose which fields show for a command on the Log page and the Today page.</p>
+            <p class="display-hint">Choose which fields show for a command on the Log page and the Today page, and whether its mastery can decay.</p>
             <div class="field-row display-command-row">
                 <label for="display-command">Command:</label>
                 <select id="display-command"></select>
@@ -155,6 +184,13 @@
                     <span class="toggle-track"><span class="toggle-thumb"></span></span>
                 </label>
             </div>
+            <div class="toggle-row">
+                <label for="toggle-mastery-decay">Mastery Decay:</label>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-mastery-decay" class="toggle-input">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
             <button id="save-settings" type="button" class="save-btn">Save Settings</button>
             <p id="display-status" class="display-status" role="status"></p>
         </details>
@@ -164,6 +200,68 @@
         <p>Ready to practice? Log your training session.</p>
         <a class="save-btn" href="log.html">Log Training Session</a>
     </section>
+
+    <section class="page-section">
+        <details open>
+            <summary class="collapsible-toggle"><h2 class="section-title">Clear Command History</h2></summary>
+            <p class="display-hint">Delete every logged session of one command, for all dogs. The command itself stays.</p>
+            <div class="field-row">
+                <label for="clear-history-command">Command:</label>
+                <!-- commands.js lists each command that has logged sessions -->
+                <select id="clear-history-command"></select>
+                <button type="button" id="clear-history-button" class="command-delete-btn">Clear History</button>
+            </div>
+            <p id="clear-history-status" class="clear-history-status" role="status"></p>
+        </details>
+    </section>
+
+    <!-- common commands that aren't on the list yet; commands.js fills the list -->
+    <div class="modal-overlay" id="command-suggestions-overlay" hidden>
+        <div class="modal-card command-suggestions-card" role="dialog" aria-modal="true" aria-labelledby="command-suggestions-title">
+            <h2 class="section-title command-suggestions-title" id="command-suggestions-title">Suggestions</h2>
+            <p class="display-hint">Click a command to add it.</p>
+            <div id="command-suggestion-chips" class="command-suggestion-chips"></div>
+            <p id="command-suggestions-status" class="command-suggestions-status" role="status"></p>
+            <div class="field-row">
+                <button type="button" id="command-suggestions-close" class="save-btn">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- rename the clicked command tile -->
+    <div class="modal-overlay" id="command-rename-overlay" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="command-rename-title">
+            <h2 class="section-title command-notes-title" id="command-rename-title">Rename</h2>
+            <p class="display-hint">Its logged sessions, notes, display settings and mastery move to the new name.</p>
+            <form id="command-rename-form">
+                <div class="field-row">
+                    <label for="command-rename-input">New name:</label>
+                    <input type="text" id="command-rename-input" autocomplete="off" required>
+                </div>
+                <p id="command-rename-error" class="command-rename-error" role="alert"></p>
+                <div class="field-row">
+                    <button type="submit" class="save-btn">Save Name</button>
+                    <button type="button" id="command-rename-cancel" class="hide-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- notes editor for the clicked command tile -->
+    <div class="modal-overlay" id="command-notes-overlay" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="command-notes-title">
+            <h2 class="section-title command-notes-title" id="command-notes-title">Notes</h2>
+            <p class="display-hint">Cue word, hand signal, what works, what to avoid.</p>
+            <div class="field">
+                <label for="command-notes-text" class="visually-hidden">Notes</label>
+                <textarea id="command-notes-text" class="command-notes-text" rows="6" placeholder="Add notes about this command..."></textarea>
+            </div>
+            <div class="field-row">
+                <button type="button" id="command-notes-save" class="save-btn">Save Notes</button>
+                <button type="button" id="command-notes-cancel" class="hide-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>

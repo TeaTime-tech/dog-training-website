@@ -37,6 +37,296 @@
   color: var(--white);
 }
 
+/* "Add a new command": a search-engine style pill box with a suggestion dropdown */
+.command-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 260px;
+  max-width: 480px;
+  min-height: 44px;
+  padding: 0 8px 0 14px;
+  border: 1px solid var(--clay);
+  border-radius: 22px;
+  background: var(--white);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.command-search:hover,
+.command-search:focus-within {
+  border-color: transparent;
+  box-shadow: var(--shadow-pop);
+}
+
+/* while the dropdown is open, the box and the menu read as one card */
+.command-search.is-open {
+  border-color: transparent;
+  border-radius: 22px 22px 0 0;
+  box-shadow: var(--shadow-pop);
+}
+
+.command-search-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  fill: var(--muted);
+}
+
+.field-row .command-search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 10px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: 1rem;
+  outline: none;
+}
+
+.command-search-clear {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font-size: 1.375rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.command-search-clear:hover {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.command-search-clear[hidden] {
+  display: none;
+}
+
+.command-search-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 0 0 8px;
+  list-style: none;
+  border-radius: 0 0 22px 22px;
+  background: var(--white);
+  box-shadow: var(--shadow-pop);
+  clip-path: inset(0 -24px -24px -24px);
+}
+
+.command-search-menu[hidden] {
+  display: none;
+}
+
+/* thin divider between the box and its suggestions */
+.command-search-menu::before {
+  content: "";
+  display: block;
+  margin: 0 14px 6px;
+  border-top: 1px solid var(--clay);
+}
+
+.command-search-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 18px 7px 14px;
+  font-size: 1rem;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+.command-search-option .command-search-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.command-search-option[aria-selected="true"],
+.command-search-option:hover {
+  background: var(--bg);
+}
+
+/* the part of a suggestion not typed yet, bolded like search autocomplete */
+.command-search-option b {
+  font-weight: 700;
+}
+
+/* Suggestions pop-up: a scrolling list of commands to add */
+.command-suggestions-count {
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.command-suggestions-title {
+  margin: 0 0 4px;
+}
+
+.command-suggestion-chips {
+  display: flex;
+  flex-direction: column;
+  max-height: 50vh;
+  margin: 12px -24px 0;
+  padding: 4px 0;
+  border-top: 1px solid var(--clay);
+  border-bottom: 1px solid var(--clay);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.command-suggestions-status {
+  margin: 10px 0 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.command-suggestions-status:empty {
+  display: none;
+}
+
+.command-suggestion-chips button {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 24px;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font-size: 0.9375rem;
+  text-align: left;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+.command-suggestion-chips button:hover,
+.command-suggestion-chips button:focus-visible {
+  background: var(--bg);
+}
+
+.command-suggestion-plus {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--clay);
+  color: var(--moss-dark);
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
+.command-suggestion-chips button:hover .command-suggestion-plus {
+  background: var(--moss);
+  color: var(--white);
+}
+
+/* tiles on other pages of the Commands card */
+.command-tiles button[hidden] {
+  display: none;
+}
+
+/* the tile whose actions are open */
+.command-tiles button[aria-pressed="true"] {
+  background: var(--moss);
+  color: var(--white);
+}
+
+/* Log / Delete choices for the clicked tile */
+.command-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--clay);
+  border-radius: 10px;
+  background: var(--white);
+}
+
+.command-actions[hidden] {
+  display: none;
+}
+
+/* the command's name with a small pencil button to rename it */
+.command-actions-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-basis: 100%;
+}
+
+.command-rename-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.command-rename-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.command-rename-btn:hover,
+.command-rename-btn:focus-visible {
+  background: var(--clay);
+  color: var(--ink);
+}
+
+.command-actions-name {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.command-delete-btn {
+  padding: 10px 20px;
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  background: none;
+  color: var(--danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.command-delete-btn:hover {
+  background: var(--danger);
+  color: var(--white);
+}
+
+/* Clear Command History card */
+.clear-history-status {
+  margin: 10px 0 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.clear-history-status:empty {
+  display: none;
+}
+
+/* the Commands pager reuses the mastery pager's look; just space it from the form rows below */
+.command-pager {
+  margin-bottom: 4px;
+}
+
 /* Canine Good Citizen checklist */
 .cgc-header {
   display: flex;
@@ -247,6 +537,82 @@
   color: var(--muted);
   cursor: pointer;
   text-decoration: underline;
+}
+
+/* Command notes: preview in the tile panel, editor in a pop-up */
+.command-actions-notes {
+  flex-basis: 100%;
+  margin: 0 -8px;
+  padding: 6px 8px;
+  border: 1px dashed transparent;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  cursor: text;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.command-actions-notes:hover,
+.command-actions-notes:focus-visible {
+  border-color: var(--clay);
+  background: var(--bg);
+}
+
+.command-actions-notes--empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.command-notes-btn {
+  padding: 10px 20px;
+  border: 1px solid var(--moss);
+  border-radius: 8px;
+  background: none;
+  color: var(--moss-dark);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.command-notes-btn:hover {
+  background: var(--moss);
+  color: var(--white);
+}
+
+.command-actions-status {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.command-actions-status:empty {
+  display: none;
+}
+
+.command-rename-error {
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+  color: var(--danger);
+}
+
+.command-rename-error:empty {
+  display: none;
+}
+
+.command-notes-title {
+  margin: 0 0 4px;
+  text-transform: capitalize;
+}
+
+.command-notes-text {
+  min-height: 140px;
+  margin-top: 12px;
 }
 
 /* Display settings: command picker and the saved/unsaved line */

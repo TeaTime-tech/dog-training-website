@@ -194,3 +194,30 @@ details[open] > .collapsible-toggle::after {
   font-family: 'Work Sans', sans-serif;
   font-weight: 600;
 }
+
+/* pop-up cards over a dimmed page (Today's add forms, the Commands notes editor); toggle the overlay's hidden attribute */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(47, 64, 48, 0.55);
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-raised);
+}
