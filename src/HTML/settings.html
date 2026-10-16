@@ -90,11 +90,12 @@
 
     <section class="page-section settings-card">
         <h2 class="section-title">Units</h2>
+        <p class="settings-note">Weights on My Dogs and in each dog's chart show in this unit.</p>
         <div class="settings-row">
             <label for="weight-unit">Weight</label>
             <select id="weight-unit">
-                <option value="kg">Kilograms (kg)</option>
                 <option value="lb">Pounds (lb)</option>
+                <option value="kg">Kilograms (kg)</option>
             </select>
         </div>
         <div class="settings-row">
@@ -104,7 +105,9 @@
                 <option value="ft">Feet (ft)</option>
             </select>
         </div>
+        <p class="settings-hint">Nothing in the app records distances yet; this is for upcoming features.</p>
         <button id="save-settings" type="button" class="save-btn">Save Settings</button>
+        <p id="units-status" class="subhead settings-note" role="status"></p>
     </section>
 
     <section class="page-section settings-card">

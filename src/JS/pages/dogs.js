@@ -226,7 +226,7 @@ function renderDogCard(dog) {
     body.className = "dog-card-body";
     details.append(body);
 
-    const profileBits = [dog.breed, dog.birthday && formatDogAge(dog.birthday)].filter(Boolean);
+    const profileBits = [dog.breed, dog.birthday && formatDogAge(dog.birthday), formatDogWeight(dog.profile)].filter(Boolean);
     if (profileBits.length) {
         const meta = document.createElement("p");
         meta.className = "dog-meta";

@@ -142,7 +142,7 @@ function renderChartHeader(dog) {
     chartNameEl.textContent = `${dog.name}'s Chart`;
     document.title = `${dog.name} · Dog Chart`;
     const profile = dog.profile || {};
-    const bits = [dog.breed, dog.birthday && formatAge(dog.birthday), profile.sex].filter(Boolean);
+    const bits = [dog.breed, dog.birthday && formatAge(dog.birthday), profile.sex, formatDogWeight(profile)].filter(Boolean);
     chartMetaEl.textContent = bits.length ? bits.join(" · ") : "Fill out what you know; everything is optional except the name.";
 }
 
@@ -265,13 +265,25 @@ function makeChartField(field, dog) {
     if (field.type === "weight") {
         const row = document.createElement("div");
         row.className = "dog-chart-weight";
-        const amount = makeChartControl({ key: "weight", type: "number" }, profile.weight, id);
+        // shown in the unit picked in Settings > Units, converted from whatever unit it was saved in
+        const preferredUnit = getWeightUnit();
+        const savedUnit = profile.weightUnit === "kg" ? "kg" : "lb";
+        const amount = makeChartControl({ key: "weight", type: "number" }, convertWeight(profile.weight, savedUnit, preferredUnit), id);
         amount.min = "0";
         amount.step = "0.1";
         amount.inputMode = "decimal";
-        const unit = makeChartControl({ key: "weightUnit", type: "select", options: ["lb", "kg"] }, profile.weightUnit || "lb", `${id}-unit`);
+        const unit = makeChartControl({ key: "weightUnit", type: "select", options: ["lb", "kg"] }, preferredUnit, `${id}-unit`);
         unit.firstChild.remove(); // no "Not set" for the unit
         unit.setAttribute("aria-label", "Weight unit");
+        // switching lb/kg here converts the number in the box rather than relabelling it. Until the number is
+        // edited, it converts from the saved weight, so flipping back and forth doesn't drift by rounding
+        let source = { value: profile.weight, unit: savedUnit };
+        let shown = amount.value;
+        unit.addEventListener("change", () => {
+            if (amount.value !== shown) source = { value: amount.value, unit: unit.value === "kg" ? "lb" : "kg" };
+            amount.value = convertWeight(source.value, source.unit, unit.value);
+            shown = amount.value;
+        });
         row.append(amount, unit);
         wrapper.append(row);
     } else {

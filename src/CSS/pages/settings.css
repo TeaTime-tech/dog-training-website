@@ -21,6 +21,12 @@ fieldset:disabled {
   display: none;
 }
 
+.settings-hint {
+  margin: -0.25rem 0 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
 /* label on the left, then the control and its button; wraps onto two lines on phones */
 .settings-row {
   display: grid;

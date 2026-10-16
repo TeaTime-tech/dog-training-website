@@ -21,6 +21,32 @@ function setCurrentDogId(dogId) {
     }
 }
 
+// the weight unit picked in Settings > Units ("lb" or "kg"); pounds until one is picked
+const WEIGHT_UNIT_KEY = "weightUnit";
+function getWeightUnit() {
+    try {
+        return localStorage.getItem(WEIGHT_UNIT_KEY) === "kg" ? "kg" : "lb";
+    } catch (error) {
+        return "lb";
+    }
+}
+
+// a weight in another unit, rounded to one decimal; "" when there's no usable number
+function convertWeight(value, fromUnit, toUnit) {
+    const number = Number(value);
+    if (value === "" || value === null || value === undefined || !Number.isFinite(number)) return "";
+    const converted = fromUnit === toUnit ? number : fromUnit === "kg" ? number * 2.20462 : number / 2.20462;
+    return String(Math.round(converted * 10) / 10);
+}
+
+// a dog's chart weight in the Settings unit, e.g. "38 lb"; "" when none is saved
+function formatDogWeight(profile) {
+    if (!profile || !profile.weight) return "";
+    const unit = getWeightUnit();
+    const weight = convertWeight(profile.weight, profile.weightUnit === "kg" ? "kg" : "lb", unit);
+    return weight ? `${weight} ${unit}` : "";
+}
+
 // every dog on the signed-in account, oldest first
 async function getDogs() {
     if (!supabaseClient) return [];

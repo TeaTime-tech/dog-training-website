@@ -162,19 +162,23 @@ masteryDecayToggle.addEventListener("change", async () => {
     }
 });
 
-/* weight and distance units: saved in this browser when "Save Settings" is clicked */
+/* weight and distance units: saved in this browser when "Save Settings" is clicked.
+   The weight unit is what My Dogs and the dog chart show weights in (getWeightUnit in dogs.js) */
 
 const WEIGHT_UNIT_STORAGE_KEY = "weightUnit";
 const DISTANCE_UNIT_STORAGE_KEY = "distanceUnit";
 const weightUnitSelect = document.getElementById("weight-unit");
 const distanceUnitSelect = document.getElementById("distance-unit");
+const unitsStatus = document.getElementById("units-status");
 
-weightUnitSelect.value = localStorage.getItem(WEIGHT_UNIT_STORAGE_KEY) || weightUnitSelect.value;
+weightUnitSelect.value = getWeightUnit();
 distanceUnitSelect.value = localStorage.getItem(DISTANCE_UNIT_STORAGE_KEY) || distanceUnitSelect.value;
 
 document.getElementById("save-settings").addEventListener("click", () => {
     localStorage.setItem(WEIGHT_UNIT_STORAGE_KEY, weightUnitSelect.value);
     localStorage.setItem(DISTANCE_UNIT_STORAGE_KEY, distanceUnitSelect.value);
+    const unitName = weightUnitSelect.value === "kg" ? "kilograms" : "pounds";
+    showStatus(unitsStatus, `Saved. Dog weights now show in ${unitName} on this device.`);
 });
 
 /* export: download this browser's training data, plus the account's cloud data if signed in */
