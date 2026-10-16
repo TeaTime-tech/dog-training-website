@@ -6,7 +6,7 @@
   justify-content: space-between;
   gap: 12px;
   margin: 12px 0 24px;
-  max-width: 720px;
+  max-width: 45rem;
   font-size: 0.8125rem;
   color: var(--muted);
 }
@@ -36,7 +36,7 @@
 .table-wrap {
   overflow-x: auto;
   margin: 16px 0 32px;
-  max-width: 720px;
+  max-width: 45rem;
   border-radius: 12px;
   box-shadow: var(--shadow-card);
 }
@@ -108,7 +108,7 @@
 /* Training graph (load.html) */
 .graph-area {
   position: relative;
-  max-width: 720px;
+  max-width: 45rem;
 }
 
 /* custom circular hover badge for the Gantt chart, replacing Plotly's default tooltip box */

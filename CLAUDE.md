@@ -47,5 +47,5 @@ Pages reference assets relatively (`../CSS/...`, `../JS/...`). Folder names HTML
 - Short lowercase `//` comments above functions describing what they do.
 - LF line endings, UTF-8 without BOM.
 - Colors and shadows come from the tokens in `base.css` (`--moss`, `--danger`, `--shadow-card`, ...); add a token rather than a new hex value. Stat tiles (`.stat-row`/`.stat-tile`), `.visually-hidden` and `.amp` (wrap "&" in Fraunces headings) are shared in `base.css`, as are pop-ups (`.modal-overlay` > `.modal-card`, shown by toggling the overlay's `hidden`).
-- Font sizes are in `rem` (1rem = 16px on phones). `base.css` raises the root size to 18px on screens 900px+ wide, so new font sizes should use `rem` too or they won't scale.
+- Font sizes are in `rem` (1rem = 16px on phones). `base.css` raises the root size to 18px at 900px+, 20px at 1280px+ and 22px at 1680px+ wide. Page and card widths are in `rem` too, so the layout grows with it; use `rem` for new font sizes and max-widths or they won't scale.
 - Fonts: Google Fonts (Fraunces + Work Sans). Charts: Plotly from CDN (`load.html`).
