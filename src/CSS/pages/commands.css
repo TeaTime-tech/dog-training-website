@@ -312,6 +312,15 @@
 }
 
 /* Clear Command History card */
+.clear-history-dog-link {
+  color: var(--moss-dark);
+  font-weight: 600;
+}
+
+.clear-history-dog-link[hidden] {
+  display: none;
+}
+
 .clear-history-status {
   margin: 0.625rem 0 0;
   font-size: 0.875rem;

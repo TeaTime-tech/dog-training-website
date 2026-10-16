@@ -15,6 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JS/shared/supabaseClient.js" defer></script>
     <script src="../JS/shared/commandList.js" defer></script>
+    <script src="../JS/shared/dogs.js" defer></script>
     <script src="../JS/shared/sessions.js" defer></script>
     <script src="../JS/shared/accountNav.js" defer></script>
     <script src="../JS/shared/trainingData.js" defer></script>
@@ -204,7 +205,7 @@
     <section class="page-section">
         <details open>
             <summary class="collapsible-toggle"><h2 class="section-title">Clear Command History</h2></summary>
-            <p class="display-hint">Delete every logged session of one command, for all dogs. The command itself stays.</p>
+            <p class="display-hint">Delete every logged session of one command for <strong id="clear-history-dog">the dog you're training</strong>. Other dogs' sessions and the command itself stay. <a href="dogs.html" id="clear-history-dog-link" class="clear-history-dog-link" hidden>Switch dog</a></p>
             <div class="field-row">
                 <label for="clear-history-command">Command:</label>
                 <!-- commands.js lists each command that has logged sessions -->

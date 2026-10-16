@@ -1,5 +1,5 @@
 /* commands.html: command tiles (with log, notes and delete), the Canine Good Citizen checklist, mastery, and per-command display settings.
-   Needs commandList.js, trainingData.js, mastery.js, commandDisplay.js and commandNotes.js loaded first. */
+   Needs commandList.js, dogs.js, sessions.js, trainingData.js, mastery.js, commandDisplay.js and commandNotes.js loaded first. */
 
 /*view, add, and hide commands as buttons (commands.html)*/
 /*commands are never deleted from storage, only hidden from view*/
@@ -605,21 +605,41 @@ if (commandButtonsContainer) {
     });
 }
 
-/*clear one command's logged sessions, for every dog (commands.html)*/
+/*clear one command's logged sessions for the dog you're training (commands.html)*/
 
 const clearHistorySelect = document.getElementById("clear-history-command");
 
 if (clearHistorySelect) {
     const clearHistoryButton = document.getElementById("clear-history-button");
     const clearHistoryStatus = document.getElementById("clear-history-status");
+    const clearHistoryDog = document.getElementById("clear-history-dog");
+    const clearHistoryDogLink = document.getElementById("clear-history-dog-link");
+    let clearHistoryDogName = null;
 
     const sameCommand = (a, b) => String(a || "").toLowerCase() === String(b || "").toLowerCase();
+
+    // sessions of the dog you're training (when no dog is picked, e.g. signed out, the sessions that have no dog)
+    const isCurrentDogSession = (session) => (session.dogId || null) === getCurrentDogId();
+
+    // show which dog's history gets cleared, by name once the account's dogs have loaded
+    const showClearHistoryDog = async () => {
+        let dogs = [];
+        try {
+            if (await getSignedInUser()) dogs = await getDogs();
+        } catch (error) {
+            console.error("Could not load dogs:", error);
+        }
+        const dog = dogs.find((item) => item.id === getCurrentDogId());
+        clearHistoryDogName = dog ? dog.name : null;
+        clearHistoryDog.textContent = clearHistoryDogName || "the dog you're training";
+        clearHistoryDogLink.hidden = dogs.length < 2;
+    };
 
     // list each command that has logged sessions, with its count, keeping the current choice when it's still there
     const fillClearHistoryCommands = () => {
         const counts = new Map();
         getSessionHistory().forEach((session) => {
-            if (!session.command) return;
+            if (!session.command || !isCurrentDogSession(session)) return;
             const key = session.command.toLowerCase();
             const entry = counts.get(key) || { name: session.command, count: 0 };
             entry.count += 1;
@@ -650,18 +670,19 @@ if (clearHistorySelect) {
         const name = clearHistorySelect.value;
         if (!name) return;
         const history = getSessionHistory();
-        const kept = history.filter((session) => !sameCommand(session.command, name));
+        const kept = history.filter((session) => !(sameCommand(session.command, name) && isCurrentDogSession(session)));
         const removed = history.length - kept.length;
         const plural = removed === 1 ? "session" : "sessions";
-        if (!confirm(`Delete all ${removed} logged ${plural} of "${name}" for every dog? This can't be undone. The command itself stays.`)) {
+        const forDog = clearHistoryDogName ? ` for ${clearHistoryDogName}` : "";
+        if (!confirm(`Delete all ${removed} logged ${plural} of "${name}"${forDog}? This can't be undone. Other dogs' sessions and the command itself stay.`)) {
             return;
         }
 
         clearHistoryStatus.textContent = `Clearing ${removed} ${plural}...`;
         const synced = await setSessionHistory(kept);
         clearHistoryStatus.textContent = synced === false
-            ? `Cleared ${removed} ${plural} of "${name}" on this device. Couldn't reach your account yet; it will retry next time.`
-            : `Cleared ${removed} ${plural} of "${name}".`;
+            ? `Cleared ${removed} ${plural} of "${name}"${forDog} on this device. Couldn't reach your account yet; it will retry next time.`
+            : `Cleared ${removed} ${plural} of "${name}"${forDog}.`;
         fillClearHistoryCommands();
         window.dispatchEvent(new CustomEvent("commandhistorycleared", { detail: { command: name } }));
     });
@@ -670,6 +691,7 @@ if (clearHistorySelect) {
         if (event.detail.changed) fillClearHistoryCommands();
     });
     window.addEventListener("commandrenamed", fillClearHistoryCommands);
+    showClearHistoryDog();
     fillClearHistoryCommands();
 }
 
