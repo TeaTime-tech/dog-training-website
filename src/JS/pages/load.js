@@ -940,7 +940,7 @@ const buildGraphTrace = (traceType, name, x, y, color, yaxisId) => {
         type: "scatter",
         mode: "lines+markers",
         yaxis: yaxisId,
-        line: { color, width: 3, shape: "spline" },
+        line: { color, width: 3, shape: "linear" },
         marker: { color, size: 7 },
     };
 };
