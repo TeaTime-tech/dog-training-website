@@ -1,11 +1,5 @@
 /* today.html: Fitbit-inspired hero ring, stat tiles, goal card, session cards, and pop-up forms. */
 
-/* this page uses the body font for headings instead of Fraunces */
-.today-page h1,
-.today-page h2 {
-  font-family: 'Work Sans', sans-serif;
-}
-
 /* Day arrows, compressed into the hero card, flanking the date label */
 .today-date-nav {
   position: relative;

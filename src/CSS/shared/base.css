@@ -30,7 +30,7 @@ body {
   padding: 0 1.25rem 3.75rem;
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Work Sans', sans-serif;
+  font-family: 'Newsreader', serif;
   line-height: 1.5;
 }
 
@@ -64,7 +64,6 @@ textarea {
 
 .section-title {
   margin: 0 0 0.875rem;
-  font-family: 'Fraunces', serif;
   font-size: 1.1875rem;
   font-weight: 600;
 }
@@ -79,7 +78,6 @@ header {
 }
 
 h1 {
-  font-family: 'Fraunces', serif;
   font-weight: 600;
   font-size: 2rem;
   margin: 0;
@@ -92,7 +90,7 @@ h1 {
 }
 
 /* Collapsible section: <details open><summary class="collapsible-toggle">heading</summary>...</details>
-   (load.html, commands.html) */
+   (load.html, commands.html, dogs.html) */
 .collapsible-toggle {
   display: flex;
   align-items: center;
@@ -115,7 +113,7 @@ details[open] > .collapsible-toggle::after {
   content: '\25B4';
 }
 
-/* a collapsible section card (commands.html): the title sits flush, with space below it when open */
+/* a collapsible section card (commands.html, dogs.html): the title sits flush, with space below it when open */
 .page-section > details > .collapsible-toggle > .section-title {
   margin-top: 0;
   margin-bottom: 0;
@@ -181,12 +179,6 @@ details[open] > .collapsible-toggle::after {
   html {
     font-size: clamp(18px, 1.4vw, 36px);
   }
-}
-
-/* Fraunces draws "&" as a curly script shape; headings wrap it in <span class="amp"> to use a plainer one */
-.amp {
-  font-family: 'Work Sans', sans-serif;
-  font-weight: 600;
 }
 
 /* pop-up cards over a dimmed page (Today's add forms, the Commands notes editor); toggle the overlay's hidden attribute */

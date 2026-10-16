@@ -41,12 +41,23 @@ async function createDog(name) {
     return data;
 }
 
-// change a dog's name and return the updated dog
-async function renameDog(dogId, name) {
+// save a dog's name and profile (breed, birthday "YYYY-MM-DD", notes) and return the updated dog
+async function updateDog(dogId, { name, breed, birthday, notes }) {
     const trimmed = String(name || "").trim();
     if (!trimmed) throw new Error("Please enter your dog's name.");
+    if (birthday && birthday > localDateString()) throw new Error("Birthday can't be in the future.");
     if (!supabaseClient) throw new Error("Can't reach your account right now. Please try again later.");
-    const { data, error } = await supabaseClient.from("dogs").update({ name: trimmed }).eq("id", dogId).select().single();
+    const changes = {
+        name: trimmed,
+        breed: String(breed || "").trim() || null,
+        birthday: birthday || null,
+        notes: String(notes || "").trim() || null,
+    };
+    const { data, error } = await supabaseClient.from("dogs").update(changes).eq("id", dogId).select().single();
+    // PGRST204: a column is missing, so supabase/dog_profiles.sql hasn't been run yet
+    if (error && error.code === "PGRST204") {
+        throw new Error("Dog profiles aren't set up yet. Run supabase/dog_profiles.sql in Supabase.");
+    }
     if (error) throw error;
     return data;
 }

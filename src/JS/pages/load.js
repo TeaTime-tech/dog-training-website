@@ -707,12 +707,12 @@ const GRAPH_AXIS_STYLE = {
     gridcolor: GRAPH_COLORS.clay,
     zeroline: false,
     showline: false,
-    tickfont: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.muted, size: 12 },
-    title: { font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.muted, size: 12 } },
+    tickfont: { family: "Newsreader, serif", color: GRAPH_COLORS.muted, size: 12 },
+    title: { font: { family: "Newsreader, serif", color: GRAPH_COLORS.muted, size: 12 } },
 };
 
 const GRAPH_LAYOUT_BASE = {
-    font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.ink },
+    font: { family: "Newsreader, serif", color: GRAPH_COLORS.ink },
     paper_bgcolor: GRAPH_COLORS.white,
     plot_bgcolor: GRAPH_COLORS.white,
     margin: { t: 56, r: 24, b: 48, l: 56 },
@@ -721,7 +721,7 @@ const GRAPH_LAYOUT_BASE = {
     hoverlabel: {
         bgcolor: GRAPH_COLORS.white,
         bordercolor: GRAPH_COLORS.clay,
-        font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.ink },
+        font: { family: "Newsreader, serif", color: GRAPH_COLORS.ink },
     },
 };
 
@@ -991,7 +991,7 @@ if (graphCommandSelect) {
                     overlaying: "y",
                     side: "right",
                 },
-                legend: { orientation: "h", font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.muted } },
+                legend: { orientation: "h", font: { family: "Newsreader, serif", color: GRAPH_COLORS.muted } },
             };
         } else {
             const showDuration = selectedMetric === "duration";
@@ -1193,7 +1193,7 @@ if (totalsTiles) {
                 ...(group === "daily" ? { nticks: 10 } : {}),
             },
             yaxis: { ...GRAPH_AXIS_STYLE, rangemode: "tozero", title: { ...GRAPH_AXIS_STYLE.title, text: unitLabel } },
-            legend: { orientation: "h", font: { family: "Work Sans, sans-serif", color: GRAPH_COLORS.muted } },
+            legend: { orientation: "h", font: { family: "Newsreader, serif", color: GRAPH_COLORS.muted } },
             showlegend: data.length > 1,
         };
         Plotly.react(totalsChartEl, data, layout, GRAPH_CONFIG);
@@ -1404,20 +1404,20 @@ if (ganttChartEl) {
         ];
 
         const layout = {
-            font: { family: "Work Sans, sans-serif", color: GANTT_COLORS.ink },
+            font: { family: "Newsreader, serif", color: GANTT_COLORS.ink },
             paper_bgcolor: GANTT_COLORS.white,
             plot_bgcolor: GANTT_COLORS.white,
             margin: { t: 24, r: 24, b: 48, l: 100 },
             showlegend: false,
             xaxis: {
                 type: "date",
-                title: { text: "Date", font: { family: "Work Sans, sans-serif", color: GANTT_COLORS.muted, size: 12 } },
+                title: { text: "Date", font: { family: "Newsreader, serif", color: GANTT_COLORS.muted, size: 12 } },
                 gridcolor: GANTT_COLORS.clay,
-                tickfont: { family: "Work Sans, sans-serif", color: GANTT_COLORS.muted, size: 12 },
+                tickfont: { family: "Newsreader, serif", color: GANTT_COLORS.muted, size: 12 },
             },
             yaxis: {
                 automargin: true,
-                tickfont: { family: "Work Sans, sans-serif", color: GANTT_COLORS.ink, size: 13 },
+                tickfont: { family: "Newsreader, serif", color: GANTT_COLORS.ink, size: 13 },
             },
         };
 

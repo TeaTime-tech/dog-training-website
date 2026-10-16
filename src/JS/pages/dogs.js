@@ -1,5 +1,6 @@
-/* dogs.html: list the account's dogs, pick which one is being trained, and add, rename or delete dogs.
-   Needs supabaseClient.js, shared/dogs.js and sessions.js loaded first. */
+/* dogs.html: a card for each of the account's dogs (profile and training stats), picking which one is
+   being trained, and adding, editing or deleting dogs.
+   Needs supabaseClient.js, shared/dogs.js, sessions.js and trainingData.js loaded first. */
 
 const dogsStatus = document.getElementById("dogs-status");
 const dogListSection = document.getElementById("dog-list-section");
@@ -12,9 +13,13 @@ const unassignedSection = document.getElementById("unassigned-section");
 const unassignedSummary = document.getElementById("unassigned-summary");
 const assignForm = document.getElementById("assign-form");
 const assignDogSelect = document.getElementById("assign-dog");
+const deleteUnassignedButton = document.getElementById("delete-unassigned-btn");
 
 let accountDogs = [];
-let renamingDogId = null;
+let editingDogId = null;
+// cards opened or closed by hand, so redraws keep them that way
+const openDogIds = new Set();
+const closedDogIds = new Set();
 
 // show a status line above the dog list (in red when it's an error)
 function showDogsStatus(text, isError) {
@@ -22,7 +27,7 @@ function showDogsStatus(text, isError) {
     dogsStatus.classList.toggle("dogs-error", Boolean(isError));
 }
 
-// a small text-style button for a dog row
+// a small text-style button for a dog card
 function makeRowButton(text, className, onClick) {
     const button = document.createElement("button");
     button.type = "button";
@@ -32,60 +37,233 @@ function makeRowButton(text, className, onClick) {
     return button;
 }
 
-// one dog's row: name, "Training now" or a button to switch to it, and rename/delete
-function renderDogRow(dog) {
-    const row = document.createElement("li");
-    row.className = "dog-row";
+// "3 years old", "1 year 4 months old", "5 months old" from a "YYYY-MM-DD" birthday
+function formatDogAge(birthday) {
+    const [year, month, day] = birthday.split("-").map(Number);
+    const today = new Date();
+    let months = (today.getFullYear() - year) * 12 + (today.getMonth() + 1 - month);
+    if (today.getDate() < day) months -= 1;
+    if (months < 1) return "under 1 month old";
+    if (months < 12) return `${months} month${months === 1 ? "" : "s"} old`;
+    const years = Math.floor(months / 12);
+    const extraMonths = months % 12;
+    if (years >= 2 || extraMonths === 0) return `${years} year${years === 1 ? "" : "s"} old`;
+    return `1 year ${extraMonths} month${extraMonths === 1 ? "" : "s"} old`;
+}
 
-    if (dog.id === renamingDogId) {
-        const input = document.createElement("input");
-        input.type = "text";
-        input.className = "dog-rename-input";
-        input.value = dog.name;
-        input.maxLength = 50;
-        input.setAttribute("aria-label", `New name for ${dog.name}`);
-        const save = () => saveDogName(dog, input.value);
-        input.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") save();
-            if (event.key === "Escape") cancelRename();
-        });
-        const actions = document.createElement("div");
-        actions.className = "dog-row-actions";
-        actions.append(
-            makeRowButton("Save", "row-save-btn", save),
-            makeRowButton("Cancel", "row-cancel-btn", cancelRename),
-        );
-        row.append(input, actions);
-        setTimeout(() => input.focus(), 0);
-        return row;
-    }
+// "Today", "Yesterday", "5 days ago" or a date, for a "YYYY-MM-DD" day
+function formatLastTrained(dateString) {
+    const [year, month, day] = dateString.split("-").map(Number);
+    const [ty, tm, td] = localDateString().split("-").map(Number);
+    const daysAgo = Math.round((Date.UTC(ty, tm - 1, td) - Date.UTC(year, month - 1, day)) / 86400000);
+    if (daysAgo <= 0) return "Today";
+    if (daysAgo === 1) return "Yesterday";
+    if (daysAgo < 30) return `${daysAgo} days ago`;
+    return new Date(year, month - 1, day).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
 
-    const name = document.createElement("span");
-    name.className = "dog-name";
-    name.textContent = dog.name;
+// "X hr Y min" (or "X min") for a number of seconds
+function formatTrainingTime(seconds) {
+    const totalMinutes = Math.round(seconds / 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (hours === 0) return `${minutes} min`;
+    return minutes ? `${hours} hr ${minutes} min` : `${hours} hr`;
+}
+
+// session count, training time, commands practiced and last training day for one dog
+function getDogStats(dogId) {
+    const sessions = getSessionHistory().filter((session) => session.dogId === dogId);
+    let seconds = 0;
+    let lastDate = "";
+    const commands = new Set();
+    sessions.forEach((session) => {
+        // a session's length (Session Duration) if entered, else its Duration, as on View Logs
+        const minutes = Number(session.sessionTotalMinutes);
+        seconds += Number.isFinite(minutes) && minutes > 0 ? minutes * 60 : parseStoredDurationSeconds(session.duration) || 0;
+        if (session.command) commands.add(session.command.toLowerCase());
+        if (session.date && session.date > lastDate) lastDate = session.date;
+    });
+    return { sessions: sessions.length, seconds, commands: commands.size, lastDate };
+}
+
+// one stat tile: a value over a label
+function makeStatTile(value, label, variant) {
+    const tile = document.createElement("div");
+    tile.className = variant ? `stat-tile stat-tile--${variant}` : "stat-tile";
+    const valueEl = document.createElement("span");
+    valueEl.className = "stat-value";
+    valueEl.textContent = value;
+    const labelEl = document.createElement("span");
+    labelEl.className = "stat-label";
+    labelEl.textContent = label;
+    tile.append(valueEl, labelEl);
+    return tile;
+}
+
+// a labeled field for the edit form
+function makeEditField(labelText, control) {
+    const field = document.createElement("div");
+    field.className = "field";
+    const label = document.createElement("label");
+    label.htmlFor = control.id;
+    label.textContent = labelText;
+    field.append(label, control);
+    return field;
+}
+
+// a dog's card in edit mode: name, breed, birthday and notes with Save / Cancel
+function renderDogEditForm(dog, card) {
+    const form = document.createElement("form");
+    form.className = "dog-edit-form";
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.id = `edit-name-${dog.id}`;
+    nameInput.value = dog.name;
+    nameInput.maxLength = 50;
+    nameInput.required = true;
+
+    const breedInput = document.createElement("input");
+    breedInput.type = "text";
+    breedInput.id = `edit-breed-${dog.id}`;
+    breedInput.value = dog.breed || "";
+    breedInput.maxLength = 60;
+    breedInput.placeholder = "e.g. Border Collie";
+
+    const birthdayInput = document.createElement("input");
+    birthdayInput.type = "date";
+    birthdayInput.id = `edit-birthday-${dog.id}`;
+    birthdayInput.value = dog.birthday || "";
+    birthdayInput.max = localDateString();
+
+    const notesInput = document.createElement("textarea");
+    notesInput.id = `edit-notes-${dog.id}`;
+    notesInput.value = dog.notes || "";
+    notesInput.maxLength = 1000;
+    notesInput.placeholder = "Temperament, health, favorite rewards...";
+
+    const pair = document.createElement("div");
+    pair.className = "dog-edit-pair";
+    pair.append(makeEditField("Breed", breedInput), makeEditField("Birthday", birthdayInput));
 
     const actions = document.createElement("div");
-    actions.className = "dog-row-actions";
-    if (dog.id === getCurrentDogId()) {
+    actions.className = "dog-card-actions";
+    const saveButton = document.createElement("button");
+    saveButton.type = "submit";
+    saveButton.className = "row-save-btn";
+    saveButton.textContent = "Save";
+    actions.append(saveButton, makeRowButton("Cancel", "row-cancel-btn", cancelEdit));
+
+    form.append(makeEditField("Name", nameInput), pair, makeEditField("Notes", notesInput), actions);
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        saveButton.disabled = true;
+        await saveDogProfile(dog, {
+            name: nameInput.value,
+            breed: breedInput.value,
+            birthday: birthdayInput.value,
+            notes: notesInput.value,
+        });
+        saveButton.disabled = false;
+    });
+    form.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") cancelEdit();
+    });
+
+    card.append(form);
+    setTimeout(() => nameInput.focus(), 0);
+}
+
+// one dog's card: a collapsible name row ("Training now" or a button to switch to it) over the profile,
+// stats, and edit/delete
+function renderDogCard(dog) {
+    const card = document.createElement("li");
+    card.className = "dog-card";
+    const isCurrent = dog.id === getCurrentDogId();
+    card.classList.toggle("dog-card--current", isCurrent);
+
+    if (dog.id === editingDogId) {
+        renderDogEditForm(dog, card);
+        return card;
+    }
+
+    // the name row is the toggle; the current dog starts open, the rest start closed
+    const details = document.createElement("details");
+    details.open = openDogIds.has(dog.id) || (isCurrent && !closedDogIds.has(dog.id));
+    details.addEventListener("toggle", () => {
+        if (details.open) {
+            openDogIds.add(dog.id);
+            closedDogIds.delete(dog.id);
+        } else {
+            openDogIds.delete(dog.id);
+            closedDogIds.add(dog.id);
+        }
+    });
+
+    const header = document.createElement("summary");
+    header.className = "collapsible-toggle dog-card-header";
+    const name = document.createElement("h3");
+    name.className = "dog-name";
+    name.textContent = dog.name;
+    header.append(name);
+    if (isCurrent) {
         const badge = document.createElement("span");
         badge.className = "current-dog-badge";
         badge.textContent = "Training now";
-        actions.append(badge);
+        header.append(badge);
     } else {
-        actions.append(makeRowButton("Train this dog", "row-save-btn", () => selectDog(dog)));
+        // preventDefault so clicking the button doesn't also open or close the card
+        header.append(makeRowButton("Train this dog", "row-save-btn", (event) => {
+            event.preventDefault();
+            selectDog(dog);
+        }));
     }
+    details.append(header);
+    card.append(details);
+
+    const body = document.createElement("div");
+    body.className = "dog-card-body";
+    details.append(body);
+
+    const profileBits = [dog.breed, dog.birthday && formatDogAge(dog.birthday)].filter(Boolean);
+    if (profileBits.length) {
+        const meta = document.createElement("p");
+        meta.className = "dog-meta";
+        meta.textContent = profileBits.join(" · ");
+        body.append(meta);
+    }
+    if (dog.notes) {
+        const notes = document.createElement("p");
+        notes.className = "dog-notes";
+        notes.textContent = dog.notes;
+        body.append(notes);
+    }
+
+    const stats = getDogStats(dog.id);
+    const statRow = document.createElement("div");
+    statRow.className = "stat-row dog-stats";
+    statRow.append(
+        makeStatTile(String(stats.sessions), stats.sessions === 1 ? "Session" : "Sessions", "moss"),
+        makeStatTile(formatTrainingTime(stats.seconds), "Training time", "brass"),
+        makeStatTile(String(stats.commands), stats.commands === 1 ? "Command" : "Commands"),
+        makeStatTile(stats.lastDate ? formatLastTrained(stats.lastDate) : "Not yet", "Last trained"),
+    );
+    body.append(statRow);
+
+    const actions = document.createElement("div");
+    actions.className = "dog-card-actions";
     actions.append(
-        makeRowButton("Rename", "restore-btn", () => startRename(dog)),
+        makeRowButton("Edit profile", "restore-btn", () => startEdit(dog)),
         makeRowButton("Delete", "hide-btn delete-dog-btn", () => removeDog(dog)),
     );
-
-    row.append(name, actions);
-    return row;
+    body.append(actions);
+    return card;
 }
 
 // redraw the list from accountDogs
 function renderDogList() {
-    dogList.replaceChildren(...accountDogs.map(renderDogRow));
+    dogList.replaceChildren(...accountDogs.map(renderDogCard));
     dogListEmpty.hidden = accountDogs.length > 0;
     renderUnassignedSessions();
 }
@@ -136,34 +314,35 @@ async function loadDogsPage() {
 // make a dog the one new sessions are logged for
 function selectDog(dog) {
     setCurrentDogId(dog.id);
+    openDogIds.add(dog.id);
+    closedDogIds.delete(dog.id);
     renderDogList();
     showDogsStatus(`Now training ${dog.name}. New sessions are logged for ${dog.name}.`);
 }
 
-// switch a row into rename mode
-function startRename(dog) {
-    renamingDogId = dog.id;
+// switch a card into edit mode
+function startEdit(dog) {
+    editingDogId = dog.id;
     renderDogList();
 }
 
-// leave rename mode without saving
-function cancelRename() {
-    renamingDogId = null;
+// leave edit mode without saving
+function cancelEdit() {
+    editingDogId = null;
     renderDogList();
 }
 
-// save a new name for a dog
-async function saveDogName(dog, newName) {
-    const oldName = dog.name;
+// save a dog's name and profile
+async function saveDogProfile(dog, profile) {
     try {
-        const updated = await renameDog(dog.id, newName);
+        const updated = await updateDog(dog.id, profile);
         accountDogs = accountDogs.map((d) => (d.id === updated.id ? updated : d));
-        renamingDogId = null;
+        editingDogId = null;
         renderDogList();
-        showDogsStatus(`Renamed ${oldName} to ${updated.name}.`);
+        showDogsStatus(`Saved ${updated.name}'s profile.`);
     } catch (error) {
-        console.error("Could not rename dog:", error);
-        showDogsStatus(`Couldn't rename ${dog.name}: ${error.message}`, true);
+        console.error("Could not save dog:", error);
+        showDogsStatus(`Couldn't save ${dog.name}: ${error.message}`, true);
     }
 }
 
@@ -204,13 +383,28 @@ assignForm.addEventListener("submit", (event) => {
         session.dogId = dog.id;
     });
     setSessionHistory(history);
-    renderUnassignedSessions();
+    renderDogList();
     showDogsStatus(`Assigned ${unassigned.length} session${unassigned.length === 1 ? "" : "s"} to ${dog.name}.`);
 });
 
-// sessions from the account arrived; the unassigned count may have changed
+// permanently delete every session without a dog, here and on the account
+deleteUnassignedButton.addEventListener("click", () => {
+    const history = getSessionHistory();
+    const count = history.filter((session) => !session.dogId).length;
+    if (!count) return;
+    const noun = `${count} session${count === 1 ? "" : "s"}`;
+    if (!confirm(`Delete ${noun} that ${count === 1 ? "isn't" : "aren't"} assigned to a dog? This can't be undone.`)) return;
+    setSessionHistory(history.filter((session) => session.dogId));
+    renderDogList();
+    showDogsStatus(`Deleted ${noun} without a dog.`);
+});
+
+// sessions from the account arrived; stats and the unassigned count may have changed.
+// while a card is being edited, only the unassigned count redraws so typing isn't lost
 window.addEventListener("sessionhistorysynced", (event) => {
-    if (event.detail.changed && !dogListSection.hidden) renderUnassignedSessions();
+    if (!event.detail.changed || dogListSection.hidden) return;
+    if (editingDogId) renderUnassignedSessions();
+    else renderDogList();
 });
 
 addDogForm.addEventListener("submit", async (event) => {
@@ -223,7 +417,7 @@ addDogForm.addEventListener("submit", async (event) => {
         setCurrentDogId(dog.id);
         newDogNameInput.value = "";
         renderDogList();
-        showDogsStatus(`Added ${dog.name}. New sessions are logged for ${dog.name}.`);
+        showDogsStatus(`Added ${dog.name}. New sessions are logged for ${dog.name}. Use Edit profile to add a breed and birthday.`);
     } catch (error) {
         console.error("Could not add dog:", error);
         showDogsStatus(`Couldn't add dog: ${error.message}`, true);

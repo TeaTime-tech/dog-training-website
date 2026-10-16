@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Dogs</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&display=swap" rel="stylesheet">
     <!-- shared styles, then this page's styles -->
     <link rel="stylesheet" href="../CSS/shared/base.css">
     <link rel="stylesheet" href="../CSS/shared/nav.css">
@@ -18,6 +18,7 @@
     <script src="../JS/shared/dogs.js" defer></script>
     <script src="../JS/shared/sessions.js" defer></script>
     <script src="../JS/shared/accountNav.js" defer></script>
+    <script src="../JS/shared/trainingData.js" defer></script>
     <script src="../JS/pages/dogs.js" defer></script>
 </head>
 <body>
@@ -41,35 +42,44 @@
     </div>
 
     <h1>My Dogs</h1>
-    <p class="subhead">Choose which dog you're training. New sessions are logged for that dog.</p>
+    <p class="subhead">Each dog's profile and training so far. Choose which dog you're training; new sessions are logged for that dog.</p>
 
     <p id="dogs-status" class="dogs-status" role="status">Loading your dogs...</p>
 
     <!-- dogs.js shows these once someone is signed in -->
     <section id="dog-list-section" class="page-section" hidden>
-        <h2 class="section-title">Your Dogs</h2>
-        <p id="dog-list-empty" class="dog-list-empty" hidden>No dogs yet. Add your first dog below.</p>
-        <ul id="dog-list" class="dog-list"></ul>
+        <details open>
+            <summary class="collapsible-toggle"><h2 class="section-title">Your Dogs</h2></summary>
+            <p id="dog-list-empty" class="dog-list-empty" hidden>No dogs yet. Add your first dog below.</p>
+            <ul id="dog-list" class="dog-list"></ul>
+        </details>
     </section>
 
     <!-- shown only when some sessions (e.g. logged before dogs existed) don't belong to a dog -->
     <section id="unassigned-section" class="page-section" hidden>
-        <h2 class="section-title">Sessions Without a Dog</h2>
-        <p id="unassigned-summary" class="unassigned-summary"></p>
-        <form id="assign-form" class="field-row">
-            <label for="assign-dog">Assign them to:</label>
-            <select id="assign-dog"></select>
-            <button class="save-btn" type="submit">Assign Sessions</button>
-        </form>
+        <details open>
+            <summary class="collapsible-toggle"><h2 class="section-title">Sessions Without a Dog</h2></summary>
+            <p id="unassigned-summary" class="unassigned-summary"></p>
+            <form id="assign-form" class="field-row">
+                <label for="assign-dog">Assign them to:</label>
+                <select id="assign-dog"></select>
+                <button class="save-btn" type="submit">Assign Sessions</button>
+            </form>
+            <p class="unassigned-delete">
+                Or <button type="button" id="delete-unassigned-btn" class="hide-btn delete-dog-btn">delete these sessions</button> if you don't need them.
+            </p>
+        </details>
     </section>
 
     <section id="add-dog-section" class="page-section" hidden>
-        <h2 class="section-title">Add a Dog</h2>
-        <form id="add-dog-form" class="field-row">
-            <label class="visually-hidden" for="new-dog-name">Dog's name</label>
-            <input type="text" id="new-dog-name" placeholder="Enter your dog's name..." maxlength="50" required>
-            <button class="save-btn" type="submit">Add Dog</button>
-        </form>
+        <details open>
+            <summary class="collapsible-toggle"><h2 class="section-title">Add a Dog</h2></summary>
+            <form id="add-dog-form" class="field-row">
+                <label class="visually-hidden" for="new-dog-name">Dog's name</label>
+                <input type="text" id="new-dog-name" placeholder="Enter your dog's name..." maxlength="50" required>
+                <button class="save-btn" type="submit">Add Dog</button>
+            </form>
+        </details>
     </section>
 </body>
 </html>
