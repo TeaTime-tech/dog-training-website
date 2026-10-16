@@ -1,4 +1,5 @@
-/* load.html: session and exercise tables, test data, metric graphs, and the command timeline.
+/* load.html (View Logs): totals, session and exercise tables, test data, and the Progress charts (command graph,
+   training & exercise time, command timeline).
    Needs dogs.js, sessions.js and trainingData.js loaded first. */
 
 // tell the totals section that sessions or exercises were edited on this page
@@ -18,6 +19,43 @@ let viewingDogFilter = VIEWING_ALL_DOGS;
 function matchesViewingDog(session) {
     if (viewingDogFilter === VIEWING_ALL_DOGS) return true;
     return session.dogId === viewingDogFilter;
+}
+
+const PAW_SVG = '<svg viewBox="0 0 120 112" aria-hidden="true" focusable="false"><ellipse cx="18" cy="46" rx="12" ry="15" transform="rotate(-25 18 46)"/><ellipse cx="42" cy="18" rx="12.5" ry="16" transform="rotate(-8 42 18)"/><ellipse cx="78" cy="18" rx="12.5" ry="16" transform="rotate(8 78 18)"/><ellipse cx="102" cy="46" rx="12" ry="15" transform="rotate(25 102 46)"/><path d="M60 52c-14 0-22 9-31 21-7 9-11 15-11 22 0 9 7 15 16 15 10 0 15-5 26-5s16 5 26 5c9 0 16-6 16-15 0-7-4-13-11-22-9-12-17-21-31-21Z"/></svg>';
+
+// one pill per dog next to the page title; the picked one is filled with a paw. Clicking one switches the page to
+// that dog through the (hidden) select, so everything else listens to the same "change" as before
+function renderViewingDogChips(dogs) {
+    const chips = document.getElementById("viewing-dog-chips");
+    if (!chips) return;
+    chips.replaceChildren(...dogs.map((dog) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "load-dog-chip";
+        chip.setAttribute("role", "radio");
+        const picked = dog.id === viewingDogSelect.value;
+        chip.setAttribute("aria-checked", String(picked));
+        chip.tabIndex = picked ? 0 : -1;
+        chip.innerHTML = PAW_SVG;
+        chip.append(dog.name);
+        chip.addEventListener("click", () => {
+            if (viewingDogSelect.value === dog.id) return;
+            viewingDogSelect.value = dog.id;
+            viewingDogSelect.dispatchEvent(new Event("change"));
+            renderViewingDogChips(dogs);
+            chips.querySelector('[aria-checked="true"]').focus();
+        });
+        return chip;
+    }));
+    // arrow keys move between dogs, like radio buttons
+    chips.onkeydown = (event) => {
+        const step = ["ArrowRight", "ArrowDown"].includes(event.key) ? 1 : ["ArrowLeft", "ArrowUp"].includes(event.key) ? -1 : 0;
+        if (!step) return;
+        event.preventDefault();
+        const all = Array.from(chips.children);
+        const index = all.findIndex((chip) => chip.getAttribute("aria-checked") === "true");
+        all[(index + step + all.length) % all.length].click();
+    };
 }
 
 // fill "Switch dog" with the account's dogs, starting on the last choice, else the current dog
@@ -54,6 +92,7 @@ async function loadViewingDogOptions() {
         || dogs[0];
     viewingDogFilter = startingDog.id;
     viewingDogSelect.value = viewingDogFilter;
+    renderViewingDogChips(dogs);
     viewingDogRow.hidden = false;
     if (viewingDogFilter !== previous) window.dispatchEvent(new CustomEvent("viewingdogchanged"));
 }
@@ -77,10 +116,11 @@ if (viewingDogSelect) {
 
 /*load session history into a table (load.html)*/
 
-const loadButton = document.getElementById("load");
+const dataTableBodyEl = document.getElementById("data-table-body");
 
-if (loadButton) {
+if (dataTableBodyEl) {
     const dateInput = document.getElementById("date");
+    const dateClearButton = document.getElementById("date-clear");
     const dataTableBody = document.getElementById("data-table-body");
     const pageSizeSelect = document.getElementById("page-size");
     const prevPageButton = document.getElementById("prev-page");
@@ -90,37 +130,87 @@ if (loadButton) {
     let editingIndex = null;
     let currentPage = 1;
 
+    const SESSION_COLUMNS = 7;
+    // rows whose details (location, weather, notes) are open, by history index; kept across redraws
+    const openSessionDetails = new Set();
+
     // render a single-row message (e.g. "no sessions found") in place of the table body
     const showTableMessage = (message) => {
         dataTableBody.innerHTML = "";
         const row = document.createElement("tr");
         const cell = document.createElement("td");
-        cell.colSpan = 10;
+        cell.colSpan = SESSION_COLUMNS;
+        cell.className = "log-table-message";
         cell.textContent = message;
         row.appendChild(cell);
         dataTableBody.appendChild(row);
     };
 
-    // build a read-only table row for one session, with Edit/Delete buttons
+    // "Oct 16 · 9:05 AM" from a session's date and time
+    const formatSessionWhen = (session) => {
+        const parts = [];
+        if (session.date) {
+            const date = new Date(`${session.date}T00:00:00`);
+            parts.push(Number.isNaN(date.getTime()) ? session.date : date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: date.getFullYear() === new Date().getFullYear() ? undefined : "numeric" }));
+        }
+        if (session.time) {
+            const [hours, minutes] = session.time.split(":").map(Number);
+            const time = new Date(2000, 0, 1, hours, minutes);
+            parts.push(Number.isNaN(time.getTime()) ? session.time : time.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
+        }
+        return parts.join(" · ");
+    };
+
+    // a table cell with its column name, used as the label when rows turn into cards on phones
+    const makeCell = (label, value, className) => {
+        const cell = document.createElement("td");
+        cell.dataset.label = label;
+        if (className) cell.className = className;
+        cell.textContent = value ?? "";
+        return cell;
+    };
+
+    // a read-only row for one session (Edit/Delete at the end), plus a hidden row under it with location,
+    // weather and notes that its ▸ button opens. Returns both rows
     function buildViewRow(session, index) {
         const row = document.createElement("tr");
-        [
-            session.command,
-            session.repetitions,
-            formatDurationDisplay(session.duration),
-            session.location,
-            session.weather,
-            session.score ? `${session.score}/10` : "",
-            session.date,
-            session.time,
-            session.notes,
-        ].forEach((value) => {
-            const cell = document.createElement("td");
-            cell.textContent = value ?? "";
-            row.appendChild(cell);
-        });
+        const details = [["Location", session.location], ["Weather", session.weather], ["Notes", session.notes]]
+            .filter(([, value]) => value && value !== "N/A");
+
+        const toggleCell = document.createElement("td");
+        toggleCell.className = "col-toggle";
+        const detailRow = document.createElement("tr");
+        detailRow.className = "log-detail-row";
+        detailRow.id = `session-details-${index}`;
+        detailRow.hidden = !openSessionDetails.has(index);
+        if (details.length) {
+            const toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "log-row-toggle";
+            toggle.setAttribute("aria-expanded", String(!detailRow.hidden));
+            toggle.setAttribute("aria-controls", detailRow.id);
+            toggle.setAttribute("aria-label", `More about this ${session.command || "session"}`);
+            toggle.textContent = "\u25B8";
+            toggle.addEventListener("click", () => {
+                detailRow.hidden = !detailRow.hidden;
+                toggle.setAttribute("aria-expanded", String(!detailRow.hidden));
+                if (detailRow.hidden) openSessionDetails.delete(index);
+                else openSessionDetails.add(index);
+            });
+            toggleCell.appendChild(toggle);
+        }
+        row.appendChild(toggleCell);
+
+        row.append(
+            makeCell("Command", session.command, "col-command"),
+            makeCell("Reps", session.repetitions),
+            makeCell("Duration", formatDurationDisplay(session.duration)),
+            makeCell("Score", session.score ? `${session.score}/10` : ""),
+            makeCell("When", formatSessionWhen(session)),
+        );
 
         const actionCell = document.createElement("td");
+        actionCell.className = "col-actions";
 
         const editButton = document.createElement("button");
         editButton.type = "button";
@@ -142,6 +232,7 @@ if (loadButton) {
             const currentHistory = getSessionHistory();
             currentHistory.splice(index, 1);
             setSessionHistory(currentHistory);
+            openSessionDetails.clear();
             notifyTrainingDataChanged();
             renderSessionTable();
         });
@@ -150,12 +241,39 @@ if (loadButton) {
         actionCell.appendChild(deleteButton);
         row.appendChild(actionCell);
 
-        return row;
+        const detailCell = document.createElement("td");
+        detailCell.colSpan = SESSION_COLUMNS;
+        const list = document.createElement("dl");
+        list.className = "log-detail-list";
+        details.forEach(([label, value]) => {
+            const term = document.createElement("dt");
+            term.textContent = label;
+            const description = document.createElement("dd");
+            description.textContent = value;
+            list.append(term, description);
+        });
+        detailCell.appendChild(list);
+        detailRow.appendChild(detailCell);
+
+        const rows = document.createDocumentFragment();
+        rows.append(row, detailRow);
+        return rows;
     }
 
-    // build an editable table row with input fields and Save/Cancel buttons
+    // a labelled field for the edit form
+    const makeEditField = (label, control) => {
+        const field = document.createElement("label");
+        field.className = "log-edit-field";
+        const name = document.createElement("span");
+        name.textContent = label;
+        field.append(name, control);
+        return field;
+    };
+
+    // an edit form for one session, spanning the whole row, with every field and Save/Cancel
     function buildEditRow(session, index) {
         const row = document.createElement("tr");
+        row.className = "log-edit-row";
 
         const commandSelectEdit = document.createElement("select");
         const commandNames = getVisibleCommandNames();
@@ -170,21 +288,19 @@ if (loadButton) {
         });
         commandSelectEdit.value = session.command ?? "";
 
-        const repetitionsInput = document.createElement("input");
-        repetitionsInput.type = "text";
-        repetitionsInput.value = session.repetitions ?? "";
-
-        const durationInput = document.createElement("input");
-        durationInput.type = "text";
-        durationInput.value = session.duration ?? "";
-
-        const locationInput = document.createElement("input");
-        locationInput.type = "text";
-        locationInput.value = session.location ?? "";
-
-        const weatherInput = document.createElement("input");
-        weatherInput.type = "text";
-        weatherInput.value = session.weather ?? "";
+        const makeInput = (type, value) => {
+            const input = document.createElement("input");
+            input.type = type;
+            input.value = value ?? "";
+            return input;
+        };
+        const repetitionsInput = makeInput("text", session.repetitions);
+        const durationInput = makeInput("text", session.duration);
+        const locationInput = makeInput("text", session.location);
+        const weatherInput = makeInput("text", session.weather);
+        const dateInputEdit = makeInput("date", session.date);
+        const timeInputEdit = makeInput("time", session.time);
+        const notesInput = makeInput("text", session.notes);
 
         // "—" (no score) or 1-10
         const scoreSelect = document.createElement("select");
@@ -196,35 +312,26 @@ if (loadButton) {
         });
         scoreSelect.value = session.score ?? "";
 
-        const dateInputEdit = document.createElement("input");
-        dateInputEdit.type = "date";
-        dateInputEdit.value = session.date ?? "";
+        const cell = document.createElement("td");
+        cell.colSpan = SESSION_COLUMNS;
+        const form = document.createElement("div");
+        form.className = "log-edit-form";
+        form.append(
+            makeEditField("Command", commandSelectEdit),
+            makeEditField("Reps", repetitionsInput),
+            makeEditField("Duration", durationInput),
+            makeEditField("Score", scoreSelect),
+            makeEditField("Date", dateInputEdit),
+            makeEditField("Time", timeInputEdit),
+            makeEditField("Location", locationInput),
+            makeEditField("Weather", weatherInput),
+        );
+        const notesField = makeEditField("Notes", notesInput);
+        notesField.classList.add("log-edit-field--wide");
+        form.appendChild(notesField);
 
-        const timeInputEdit = document.createElement("input");
-        timeInputEdit.type = "time";
-        timeInputEdit.value = session.time ?? "";
-
-        const notesInput = document.createElement("input");
-        notesInput.type = "text";
-        notesInput.value = session.notes ?? "";
-
-        [
-            commandSelectEdit,
-            repetitionsInput,
-            durationInput,
-            locationInput,
-            weatherInput,
-            scoreSelect,
-            dateInputEdit,
-            timeInputEdit,
-            notesInput,
-        ].forEach((field) => {
-            const cell = document.createElement("td");
-            cell.appendChild(field);
-            row.appendChild(cell);
-        });
-
-        const actionCell = document.createElement("td");
+        const actions = document.createElement("div");
+        actions.className = "log-edit-actions";
 
         const saveButton = document.createElement("button");
         saveButton.type = "button";
@@ -259,10 +366,10 @@ if (loadButton) {
             renderSessionTable();
         });
 
-        actionCell.appendChild(saveButton);
-        actionCell.appendChild(cancelButton);
-        row.appendChild(actionCell);
-
+        actions.append(saveButton, cancelButton);
+        form.appendChild(actions);
+        cell.appendChild(form);
+        row.appendChild(cell);
         return row;
     }
 
@@ -323,22 +430,32 @@ if (loadButton) {
         updatePaginationControls(totalPages, matches.length);
     }
 
-    let tableLoaded = false;
-    loadButton.addEventListener("click", () => {
+    // picking a date narrows the table to that day; "Show all" clears it
+    const applyDateFilter = () => {
         editingIndex = null;
         currentPage = 1;
-        tableLoaded = true;
+        dateClearButton.hidden = !dateInput.value;
         renderSessionTable();
+    };
+    dateInput.addEventListener("change", applyDateFilter);
+    dateClearButton.addEventListener("click", () => {
+        dateInput.value = "";
+        applyDateFilter();
     });
 
-    // sessions from the account arrived; refresh the table if it's showing and nothing is mid-edit
+    // newest sessions show as soon as the page opens
+    renderSessionTable();
+
+    // sessions from the account arrived (or test data was added); refresh the table unless a row is mid-edit
     window.addEventListener("sessionhistorysynced", (event) => {
-        if (event.detail.changed && tableLoaded && editingIndex === null) renderSessionTable();
+        if (event.detail.changed && editingIndex === null) renderSessionTable();
+    });
+    window.addEventListener("trainingdatachanged", () => {
+        if (editingIndex === null) renderSessionTable();
     });
 
     // a different dog was picked; start back on page 1
     window.addEventListener("viewingdogchanged", () => {
-        if (!tableLoaded) return;
         editingIndex = null;
         currentPage = 1;
         renderSessionTable();
@@ -369,10 +486,11 @@ if (loadButton) {
 
 /*load exercise history into a table (load.html)*/
 
-const loadExercisesButton = document.getElementById("load-exercises");
+const exerciseTableBodyEl = document.getElementById("exercise-table-body");
 
-if (loadExercisesButton) {
+if (exerciseTableBodyEl) {
     const exerciseDateInput = document.getElementById("exercise-date");
+    const exerciseDateClearButton = document.getElementById("exercise-date-clear");
     const exerciseTableBody = document.getElementById("exercise-table-body");
     const exercisePageSizeSelect = document.getElementById("exercise-page-size");
     const exercisePrevPageButton = document.getElementById("exercise-prev-page");
@@ -396,11 +514,14 @@ if (loadExercisesButton) {
     // build a read-only table row for one exercise, with Edit/Delete buttons
     function buildExerciseViewRow(exercise, index) {
         const row = document.createElement("tr");
-        [exercise.name, formatDurationDisplay(exercise.duration), exercise.notes, exercise.date, exercise.time].forEach((value) => {
-            const cell = document.createElement("td");
-            cell.textContent = value ?? "";
-            row.appendChild(cell);
-        });
+        // labels name each cell when rows turn into cards on phones
+        [["Name", exercise.name], ["Duration", formatDurationDisplay(exercise.duration)], ["Notes", exercise.notes], ["Date", exercise.date], ["Time", exercise.time]]
+            .forEach(([label, value]) => {
+                const cell = document.createElement("td");
+                cell.dataset.label = label;
+                cell.textContent = value ?? "";
+                row.appendChild(cell);
+            });
 
         const actionCell = document.createElement("td");
 
@@ -566,10 +687,23 @@ if (loadExercisesButton) {
         updateExercisePaginationControls(totalPages, matches.length);
     }
 
-    loadExercisesButton.addEventListener("click", () => {
+    // picking a date narrows the table to that day; "Show all" clears it
+    const applyExerciseDateFilter = () => {
         editingExerciseIndex = null;
         currentExercisePage = 1;
+        exerciseDateClearButton.hidden = !exerciseDateInput.value;
         renderExerciseTable();
+    };
+    exerciseDateInput.addEventListener("change", applyExerciseDateFilter);
+    exerciseDateClearButton.addEventListener("click", () => {
+        exerciseDateInput.value = "";
+        applyExerciseDateFilter();
+    });
+
+    // newest exercises show as soon as the page opens, and again after test data or edits elsewhere on the page
+    renderExerciseTable();
+    window.addEventListener("trainingdatachanged", () => {
+        if (editingExerciseIndex === null) renderExerciseTable();
     });
 
     exercisePageSizeSelect.addEventListener("change", () => {
@@ -598,8 +732,11 @@ if (loadExercisesButton) {
 /*generate random sessions/exercises to try out load.html (testing utility)*/
 
 const seedTestDataButton = document.getElementById("seed-test-data");
+// only offered when the site runs from this computer (a file or a local server), never on the live site
+const isLocalSite = window.location.protocol === "file:" || ["localhost", "127.0.0.1", ""].includes(window.location.hostname);
 
-if (seedTestDataButton) {
+if (seedTestDataButton && isLocalSite) {
+    document.getElementById("load-test-data").hidden = false;
     const SEED_COMMANDS = ["sit", "stay", "come"];
     const SEED_REPETITIONS = ["N/A", "1", "2", "3", "4", "5"];
     const SEED_DURATIONS = ["5", "10", "15", "20", "30", "1", "1:30", "2:00", "3:30"];
@@ -665,14 +802,8 @@ if (seedTestDataButton) {
             "exerciseHistory",
             JSON.stringify(exerciseHistory.concat(generateRandomExercises(15)))
         );
+        // the tables, totals and charts all redraw on this
         notifyTrainingDataChanged();
-
-        if (loadButton) {
-            loadButton.click();
-        }
-        if (loadExercisesButton) {
-            loadExercisesButton.click();
-        }
 
         alert("Test data added.");
     });
@@ -734,7 +865,7 @@ const plottedCharts = new Set();
 
 // how much bigger the page is than the 16px phone size
 function chartScale() {
-    return (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16) / 16;
+    return (parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 16) / 16;
 }
 
 // a copy of a layout or trace list with font sizes, margins, marker sizes, line widths and bar corners scaled.
@@ -826,7 +957,6 @@ if (graphCommandSelect) {
         graphCommandSelect.appendChild(option);
     });
 
-    const graphCommandButton = document.getElementById("graph-command-button");
     const graphMetricSelect = document.getElementById("graph-metric");
     const graphTimeframeSelect = document.getElementById("graph-timeframe");
     const graphChartTypeSelect = document.getElementById("graph-chart-type");
@@ -934,15 +1064,9 @@ if (graphCommandSelect) {
         return tile;
     };
 
-    let graphDrawn = false;
-
-    // a different dog was picked; redraw the graph if one is showing
-    window.addEventListener("viewingdogchanged", () => {
-        if (graphDrawn) graphCommandButton.click();
-    });
-
-    graphCommandButton.addEventListener("click", () => {
-        graphDrawn = true;
+    // draw the graph for the current options (called whenever one changes, the dog changes, or sessions arrive)
+    const drawCommandGraph = () => {
+        if (typeof Plotly === "undefined") return;
         const sessionHistory = getSessionHistory();
         const selectedCommand = graphCommandSelect.value;
         const selectedMetric = graphMetricSelect.value;
@@ -1074,7 +1198,16 @@ if (graphCommandSelect) {
         }
 
         plotChart(document.getElementById("tester"), data, layout);
+    };
+
+    [graphCommandSelect, graphMetricSelect, graphTimeframeSelect, graphChartTypeSelect, graphDayPicker, graphMonthPicker, graphYearPicker]
+        .forEach((control) => control.addEventListener("change", drawCommandGraph));
+    window.addEventListener("viewingdogchanged", drawCommandGraph);
+    window.addEventListener("trainingdatachanged", drawCommandGraph);
+    window.addEventListener("sessionhistorysynced", (event) => {
+        if (event.detail.changed) drawCommandGraph();
     });
+    drawCommandGraph();
 }
 
 /*total training and exercise time: all-time tiles plus a day/week/month/year graph (load.html)*/
@@ -1500,10 +1633,6 @@ if (ganttChartEl) {
         });
     }
 
-    const ganttRefreshButton = document.getElementById("gantt-refresh");
-    if (ganttRefreshButton) {
-        ganttRefreshButton.addEventListener("click", renderCommandTimeline);
-    }
     if (ganttBreakSelect) {
         ganttBreakSelect.addEventListener("change", renderCommandTimeline);
     }
@@ -1515,3 +1644,34 @@ if (ganttChartEl) {
     });
     window.addEventListener("viewingdogchanged", renderCommandTimeline);
 }
+
+/*tab strips (load.html): Logs (Sessions | Exercises) and Progress (three charts). Each strip switches its own panels.
+  Charts drawn while their tab was hidden have no width, so opening a tab resizes its chart to fit*/
+
+document.querySelectorAll('.load-tabs[role="tablist"]').forEach((tablist) => {
+    const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+
+    // show one tab's panel, hide the strip's others, and fit a chart in it to the now-visible card
+    const selectTab = (tab, focus = false) => {
+        tabs.forEach((other) => {
+            const selected = other === tab;
+            other.setAttribute("aria-selected", String(selected));
+            other.tabIndex = selected ? 0 : -1;
+            document.getElementById(other.getAttribute("aria-controls")).hidden = !selected;
+        });
+        if (focus) tab.focus();
+        const chart = document.getElementById(tab.getAttribute("aria-controls")).querySelector(".graph-plot");
+        if (chart && typeof Plotly !== "undefined" && chart.data) Plotly.Plots.resize(chart);
+    };
+
+    tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => selectTab(tab));
+        // arrow keys move between tabs, like a native tab strip
+        tab.addEventListener("keydown", (event) => {
+            const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+            if (!step) return;
+            event.preventDefault();
+            selectTab(tabs[(index + step + tabs.length) % tabs.length], true);
+        });
+    });
+});

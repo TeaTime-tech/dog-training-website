@@ -45,225 +45,228 @@
             <a class="home-link" href="login.html">Login</a>
         </div>
     </div>
-    <details open>
-        <summary class="collapsible-toggle"><h1>Training Log</h1></summary>
+    <!-- header: the page title, the dog switcher (load.js shows it once there are dogs) and the main action -->
+    <div class="load-header">
+        <h1>View Logs</h1>
+        <!-- one pill per dog (load.js); the select underneath holds the choice for the rest of the page -->
+        <div id="viewing-dog-row" class="load-dog" hidden>
+            <div id="viewing-dog-chips" class="load-dog-chips" role="radiogroup" aria-label="Dog"></div>
+            <select id="viewing-dog" hidden aria-hidden="true" tabindex="-1"></select>
+        </div>
+        <a class="save-btn load-log-btn" href="log.html">+ Log a Session</a>
+    </div>
 
-        <!-- load.js fills this with the account's dogs and shows it once there are any -->
-        <div id="viewing-dog-row" hidden>
-            <div class="field-row">
-                <label for="viewing-dog">Switch dog:</label>
-                <select id="viewing-dog"></select>
+    <!-- summary first: all-time totals for the picked dog -->
+    <section class="page-section load-summary" aria-label="Totals">
+        <div id="totals-tiles" class="stat-row"></div>
+        <p class="load-note">Training time uses each session's length (Session Duration), or its Duration when no length was entered.</p>
+        <p id="totals-note" class="load-note" hidden>Training totals are for the dog picked above. Exercises aren't tied to a dog, so they include everything.</p>
+    </section>
+
+    <!-- one Logs card: sessions and exercises behind tabs, newest first, with an optional date filter -->
+    <section class="page-section load-logs">
+        <h2 class="section-title">Logs</h2>
+        <div class="load-tabs" role="tablist" aria-label="Logs">
+            <button type="button" role="tab" id="tab-sessions" class="load-tab" aria-controls="panel-sessions" aria-selected="true">Sessions</button>
+            <button type="button" role="tab" id="tab-exercises" class="load-tab" aria-controls="panel-exercises" aria-selected="false" tabindex="-1">Exercises</button>
+        </div>
+
+        <div role="tabpanel" id="panel-sessions" class="load-panel" aria-labelledby="tab-sessions">
+            <div class="load-filter">
+                <label for="date">Filter by date</label>
+                <input type="date" id="date" name="date">
+                <button type="button" id="date-clear" class="hide-btn" hidden>Show all</button>
             </div>
-            <p class="subhead viewing-dog-note">Shows only this dog's sessions in the table, graphs and timeline below.</p>
-        </div>
-
-        <div>
-            <p>Ready to log a new session?</p>
-            <a class="save-btn" href="log.html">Log Training Session</a>
-        </div>
-
-        <div>
-            <p class="subhead">Testing: fill in some random sessions and exercises to try out this page.</p>
-            <button type="button" id="seed-test-data" class="hide-btn">Generate Test Data</button>
-        </div>
-
-        <p>Select the date of a previous training session:</p>
-        <div>
-            <label for="date">Select a date:</label>
-            <input type="date" id="date" name="date">
-            <button id="load" type="button">Load Session Info</button>
-
-            <!-- select logs per page-->
-            <label for="page-size">Logs per page:</label>
-            <select id="page-size">
-                <option value="5">5</option>
-                <option value="10" selected>10</option>
-                <option value="15">15</option>
-            </select>
-        </div>
-
-        <div class="table-wrap">
-            <table id="data-table">
-                <thead>
-                    <tr>
-                        <th>Command</th>
-                        <th>Repetition(s)</th>
-                        <th>Duration</th>
-                        <th>Location</th>
-                        <th>Weather</th>
-                        <th>Score</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Notes</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="data-table-body">
-                </tbody>
-            </table>
-        </div>
-        <div class="pagination" id="pagination">
-            <button type="button" id="prev-page" disabled>&larr; Previous</button>
-            <label for="page-select">Page</label>
-            <select id="page-select" disabled></select>
-            <span id="page-total-label"></span>
-            <button type="button" id="next-page" disabled>Next &rarr;</button>
-        </div>
-    </details>
-
-    <details open>
-        <summary class="collapsible-toggle"><h1>Exercise Log</h1></summary>
-        <p>Select the date of a previous exercise, or leave blank to see all:</p>
-        <div>
-            <label for="exercise-date">Select a date:</label>
-            <input type="date" id="exercise-date" name="exercise-date">
-            <button id="load-exercises" type="button">Load Exercise Info</button>
-
-            <!-- select logs per page-->
-            <label for="exercise-page-size">Logs per page:</label>
-            <select id="exercise-page-size">
-                <option value="5">5</option>
-                <option value="10" selected>10</option>
-                <option value="15">15</option>
-            </select>
-        </div>
-
-        <div class="table-wrap">
-            <table id="exercise-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Duration</th>
-                        <th>Notes</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="exercise-table-body">
-                </tbody>
-            </table>
-        </div>
-        <div class="pagination" id="exercise-pagination">
-            <button type="button" id="exercise-prev-page" disabled>&larr; Previous</button>
-            <label for="exercise-page-select">Page</label>
-            <select id="exercise-page-select" disabled></select>
-            <span id="exercise-page-total-label"></span>
-            <button type="button" id="exercise-next-page" disabled>Next &rarr;</button>
-        </div>
-    </details>
-
-    <details open>
-        <summary class="collapsible-toggle"><h1>Training Totals</h1></summary>
-        <p class="subhead">Training time uses each session's length (Session Duration), or its Duration when no length was entered.</p>
-        <p id="totals-note" class="subhead" hidden>Training totals are for the dog picked in Switch dog. Exercises aren't tied to a dog, so they include everything.</p>
-        <div class="page-section graph-area">
-            <div id="totals-tiles" class="stat-row"></div>
-        </div>
-    </details>
-
-    <details open>
-        <summary class="collapsible-toggle"><h1>Training Graphs</h1></summary>
-        <p>Select a command and a metric to view over time:</p>
-
-        <div class="page-section">
-            <div class="field-row">
-                <label for="graph-command">Command:</label>
-                <select id="graph-command" name="graph-command"></select>
-                <label for="graph-metric">Metric:</label>
-                <select id="graph-metric" name="graph-metric">
-                    <option value="repetitions">Repetitions</option>
-                    <option value="duration">Duration</option>
-                    <option value="both" selected>Both</option>
-                </select>
+            <!-- location, weather and notes open under a row with its ▸ button; on phones each row becomes a card -->
+            <div class="table-wrap">
+                <table id="data-table" class="log-table">
+                    <thead>
+                        <tr>
+                            <th class="col-toggle"><span class="visually-hidden">More</span></th>
+                            <th>Command</th>
+                            <th>Reps</th>
+                            <th>Duration</th>
+                            <th>Score</th>
+                            <th>When</th>
+                            <th class="col-actions"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body">
+                    </tbody>
+                </table>
             </div>
-            <div class="field-row">
-                <label for="graph-timeframe">Group by:</label>
-                <select id="graph-timeframe" name="graph-timeframe">
-                    <option value="daily">Day</option>
-                    <option value="monthly" selected>Month</option>
-                    <option value="yearly">Yearly</option>
-                    <option value="all">All Time</option>
-                </select>
-                <label for="graph-day-picker" id="graph-day-picker-label" hidden>Day:</label>
-                <input type="date" id="graph-day-picker" hidden>
-                <label for="graph-month-picker" id="graph-month-picker-label">Month:</label>
-                <input type="month" id="graph-month-picker">
-                <label for="graph-year-picker" id="graph-year-picker-label" hidden>Year:</label>
-                <input type="number" id="graph-year-picker" min="2000" max="2100" step="1" hidden>
+            <div class="pagination" id="pagination">
+                <button type="button" id="prev-page" disabled>&larr; Previous</button>
+                <span class="pagination-pages">
+                    <label for="page-select">Page</label>
+                    <select id="page-select" disabled></select>
+                    <span id="page-total-label"></span>
+                </span>
+                <span class="pagination-size">
+                    <label for="page-size">Per page</label>
+                    <select id="page-size">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="15">15</option>
+                    </select>
+                </span>
+                <button type="button" id="next-page" disabled>Next &rarr;</button>
             </div>
-            <div class="field-row">
-                <label for="graph-chart-type">Chart type:</label>
-                <select id="graph-chart-type" name="graph-chart-type">
-                    <option value="auto" selected>Auto</option>
-                    <option value="bar">Bar</option>
-                    <option value="line">Line</option>
-                </select>
-                <button id="graph-command-button" type="button" class="save-btn">View Data Over Time</button>
+            <!-- only shown when running locally (load.js), so real users can't add fake data by accident -->
+            <p id="load-test-data" class="load-test-data" hidden>
+                <span>Testing: fill in some random sessions and exercises to try out this page.</span>
+                <button type="button" id="seed-test-data" class="hide-btn">Generate Test Data</button>
+            </p>
+        </div>
+
+        <div role="tabpanel" id="panel-exercises" class="load-panel" aria-labelledby="tab-exercises" hidden>
+            <div class="load-filter">
+                <label for="exercise-date">Filter by date</label>
+                <input type="date" id="exercise-date" name="exercise-date">
+                <button type="button" id="exercise-date-clear" class="hide-btn" hidden>Show all</button>
+            </div>
+            <div class="table-wrap">
+                <table id="exercise-table" class="log-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Duration</th>
+                            <th>Notes</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th class="col-actions"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="exercise-table-body">
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="exercise-pagination">
+                <button type="button" id="exercise-prev-page" disabled>&larr; Previous</button>
+                <span class="pagination-pages">
+                    <label for="exercise-page-select">Page</label>
+                    <select id="exercise-page-select" disabled></select>
+                    <span id="exercise-page-total-label"></span>
+                </span>
+                <span class="pagination-size">
+                    <label for="exercise-page-size">Per page</label>
+                    <select id="exercise-page-size">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="15">15</option>
+                    </select>
+                </span>
+                <button type="button" id="exercise-next-page" disabled>Next &rarr;</button>
             </div>
         </div>
+    </section>
 
-        <div class="page-section graph-area" id="graph-area">
-            <div id="tester" class="graph-plot"></div>
-            <div id="graph-stat-summary" class="stat-row" hidden></div>
+    <!-- one Progress card, three charts behind tabs; each draws when its tab opens or an option changes -->
+    <section class="page-section load-progress">
+        <h2 class="section-title">Progress</h2>
+        <div class="load-tabs" role="tablist" aria-label="Charts">
+            <button type="button" role="tab" id="tab-command" class="load-tab" aria-controls="panel-command" aria-selected="true">Command over time</button>
+            <button type="button" role="tab" id="tab-time" class="load-tab" aria-controls="panel-time" aria-selected="false" tabindex="-1">Training &amp; exercise time</button>
+            <button type="button" role="tab" id="tab-timeline" class="load-tab" aria-controls="panel-timeline" aria-selected="false" tabindex="-1">Timeline</button>
         </div>
-    </details>
 
-    <details open>
-        <summary class="collapsible-toggle"><h1>Training &amp; Exercise Time</h1></summary>
-        <p>Choose how to group your training and exercise time:</p>
-
-        <div class="page-section">
-            <div class="field-row">
-                <label for="totals-group">Group by:</label>
-                <select id="totals-group">
-                    <option value="daily">Daily (last 30 days)</option>
-                    <option value="weekly" selected>Weekly (last 12 weeks)</option>
-                    <option value="monthly">Monthly (last 12 months)</option>
-                    <option value="yearly">Yearly</option>
-                </select>
+        <div role="tabpanel" id="panel-command" class="load-panel" aria-labelledby="tab-command">
+            <div class="load-options">
+                <div class="load-option">
+                    <label for="graph-command">Command</label>
+                    <select id="graph-command" name="graph-command"></select>
+                </div>
+                <div class="load-option">
+                    <label for="graph-metric">Metric</label>
+                    <select id="graph-metric" name="graph-metric">
+                        <option value="repetitions">Repetitions</option>
+                        <option value="duration">Duration</option>
+                        <option value="both" selected>Both</option>
+                    </select>
+                </div>
+                <div class="load-option">
+                    <label for="graph-timeframe">Group by</label>
+                    <select id="graph-timeframe" name="graph-timeframe">
+                        <option value="daily">Day</option>
+                        <option value="monthly" selected>Month</option>
+                        <option value="yearly">Year</option>
+                        <option value="all">All time</option>
+                    </select>
+                </div>
+                <div class="load-option">
+                    <label for="graph-day-picker" id="graph-day-picker-label" hidden>Day</label>
+                    <input type="date" id="graph-day-picker" hidden>
+                    <label for="graph-month-picker" id="graph-month-picker-label">Month</label>
+                    <input type="month" id="graph-month-picker">
+                    <label for="graph-year-picker" id="graph-year-picker-label" hidden>Year</label>
+                    <input type="number" id="graph-year-picker" min="2000" max="2100" step="1" hidden>
+                </div>
+                <div class="load-option">
+                    <label for="graph-chart-type">Chart</label>
+                    <select id="graph-chart-type" name="graph-chart-type">
+                        <option value="auto" selected>Auto</option>
+                        <option value="bar">Bar</option>
+                        <option value="line">Line</option>
+                    </select>
+                </div>
             </div>
-            <div class="field-row">
-                <label for="totals-show">Show:</label>
-                <select id="totals-show">
-                    <option value="both" selected>Training &amp; exercise</option>
-                    <option value="training">Training time</option>
-                    <option value="exercise">Exercise time</option>
-                </select>
-                <label for="totals-chart-type">Chart type:</label>
-                <select id="totals-chart-type">
-                    <option value="bar" selected>Bar</option>
-                    <option value="line">Line</option>
-                </select>
-            </div>
-        </div>
-        <div class="page-section graph-area" id="totals-area">
-            <div id="totals-chart" class="graph-plot"></div>
-        </div>
-    </details>
-
-    <details open>
-        <summary class="collapsible-toggle"><h1>Command History Timeline</h1></summary>
-        <p>Each bar shows a stretch of practice for a command. A gap means the command wasn't practiced for a while.</p>
-
-        <div class="page-section">
-            <div class="field-row">
-                <label for="gantt-break">Show a break after:</label>
-                <select id="gantt-break">
-                    <option value="3">3 days without practice</option>
-                    <option value="7" selected>1 week without practice</option>
-                    <option value="14">2 weeks without practice</option>
-                    <option value="30">1 month without practice</option>
-                </select>
-                <button type="button" id="gantt-refresh" class="save-btn">Refresh Timeline</button>
+            <div class="graph-area" id="graph-area">
+                <div id="tester" class="graph-plot"></div>
+                <div id="graph-stat-summary" class="stat-row" hidden></div>
             </div>
         </div>
 
-        <div class="page-section graph-area" id="gantt-area">
-            <div id="gantt-chart" class="graph-plot"></div>
-            <div id="gantt-hover-badge" class="gantt-hover-badge" hidden></div>
+        <div role="tabpanel" id="panel-time" class="load-panel" aria-labelledby="tab-time" hidden>
+            <div class="load-options">
+                <div class="load-option">
+                    <label for="totals-group">Group by</label>
+                    <select id="totals-group">
+                        <option value="daily">Daily (last 30 days)</option>
+                        <option value="weekly" selected>Weekly (last 12 weeks)</option>
+                        <option value="monthly">Monthly (last 12 months)</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <div class="load-option">
+                    <label for="totals-show">Show</label>
+                    <select id="totals-show">
+                        <option value="both" selected>Training &amp; exercise</option>
+                        <option value="training">Training time</option>
+                        <option value="exercise">Exercise time</option>
+                    </select>
+                </div>
+                <div class="load-option">
+                    <label for="totals-chart-type">Chart</label>
+                    <select id="totals-chart-type">
+                        <option value="bar" selected>Bar</option>
+                        <option value="line">Line</option>
+                    </select>
+                </div>
+            </div>
+            <div class="graph-area" id="totals-area">
+                <div id="totals-chart" class="graph-plot"></div>
+            </div>
         </div>
-    </details>
+
+        <div role="tabpanel" id="panel-timeline" class="load-panel" aria-labelledby="tab-timeline" hidden>
+            <p class="load-note">Each bar is a stretch of practice for a command. A gap means it wasn't practiced for a while.</p>
+            <div class="load-options">
+                <div class="load-option">
+                    <label for="gantt-break">Show a break after</label>
+                    <select id="gantt-break">
+                        <option value="3">3 days without practice</option>
+                        <option value="7" selected>1 week without practice</option>
+                        <option value="14">2 weeks without practice</option>
+                        <option value="30">1 month without practice</option>
+                    </select>
+                </div>
+            </div>
+            <div class="graph-area" id="gantt-area">
+                <div id="gantt-chart" class="graph-plot"></div>
+                <div id="gantt-hover-badge" class="gantt-hover-badge" hidden></div>
+            </div>
+        </div>
+    </section>
 
 </body>
 
