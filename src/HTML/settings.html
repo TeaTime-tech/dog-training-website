@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- before the styles, so the saved light/dark theme applies from the first paint -->
+    <script src="../JS/shared/theme.js"></script>
     <title>Settings</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&display=swap" rel="stylesheet">
@@ -71,6 +73,19 @@
     </section>
 
     <section class="page-section settings-card">
+        <h2 class="section-title">Appearance</h2>
+        <div class="settings-row">
+            <label for="theme-choice">Theme</label>
+            <select id="theme-choice">
+                <option value="">Match my device</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+        <p class="settings-hint">Saved on this device. The sun/moon button in the top bar switches it too.</p>
+    </section>
+
+    <section class="page-section settings-card">
         <h2 class="section-title">Units</h2>
         <p class="settings-note">Weights on My Dogs and in each dog's chart show in this unit.</p>
         <div class="settings-row">
@@ -106,7 +121,6 @@
             <li>Profile picture</li>
             <li>Language</li>
             <li>Date format</li>
-            <li>Light and dark theme</li>
             <li>Email notifications</li>
             <li>Vaccination and health reminders</li>
             <li>Privacy settings</li>

@@ -96,7 +96,7 @@
   display: inline-block;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--moss-dark);
+  color: var(--accent-text);
   cursor: pointer;
   list-style: none;
 }
@@ -143,7 +143,7 @@
 .total-time-display {
   margin: 0.5rem 0 0;
   font-weight: 600;
-  color: var(--moss-dark);
+  color: var(--accent-text);
 }
 
 /* shown under the Session card when the command hides some fields */
@@ -176,7 +176,7 @@
 #save-message {
   margin: 0;
   font-weight: 600;
-  color: var(--moss-dark);
+  color: var(--accent-text);
 }
 
 .log-save .home-link {

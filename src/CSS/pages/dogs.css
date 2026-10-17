@@ -15,7 +15,7 @@
 
 /* the "Log in" link when signed out, in the site's green like other status links */
 .dogs-status a {
-  color: var(--moss-dark);
+  color: var(--accent-text);
   font-weight: 600;
 }
 
@@ -72,14 +72,14 @@
   padding: 0.1875rem 0.625rem;
   border-radius: 999px;
   background: var(--clay);
-  color: var(--moss-dark);
+  color: var(--accent-text);
   font-size: 0.8125rem;
   font-weight: 600;
 }
 
 .dog-card--current .current-dog-badge {
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .dog-meta {

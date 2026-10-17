@@ -3,7 +3,7 @@
 .dog-chart-back {
   display: inline-block;
   margin: 0.5rem 0 0.25rem;
-  color: var(--moss-dark);
+  color: var(--accent-text);
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
@@ -27,7 +27,7 @@
 }
 
 .dog-chart-status a {
-  color: var(--moss-dark);
+  color: var(--accent-text);
   font-weight: 600;
 }
 
@@ -118,7 +118,7 @@
   padding: 0.3125rem 0.8125rem;
   border: 1px solid var(--clay);
   border-radius: 999px;
-  background: var(--white);
+  background: var(--surface);
   color: var(--ink);
   font-size: 0.875rem;
   cursor: pointer;
@@ -132,7 +132,7 @@
 .dog-chart-chip[aria-pressed="true"] {
   border-color: var(--moss);
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 /* a check mark on picked bubbles, so "on" doesn't rely on color alone */
@@ -229,7 +229,7 @@
   border: 1px dashed var(--moss);
   border-radius: 999px;
   background: none;
-  color: var(--moss-dark);
+  color: var(--accent-text);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -238,7 +238,7 @@
 .dog-chart-add:hover {
   border-style: solid;
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 /* vaccines due within 30 days (brass) or overdue (red), at the top of Health & Vet */
@@ -264,7 +264,7 @@
 
 .dog-chart-alert--overdue {
   background: var(--danger);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 /* save bar: sticks to the bottom of the screen while the chart scrolls */

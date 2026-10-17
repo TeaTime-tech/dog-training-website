@@ -9,8 +9,8 @@
   margin: 1rem 0 1.5rem;
   padding: 2rem 1.75rem;
   border-radius: 1.25rem;
-  background: linear-gradient(135deg, var(--moss-dark) 0%, var(--ink) 100%);
-  color: var(--white);
+  background: linear-gradient(135deg, var(--hero-start) 0%, var(--hero-end) 100%);
+  color: var(--on-accent);
   box-shadow: var(--shadow-raised);
 }
 
@@ -19,7 +19,7 @@
   margin: 0 0 0.75rem;
   font-size: 2.125rem;
   line-height: 1.15;
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .home-hero-lead {
@@ -27,7 +27,7 @@
   margin: 0 0 1.25rem;
   font-size: 1.0625rem;
   line-height: 1.55;
-  color: var(--white);
+  color: var(--on-accent);
   opacity: 0.9;
 }
 
@@ -39,7 +39,7 @@
   gap: 0.375rem;
   min-width: 12rem;
   text-align: center;
-  color: var(--white);
+  color: var(--on-accent);
   transition: opacity 0.15s ease;
 }
 
@@ -55,7 +55,8 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--brass-light);
+  color: var(--on-accent);
+  opacity: 0.8;
 }
 
 .home-dog-switch {
@@ -124,18 +125,18 @@
 .home-dog-today {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--white);
+  color: var(--on-accent);
   opacity: 0.88;
   transition: opacity 0.15s ease;
 }
 
 .home-dog-today a {
-  color: var(--white);
+  color: var(--on-accent);
   font-weight: 700;
 }
 
 .home-dog-today a:hover {
-  color: var(--brass-light);
+  color: var(--on-accent);
 }
 
 .home-dog-arrow {
@@ -148,7 +149,7 @@
   border: 2px solid rgba(255, 255, 255, 0.7);
   border-radius: 50%;
   background: transparent;
-  color: var(--white);
+  color: var(--on-accent);
   font-size: 1.375rem;
   font-weight: 700;
   line-height: 1;
@@ -157,9 +158,9 @@
 }
 
 .home-dog-arrow:hover {
-  border-color: var(--white);
-  background: var(--white);
-  color: var(--moss-dark);
+  border-color: var(--on-accent);
+  background: var(--on-accent);
+  color: var(--hero-start);
 }
 
 .home-dog-arrow:focus-visible {
@@ -180,10 +181,10 @@
 .home-cta {
   display: inline-block;
   padding: 0.6875rem 1.375rem;
-  border: 2px solid var(--white);
+  border: 2px solid var(--on-accent);
   border-radius: 999px;
-  background: var(--white);
-  color: var(--moss-dark);
+  background: var(--on-accent);
+  color: var(--hero-start);
   font-size: 0.9375rem;
   font-weight: 700;
   text-decoration: none;
@@ -191,18 +192,18 @@
 }
 
 .home-cta:hover {
-  color: var(--ink);
+  color: var(--hero-end);
   transform: translateY(-1px);
 }
 
 .home-cta--ghost {
   background: transparent;
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .home-cta--ghost:hover {
-  background: var(--white);
-  color: var(--moss-dark);
+  background: var(--on-accent);
+  color: var(--hero-start);
 }
 
 .home-cta:focus-visible {
@@ -244,7 +245,7 @@
   padding: 1rem 1.125rem;
   border: 1px solid var(--clay);
   border-radius: 0.875rem;
-  background: var(--white);
+  background: var(--surface);
   color: var(--ink);
   text-decoration: none;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
@@ -272,7 +273,7 @@
   height: 2.75rem;
   border-radius: 50%;
   background: var(--bg);
-  color: var(--moss-dark);
+  color: var(--accent-text);
 }
 
 .home-tile--brass .home-tile-icon {

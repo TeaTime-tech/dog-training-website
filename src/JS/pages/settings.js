@@ -131,6 +131,16 @@ document.getElementById("change-password").addEventListener("click", () => withA
     showStatus(accountStatus, "Password updated.");
 }));
 
+/* theme: follow the device, or always light / dark (theme.js does the work) */
+
+const themeChoiceSelect = document.getElementById("theme-choice");
+themeChoiceSelect.value = getThemeChoice();
+themeChoiceSelect.addEventListener("change", () => setThemeChoice(themeChoiceSelect.value));
+// the top bar button changed it
+window.addEventListener("themechange", () => {
+    themeChoiceSelect.value = getThemeChoice();
+});
+
 /* weight and distance units: saved in this browser when "Save Settings" is clicked.
    The weight unit is what My Dogs and the dog chart show weights in (getWeightUnit in dogs.js) */
 

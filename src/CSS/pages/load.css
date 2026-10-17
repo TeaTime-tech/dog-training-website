@@ -20,7 +20,7 @@
   padding: 0.3125rem 0.875rem 0.3125rem 0.625rem;
   border: 1px solid var(--clay);
   border-radius: 999px;
-  background: var(--white);
+  background: var(--surface);
   color: var(--ink);
   font-size: 0.9375rem;
   font-weight: 600;
@@ -157,7 +157,7 @@
 .load-tab[aria-selected="true"] {
   border-color: var(--moss);
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .load-tab:focus-visible {
@@ -217,7 +217,7 @@
 
 .pagination button:hover:not(:disabled) {
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .pagination button:disabled {
@@ -237,7 +237,7 @@
 #exercise-table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--white);
+  background: var(--surface);
   font-size: 0.875rem;
 }
 
@@ -312,7 +312,7 @@
   width: 4.75rem;
   height: 4.75rem;
   border-radius: 50%;
-  background: var(--white);
+  background: var(--surface);
   color: var(--moss);
   text-align: center;
   pointer-events: none;
@@ -386,7 +386,7 @@
   border: 1px solid var(--clay);
   border-radius: 50%;
   background: none;
-  color: var(--moss-dark);
+  color: var(--accent-text);
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
@@ -495,11 +495,11 @@
     padding: 0.75rem 0.875rem;
     border: 1px solid var(--clay);
     border-radius: 0.75rem;
-    background: var(--white);
+    background: var(--surface);
   }
 
   .log-table tbody tr:hover {
-    background: var(--white);
+    background: var(--surface);
   }
 
   #data-table tbody td,

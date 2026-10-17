@@ -18,6 +18,45 @@
   margin-left: auto;
 }
 
+/* light/dark switch (theme.js adds it), on the right before the account links */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-left: auto;
+  padding: 0;
+  border: 1px solid var(--clay);
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: var(--clay);
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid var(--brass);
+  outline-offset: 2px;
+}
+
+.theme-toggle svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-toggle + .top-nav-links {
+  margin-left: 0;
+}
+
 /* site name with a small paw; links home */
 .nav-brand {
   display: inline-flex;
@@ -30,7 +69,7 @@
 }
 
 .nav-brand:hover {
-  color: var(--moss-dark);
+  color: var(--accent-text);
 }
 
 .nav-brand svg {
@@ -89,7 +128,7 @@
   padding: 0.5rem;
   border: 1px solid var(--clay);
   border-radius: 0.625rem;
-  background: var(--white);
+  background: var(--surface);
   box-shadow: var(--shadow-pop);
 }
 
@@ -121,7 +160,7 @@
   margin-bottom: 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--moss-dark);
+  color: var(--accent-text);
   text-decoration: none;
 }
 

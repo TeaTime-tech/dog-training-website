@@ -21,7 +21,7 @@
   border: none;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.16);
-  color: var(--white);
+  color: var(--on-accent);
   font-size: 0.75rem;
   line-height: 1;
   cursor: pointer;
@@ -43,7 +43,7 @@
   gap: 0.625rem;
   padding: 0.5rem 0.625rem;
   width: max-content;
-  background: var(--white);
+  background: var(--surface);
   border-radius: 999px;
   box-shadow: var(--shadow-pop);
 }
@@ -67,7 +67,7 @@
   border: none;
   border-radius: 999px;
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
@@ -88,8 +88,8 @@
   padding: 1.5rem;
   max-width: none;
   border-radius: 1.25rem;
-  background: linear-gradient(135deg, var(--moss-dark) 0%, var(--ink) 100%);
-  color: var(--white);
+  background: linear-gradient(135deg, var(--hero-start) 0%, var(--hero-end) 100%);
+  color: var(--on-accent);
   box-shadow: var(--shadow-raised);
 }
 
@@ -114,7 +114,7 @@
 
 .today-ring-progress {
   fill: none;
-  stroke: var(--white);
+  stroke: var(--on-accent);
   stroke-width: 10;
   stroke-linecap: round;
   stroke-dasharray: 326.7256;
@@ -167,7 +167,7 @@
 }
 
 .today-date:hover {
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 /* dog pills in the hero: outlined in white, the picked one filled white */
@@ -187,7 +187,7 @@
   border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 999px;
   background: transparent;
-  color: var(--white);
+  color: var(--on-accent);
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
@@ -195,13 +195,13 @@
 }
 
 .today-dog-chip:hover {
-  border-color: var(--white);
+  border-color: var(--on-accent);
 }
 
 .today-dog-chip[aria-checked="true"] {
-  border-color: var(--white);
-  background: var(--white);
-  color: var(--moss-dark);
+  border-color: var(--on-accent);
+  background: var(--on-accent);
+  color: var(--hero-start);
 }
 
 .today-dog-chip:focus-visible {
@@ -213,7 +213,7 @@
   margin: 0 0 0.25rem;
   font-size: 1.625rem;
   font-weight: 700;
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .today-cta {
@@ -221,15 +221,15 @@
   width: fit-content;
   padding: 0.625rem 1.25rem;
   border-radius: 999px;
-  background: var(--white);
-  color: var(--moss-dark);
+  background: var(--on-accent);
+  color: var(--hero-start);
   font-weight: 700;
   font-size: 0.875rem;
   text-decoration: none;
 }
 
 .today-cta:hover {
-  background: var(--clay);
+  filter: brightness(0.93);
 }
 
 /* Stat tiles (styles in base.css) */
@@ -243,7 +243,7 @@
   margin: 0 0 1.5rem;
   padding: 1.125rem 1.25rem;
   max-width: none;
-  background: var(--white);
+  background: var(--surface);
   border-radius: 0.875rem;
   box-shadow: var(--shadow-card);
 }
@@ -317,7 +317,7 @@
 .today-section-card {
   max-width: none;
   margin: 0 0 1.5rem;
-  background: var(--white);
+  background: var(--surface);
   border-radius: 0.875rem;
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -373,7 +373,7 @@
 /* while collapsed, the summary becomes its own white tile like the rest of the page's cards */
 .today-section:not([open]) > .today-collapsible-toggle {
   padding: 0.875rem 1.125rem;
-  background: var(--white);
+  background: var(--surface);
   border-radius: 0.875rem;
   box-shadow: var(--shadow-card);
 }
@@ -459,7 +459,7 @@
   padding: 0.3125rem 0.75rem;
   border-radius: 999px;
   background: var(--clay);
-  color: var(--moss-dark);
+  color: var(--accent-text);
   font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
@@ -472,7 +472,7 @@
 
 .today-session-chip--score {
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .today-empty-state {

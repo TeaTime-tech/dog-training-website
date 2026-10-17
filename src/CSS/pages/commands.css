@@ -40,7 +40,7 @@
 
 .command-tiles button:hover {
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 /* "Add a new command": a search-engine style pill box with a suggestion dropdown */
@@ -54,7 +54,7 @@
   padding: 0 0.5rem 0 0.875rem;
   border: 1px solid var(--clay);
   border-radius: 1.375rem;
-  background: var(--white);
+  background: var(--surface);
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
@@ -122,7 +122,7 @@
   padding: 0 0 0.5rem;
   list-style: none;
   border-radius: 0 0 1.375rem 1.375rem;
-  background: var(--white);
+  background: var(--surface);
   box-shadow: var(--shadow-pop);
   clip-path: inset(0 -1.5rem -1.5rem -1.5rem);
 }
@@ -223,7 +223,7 @@
   height: 1.25rem;
   border-radius: 50%;
   background: var(--clay);
-  color: var(--moss-dark);
+  color: var(--accent-text);
   font-weight: 700;
   line-height: 1.25rem;
   text-align: center;
@@ -231,7 +231,7 @@
 
 .command-suggestion-chips button:hover .command-suggestion-plus {
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 /* tiles on other pages of the Commands card */
@@ -242,7 +242,7 @@
 /* the tile whose actions are open */
 .command-tiles button[aria-pressed="true"] {
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 /* Log / Delete choices for the clicked tile */
@@ -255,7 +255,7 @@
   padding: 0.75rem 0.875rem;
   border: 1px solid var(--clay);
   border-radius: 0.625rem;
-  background: var(--white);
+  background: var(--surface);
 }
 
 .command-actions[hidden] {
@@ -303,7 +303,7 @@
 
 /* Clear Command History card */
 .clear-history-dog-link {
-  color: var(--moss-dark);
+  color: var(--accent-text);
   font-weight: 600;
 }
 
@@ -375,7 +375,7 @@
   max-width: 30rem;
   border: 1px solid var(--clay);
   border-radius: 0.75rem;
-  background: var(--white);
+  background: var(--surface);
 }
 
 .cgc-checklist {
@@ -418,7 +418,7 @@
 
 .cgc-log-btn:hover {
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .cgc-summary-toggle {
@@ -487,12 +487,12 @@
 
 .cgc-attempt-pass .cgc-attempt-result {
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .cgc-attempt-fail .cgc-attempt-result {
   background: var(--brass);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .cgc-attempt-notes {
@@ -514,7 +514,7 @@
   border: 1px solid var(--clay);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  background: var(--white);
+  background: var(--surface);
   color: var(--ink);
 }
 
@@ -663,7 +663,7 @@
 }
 
 .mastery-status a {
-  color: var(--moss-dark);
+  color: var(--accent-text);
   font-weight: 600;
 }
 
@@ -697,7 +697,7 @@
 .mastery-level-name {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--moss-dark);
+  color: var(--accent-text);
 }
 
 .mastery-level-name--none {
@@ -758,7 +758,7 @@
 
 .mastery-pager-arrow:hover:not(:disabled) {
   background: var(--moss);
-  color: var(--white);
+  color: var(--on-accent);
 }
 
 .mastery-pager-arrow:disabled {

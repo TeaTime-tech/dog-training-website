@@ -893,13 +893,49 @@ function withDefaultChartFonts(layout) {
     return filled;
 }
 
-// draw (or redraw) a chart at the page's current size; returns Plotly's promise
+// the charts are written with the light colors; each is swapped for its token's current value (dark mode)
+const CHART_COLOR_TOKENS = {
+    "#2f4030": "--ink",
+    "#5a7a4e": "--moss",
+    "#b8925a": "--brass",
+    "#e8dfc9": "--clay",
+    "#6b6456": "--muted",
+    "#fffdf8": "--surface",
+};
+
+// a copy of a layout or trace list with its colors matched to the current theme
+function themeChartColors(value) {
+    if (Array.isArray(value)) return value.map(themeChartColors);
+    if (value && typeof value === "object") {
+        return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, themeChartColors(child)]));
+    }
+    const token = typeof value === "string" && CHART_COLOR_TOKENS[value.toLowerCase()];
+    if (token) {
+        const themed = window.getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+        return themed || value;
+    }
+    return value;
+}
+
+// redraw one chart from its saved layout at the current size and theme
+function drawChart(chartEl, scale = chartScale()) {
+    const { data, layout, config } = chartEl.chartBase;
+    return Plotly.react(chartEl, themeChartColors(scaleChartSizes(data, scale)), themeChartColors(scaleChartSizes(layout, scale)), config);
+}
+
+// draw (or redraw) a chart at the page's current size and theme; returns Plotly's promise
 function plotChart(chartEl, data, layout, config = GRAPH_CONFIG) {
     chartEl.chartBase = { data, layout: withDefaultChartFonts(layout), config };
     plottedCharts.add(chartEl);
-    const scale = chartScale();
-    return Plotly.react(chartEl, scaleChartSizes(data, scale), scaleChartSizes(chartEl.chartBase.layout, scale), config);
+    return drawChart(chartEl);
 }
+
+// light/dark switched: redraw every chart in the new colors
+window.addEventListener("themechange", () => {
+    plottedCharts.forEach((chartEl) => {
+        if (chartEl.isConnected && chartEl.chartBase && typeof Plotly !== "undefined") drawChart(chartEl);
+    });
+});
 
 // when the window changes size enough to change the page's scale, redraw every chart at the new size
 let lastChartScale = chartScale();
@@ -912,8 +948,7 @@ window.addEventListener("resize", () => {
         lastChartScale = scale;
         plottedCharts.forEach((chartEl) => {
             if (!chartEl.isConnected || !chartEl.chartBase) return;
-            const { data, layout, config } = chartEl.chartBase;
-            Plotly.react(chartEl, scaleChartSizes(data, scale), scaleChartSizes(layout, scale), config);
+            drawChart(chartEl, scale);
         });
     }, 150);
 });
