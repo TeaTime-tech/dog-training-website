@@ -38,12 +38,96 @@ async function loadAccountSettings() {
     }
 
     const metadata = user.user_metadata || {};
+    showAvatarPreview(user);
     displayNameInput.value = metadata.display_name || metadata.username || "";
     emailChangeInput.placeholder = `Current: ${user.email}`;
     showStatus(accountStatus, "");
     accountFields.disabled = false;
     return user;
 }
+
+/* profile picture: shrink the chosen photo to a 256 x 256 JPEG in the browser, then save it to the account
+   (setAccountAvatar in accountNav.js also updates the top bar) */
+
+const avatarPreview = document.getElementById("avatar-preview");
+const avatarInput = document.getElementById("avatar-input");
+const avatarRemoveButton = document.getElementById("avatar-remove");
+const avatarStatus = document.getElementById("avatar-status");
+const AVATAR_SIZE = 256;
+
+const showAvatarStatus = (text, isError) => {
+    avatarStatus.textContent = text;
+    avatarStatus.classList.toggle("avatar-status--error", Boolean(isError));
+};
+
+// the preview circle: the saved picture or the name's first letter; Remove only when there's a picture
+function showAvatarPreview(user) {
+    const fresh = makeAvatar(user, "avatar avatar--large");
+    avatarPreview.replaceChildren(...fresh.childNodes);
+    avatarRemoveButton.hidden = !getCachedAvatar(user.id);
+}
+
+// a square crop from the middle of an image file, as a JPEG data: URL
+async function shrinkPhoto(file) {
+    const url = URL.createObjectURL(file);
+    try {
+        const image = await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error("That file isn't a picture this browser can open."));
+            img.src = url;
+        });
+        const side = Math.min(image.naturalWidth, image.naturalHeight);
+        const canvas = document.createElement("canvas");
+        canvas.width = AVATAR_SIZE;
+        canvas.height = AVATAR_SIZE;
+        canvas.getContext("2d").drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
+        return canvas.toDataURL("image/jpeg", 0.85);
+    } finally {
+        URL.revokeObjectURL(url);
+    }
+}
+
+avatarInput.addEventListener("change", () => withAccountFieldsLocked(async () => {
+    const file = avatarInput.files[0];
+    avatarInput.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+        showAvatarStatus("Please choose a picture file.", true);
+        return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+        showAvatarStatus("That picture is over 15 MB. Please choose a smaller one.", true);
+        return;
+    }
+    try {
+        showAvatarStatus("Saving...");
+        await setAccountAvatar(await shrinkPhoto(file));
+        showAvatarPreview(await getSignedInUser());
+        showAvatarStatus("Saved.");
+    } catch (error) {
+        console.error("Could not save profile picture:", error);
+        showAvatarStatus(error.message || "Couldn't save that picture.", true);
+    }
+}));
+
+avatarRemoveButton.addEventListener("click", () => withAccountFieldsLocked(async () => {
+    if (!confirm("Remove your profile picture?")) return;
+    try {
+        await setAccountAvatar(null);
+        showAvatarPreview(await getSignedInUser());
+        showAvatarStatus("Removed.");
+    } catch (error) {
+        console.error("Could not remove profile picture:", error);
+        showAvatarStatus(error.message || "Couldn't remove the picture.", true);
+    }
+}));
+
+// the account's picture arrived (accountNav.js loads it after the page opens)
+window.addEventListener("avatarchanged", async () => {
+    const user = await getSignedInUser();
+    if (user) showAvatarPreview(user);
+});
 
 /* change display name: saved in the account_settings table, and on the login's metadata so the nav
    can show it without an extra query */

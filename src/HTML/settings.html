@@ -51,6 +51,17 @@
         <p id="account-status" class="subhead settings-note" role="status">Loading your account...</p>
         <fieldset id="account-fields" class="settings-fields" disabled>
             <div class="settings-row">
+                <label for="avatar-input">Profile picture</label>
+                <!-- settings.js shrinks the chosen photo to a 256 x 256 square and saves it to the account -->
+                <div class="avatar-picker">
+                    <span id="avatar-preview" class="avatar avatar--large" aria-hidden="true"></span>
+                    <input type="file" id="avatar-input" class="visually-hidden" accept="image/*">
+                    <label for="avatar-input" class="secondary-btn avatar-choose">Choose photo</label>
+                    <button type="button" id="avatar-remove" class="hide-btn" hidden>Remove</button>
+                    <span id="avatar-status" class="avatar-status" role="status"></span>
+                </div>
+            </div>
+            <div class="settings-row">
                 <label for="display-name">Display name</label>
                 <input type="text" id="display-name" placeholder="Enter display name...">
                 <button id="change-display-name" type="button" class="secondary-btn">Change Display Name</button>
@@ -118,7 +129,6 @@
         <h2 class="section-title">Coming Soon</h2>
         <p class="settings-note">These settings are on the way:</p>
         <ul class="settings-coming-soon">
-            <li>Profile picture</li>
             <li>Language</li>
             <li>Date format</li>
             <li>Email notifications</li>

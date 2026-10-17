@@ -12,6 +12,50 @@ fieldset:disabled {
   opacity: 0.6;
 }
 
+/* profile picture: a large round preview, Choose photo, Remove */
+.avatar-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.875rem;
+}
+
+.avatar--large {
+  width: 4rem;
+  height: 4rem;
+  font-size: 1.5rem;
+}
+
+/* the row rule stretches buttons to fill their column; this one stays button-sized */
+.settings-row .avatar-picker .avatar-choose {
+  width: auto;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+/* the hidden file input still takes keyboard focus; show it on the button-looking label */
+#avatar-input:focus-visible + .avatar-choose {
+  outline: 3px solid var(--brass);
+  outline-offset: 2px;
+}
+
+fieldset:disabled .avatar-choose {
+  cursor: not-allowed;
+}
+
+.avatar-status {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.avatar-status:empty {
+  display: none;
+}
+
+.avatar-status--error {
+  color: var(--danger);
+}
+
 .settings-note {
   margin: 0 0 0.75rem;
   font-size: 0.9375rem;
