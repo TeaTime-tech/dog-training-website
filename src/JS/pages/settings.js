@@ -1,4 +1,4 @@
-/* settings.html: account and app settings. Needs supabaseClient.js, accountNav.js and mastery.js loaded first. */
+/* settings.html: account and app settings. Needs supabaseClient.js, accountNav.js and dogs.js loaded first. */
 
 // the old local-only password check is gone; drop its leftover hash
 localStorage.removeItem("userPasswordAuth");
@@ -131,37 +131,6 @@ document.getElementById("change-password").addEventListener("click", () => withA
     showStatus(accountStatus, "Password updated.");
 }));
 
-/* mastery decay: the same account setting as the toggle on the commands page */
-
-const masteryDecayToggle = document.getElementById("mastery-decay-toggle");
-const masteryDecayStatus = document.getElementById("mastery-decay-status");
-
-// load the saved setting into the toggle
-async function loadMasteryDecaySetting(user) {
-    if (!user) {
-        showStatus(masteryDecayStatus, "Log in to change this setting.");
-        return;
-    }
-    try {
-        masteryDecayToggle.checked = await getMasteryDecayEnabled();
-        masteryDecayToggle.disabled = false;
-    } catch (error) {
-        console.error("Could not load mastery decay setting:", error);
-        showStatus(masteryDecayStatus, `Couldn't load this setting: ${error.message}`);
-    }
-}
-
-masteryDecayToggle.addEventListener("change", async () => {
-    try {
-        await setMasteryDecayEnabled(masteryDecayToggle.checked);
-        showStatus(masteryDecayStatus, "Saved.");
-    } catch (error) {
-        console.error("Could not save mastery decay setting:", error);
-        masteryDecayToggle.checked = !masteryDecayToggle.checked;
-        showStatus(masteryDecayStatus, `Couldn't save this setting: ${error.message}`);
-    }
-});
-
 /* weight and distance units: saved in this browser when "Save Settings" is clicked.
    The weight unit is what My Dogs and the dog chart show weights in (getWeightUnit in dogs.js) */
 
@@ -244,4 +213,4 @@ document.getElementById("export-data").addEventListener("click", async () => {
     showStatus(exportStatus, user ? "Downloaded." : "Downloaded this browser's data. Log in to include your cloud data too.");
 });
 
-loadAccountSettings().then(loadMasteryDecaySetting);
+loadAccountSettings();
