@@ -500,6 +500,69 @@
   flex-basis: 100%;
 }
 
+/* which dog the checklist is for, and where it's saved */
+.cgc-dog {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--brass-dark);
+}
+
+.cgc-dog:empty {
+  display: none;
+}
+
+.cgc-status {
+  margin: 0.625rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.cgc-status:empty {
+  display: none;
+}
+
+.cgc-status--error {
+  color: var(--danger);
+}
+
+/* the small x that removes a mistaken attempt */
+.cgc-remove-attempt {
+  margin-left: auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cgc-remove-attempt:hover,
+.cgc-remove-attempt:focus-visible {
+  background: var(--clay);
+  color: var(--danger);
+}
+
+/* result and date side by side in the log form */
+.cgc-log-form-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 0.75rem;
+}
+
+.cgc-log-form input[type="date"] {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--clay);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background: var(--surface);
+  color: var(--ink);
+}
+
 .cgc-log-form {
   margin-top: 0.5rem;
   padding: 0.75rem;

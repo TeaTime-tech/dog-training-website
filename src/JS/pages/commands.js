@@ -1,5 +1,5 @@
 /* commands.html: command tiles (with log, notes and delete), the Canine Good Citizen checklist, mastery, and per-command display settings.
-   Needs commandList.js, dogs.js, sessions.js, trainingData.js, mastery.js, commandDisplay.js and commandNotes.js loaded first. */
+   Needs commandList.js, dogs.js, sessions.js, trainingData.js, mastery.js, commandDisplay.js, commandNotes.js and tasklists.js loaded first. */
 
 /*view, add, and hide commands as buttons (commands.html)*/
 /*commands are never deleted from storage, only hidden from view*/
@@ -661,7 +661,8 @@ if (clearHistorySelect) {
 }
 
 /*Canine Good Citizen checklist panel (commands.html)*/
-/*each item tracks a log of pass/fail attempts in localStorage, rather than a single checked state*/
+/*each step keeps a log of pass/fail attempts. Signed in with a dog, the log is saved to the account for that dog
+  (dog_task_attempts, see tasklists.js); signed out, it stays in this browser (localStorage "cgcAttempts")*/
 
 const CGC_CHECKLIST_ITEMS = [
     { id: "cgc-friendly-stranger", name: "Accepting a Friendly Stranger" },
@@ -683,15 +684,37 @@ if (cgcToggleButton && cgcPanel) {
     const cgcChecklist = document.getElementById("cgc-checklist");
     const cgcProgressBar = document.getElementById("cgc-progress-bar");
     const cgcProgressLabel = document.getElementById("cgc-progress-label");
+    const cgcDogLabel = document.getElementById("cgc-dog");
+    const cgcStatus = document.getElementById("cgc-status");
+    const CGC_LOCAL_KEY = "cgcAttempts";
 
-    // read the pass/fail attempt log for all checklist items, keyed by item id
-    function getCgcAttempts() {
-        return JSON.parse(localStorage.getItem("cgcAttempts")) || {};
-    }
+    // where attempts are saved: "local" (this browser) or "account" (the dog you're training)
+    let cgcMode = "local";
+    let cgcDogId = null;
+    // checklist item id -> its task_list_items id in the account
+    const cgcItemIds = new Map();
+    // checklist item id -> [{ id?, date, result, notes }], oldest first
+    let cgcAttempts = {};
+    // rows whose attempt history is open, kept across redraws
+    const openCgcLogs = new Set();
 
-    function saveCgcAttempts(allAttempts) {
-        localStorage.setItem("cgcAttempts", JSON.stringify(allAttempts));
-    }
+    const showCgcStatus = (text, isError) => {
+        cgcStatus.textContent = text;
+        cgcStatus.classList.toggle("cgc-status--error", Boolean(isError));
+    };
+
+    // this browser's attempts (signed out, or saved before accounts kept them)
+    const readLocalCgcAttempts = () => {
+        try {
+            return JSON.parse(localStorage.getItem(CGC_LOCAL_KEY)) || {};
+        } catch {
+            return {};
+        }
+    };
+
+    const saveLocalCgcAttempts = () => {
+        localStorage.setItem(CGC_LOCAL_KEY, JSON.stringify(cgcAttempts));
+    };
 
     // format an ISO date as e.g. "Jan 5"
     function formatCgcDate(isoDate) {
@@ -702,20 +725,64 @@ if (cgcToggleButton && cgcPanel) {
         return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
     }
 
+    const latestCgcAttempt = (attempts) => attempts[attempts.length - 1] || null;
+
     // show the attempt count and most recent result for one checklist item
     function updateCgcSummaryText(summarySpan, attempts) {
         if (attempts.length === 0) {
             summarySpan.textContent = "No attempts yet";
             return;
         }
-        const last = attempts[attempts.length - 1];
+        const last = latestCgcAttempt(attempts);
         const plural = attempts.length === 1 ? "attempt" : "attempts";
         summarySpan.textContent = `${attempts.length} ${plural}, last: ${last.result}, ${formatCgcDate(last.date)}`;
     }
 
-    // render the full attempt history (newest first) for one checklist item
-    function renderCgcAttemptLog(container, attempts) {
+    // update the progress bar/label from items whose most recent attempt passed
+    function updateCgcProgressDisplay() {
+        const passedCount = CGC_CHECKLIST_ITEMS.filter((item) => {
+            const last = latestCgcAttempt(cgcAttempts[item.id] || []);
+            return last && last.result === "pass";
+        }).length;
+        cgcProgressBar.value = passedCount;
+        cgcProgressLabel.textContent = `${passedCount}/${CGC_CHECKLIST_ITEMS.length}`;
+    }
+
+    // after an item's attempts change in the account, mark it complete or not from its latest attempt
+    const syncCgcProgress = async (item) => {
+        if (cgcMode !== "account") return;
+        try {
+            await setTaskProgressFromLatest(cgcDogId, cgcItemIds.get(item.id), latestCgcAttempt(cgcAttempts[item.id] || []));
+        } catch (error) {
+            console.error("Could not update CGC progress:", error);
+        }
+    };
+
+    // save one attempt: to the account (then show it) or to this browser
+    async function addCgcAttempt(item, attempt) {
+        if (cgcMode === "account") {
+            const [saved] = await addTaskAttempts(cgcDogId, [{ itemId: cgcItemIds.get(item.id), ...attempt }]);
+            attempt = { ...attempt, id: saved.id };
+        }
+        const attempts = (cgcAttempts[item.id] || []).concat(attempt)
+            .sort((a, b) => a.date.localeCompare(b.date));
+        cgcAttempts[item.id] = attempts;
+        if (cgcMode === "local") saveLocalCgcAttempts();
+        await syncCgcProgress(item);
+    }
+
+    // remove one attempt (a mistake) from the account or this browser
+    async function removeCgcAttempt(item, attempt) {
+        if (cgcMode === "account" && attempt.id) await deleteTaskAttempt(attempt.id);
+        cgcAttempts[item.id] = (cgcAttempts[item.id] || []).filter((other) => other !== attempt);
+        if (cgcMode === "local") saveLocalCgcAttempts();
+        await syncCgcProgress(item);
+    }
+
+    // render the full attempt history (newest first) for one checklist item, each with a remove button
+    function renderCgcAttemptLog(container, item) {
         container.innerHTML = "";
+        const attempts = cgcAttempts[item.id] || [];
 
         if (attempts.length === 0) {
             const empty = document.createElement("p");
@@ -740,8 +807,25 @@ if (cgcToggleButton && cgcPanel) {
             resultSpan.className = "cgc-attempt-result";
             resultSpan.textContent = attempt.result === "pass" ? "Pass" : "Fail";
 
-            entry.appendChild(dateSpan);
-            entry.appendChild(resultSpan);
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.className = "cgc-remove-attempt";
+            removeButton.textContent = "×";
+            removeButton.setAttribute("aria-label", `Remove the ${resultSpan.textContent.toLowerCase()} on ${dateSpan.textContent}`);
+            removeButton.addEventListener("click", async () => {
+                if (!confirm(`Remove this attempt (${resultSpan.textContent}, ${dateSpan.textContent})?`)) return;
+                removeButton.disabled = true;
+                try {
+                    await removeCgcAttempt(item, attempt);
+                    renderCgc();
+                } catch (error) {
+                    console.error("Could not remove CGC attempt:", error);
+                    showCgcStatus(`Couldn't remove that attempt: ${error.message}`, true);
+                    removeButton.disabled = false;
+                }
+            });
+
+            entry.append(dateSpan, resultSpan, removeButton);
 
             if (attempt.notes) {
                 const notesSpan = document.createElement("span");
@@ -756,20 +840,8 @@ if (cgcToggleButton && cgcPanel) {
         container.appendChild(list);
     }
 
-    // update the progress bar/label from items whose most recent attempt passed
-    function updateCgcProgressDisplay() {
-        const allAttempts = getCgcAttempts();
-        const passedCount = CGC_CHECKLIST_ITEMS.filter((item) => {
-            const attempts = allAttempts[item.id] || [];
-            const last = attempts[attempts.length - 1];
-            return last && last.result === "pass";
-        }).length;
-        cgcProgressBar.value = passedCount;
-        cgcProgressLabel.textContent = `${passedCount}/${CGC_CHECKLIST_ITEMS.length}`;
-    }
-
     // build one checklist row: name, log button, expandable attempt history, and log form
-    function createCgcListItem(item, attempts) {
+    function createCgcListItem(item) {
         const li = document.createElement("li");
         li.className = "cgc-row";
 
@@ -791,6 +863,7 @@ if (cgcToggleButton && cgcPanel) {
         const summaryBtn = document.createElement("button");
         summaryBtn.type = "button";
         summaryBtn.className = "cgc-summary-toggle";
+        summaryBtn.setAttribute("aria-expanded", String(openCgcLogs.has(item.id)));
 
         const summarySpan = document.createElement("span");
         summarySpan.className = "cgc-summary-text";
@@ -804,45 +877,63 @@ if (cgcToggleButton && cgcPanel) {
 
         const attemptLog = document.createElement("div");
         attemptLog.className = "cgc-attempt-log";
-        attemptLog.hidden = true;
+        attemptLog.hidden = !openCgcLogs.has(item.id);
 
         const logForm = document.createElement("div");
         logForm.className = "cgc-log-form";
         logForm.hidden = true;
         logForm.innerHTML = `
-            <div class="field">
-                <label>Result</label>
-                <select class="cgc-result-select">
-                    <option value="pass">Pass</option>
-                    <option value="fail">Fail</option>
-                </select>
+            <div class="cgc-log-form-fields">
+                <div class="field">
+                    <label>Result</label>
+                    <select class="cgc-result-select">
+                        <option value="pass">Pass</option>
+                        <option value="fail">Fail</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Date</label>
+                    <input type="date" class="cgc-date-input">
+                </div>
             </div>
             <div class="field">
                 <label>Notes</label>
-                <textarea class="cgc-notes-input" placeholder="Optional notes..."></textarea>
+                <textarea class="cgc-notes-input" maxlength="500" placeholder="Optional notes..."></textarea>
             </div>
             <div class="cgc-log-form-actions">
                 <button type="button" class="save-btn cgc-save-attempt-btn">Save Attempt</button>
                 <button type="button" class="cgc-cancel-attempt-btn">Cancel</button>
             </div>
         `;
+        // labels point at their controls (ids made unique per step)
+        logForm.querySelectorAll(".field").forEach((field, index) => {
+            const control = field.querySelector("select, input, textarea");
+            control.id = `${item.id}-field-${index}`;
+            field.querySelector("label").htmlFor = control.id;
+        });
 
         li.appendChild(top);
         li.appendChild(summaryBtn);
         li.appendChild(attemptLog);
         li.appendChild(logForm);
 
-        updateCgcSummaryText(summarySpan, attempts);
-        renderCgcAttemptLog(attemptLog, attempts);
+        updateCgcSummaryText(summarySpan, cgcAttempts[item.id] || []);
+        renderCgcAttemptLog(attemptLog, item);
 
         summaryBtn.addEventListener("click", () => {
             attemptLog.hidden = !attemptLog.hidden;
+            summaryBtn.setAttribute("aria-expanded", String(!attemptLog.hidden));
+            if (attemptLog.hidden) openCgcLogs.delete(item.id);
+            else openCgcLogs.add(item.id);
         });
 
         logBtn.addEventListener("click", () => {
             logForm.hidden = !logForm.hidden;
             if (!logForm.hidden) {
                 logForm.querySelector(".cgc-result-select").value = "pass";
+                const dateInput = logForm.querySelector(".cgc-date-input");
+                dateInput.value = localDateString();
+                dateInput.max = localDateString();
                 logForm.querySelector(".cgc-notes-input").value = "";
             }
         });
@@ -851,43 +942,118 @@ if (cgcToggleButton && cgcPanel) {
             logForm.hidden = true;
         });
 
-        logForm.querySelector(".cgc-save-attempt-btn").addEventListener("click", () => {
-            const resultSelect = logForm.querySelector(".cgc-result-select");
-            const notesInput = logForm.querySelector(".cgc-notes-input");
-
+        const saveButton = logForm.querySelector(".cgc-save-attempt-btn");
+        saveButton.addEventListener("click", async () => {
+            const date = logForm.querySelector(".cgc-date-input").value || localDateString();
+            if (date > localDateString()) {
+                showCgcStatus("An attempt's date can't be in the future.", true);
+                return;
+            }
             const attempt = {
-                date: new Date().toISOString().slice(0, 10),
-                result: resultSelect.value,
-                notes: notesInput.value.trim(),
+                date,
+                result: logForm.querySelector(".cgc-result-select").value,
+                notes: logForm.querySelector(".cgc-notes-input").value.trim(),
             };
-
-            const allAttempts = getCgcAttempts();
-            const itemAttempts = allAttempts[item.id] || [];
-            itemAttempts.push(attempt);
-            allAttempts[item.id] = itemAttempts;
-            saveCgcAttempts(allAttempts);
-
-            updateCgcSummaryText(summarySpan, itemAttempts);
-            renderCgcAttemptLog(attemptLog, itemAttempts);
-            attemptLog.hidden = false;
-            logForm.hidden = true;
-            updateCgcProgressDisplay();
+            saveButton.disabled = true;
+            try {
+                await addCgcAttempt(item, attempt);
+                openCgcLogs.add(item.id);
+                showCgcStatus("");
+                renderCgc();
+            } catch (error) {
+                console.error("Could not save CGC attempt:", error);
+                showCgcStatus(`Couldn't save that attempt: ${error.message}`, true);
+                saveButton.disabled = false;
+            }
         });
 
         return li;
     }
 
-    const cgcAttemptsData = getCgcAttempts();
-    CGC_CHECKLIST_ITEMS.forEach((item) => {
-        const itemAttempts = cgcAttemptsData[item.id] || [];
-        cgcChecklist.appendChild(createCgcListItem(item, itemAttempts));
-    });
+    // redraw every step and the progress bar from cgcAttempts
+    function renderCgc() {
+        cgcChecklist.replaceChildren(...CGC_CHECKLIST_ITEMS.map(createCgcListItem));
+        updateCgcProgressDisplay();
+    }
+
+    // attempts saved in this browser before the account kept them: move them to the current dog once,
+    // if that dog has none yet, then forget the browser copy
+    const moveLocalCgcAttemptsToDog = async () => {
+        const local = readLocalCgcAttempts();
+        const rows = CGC_CHECKLIST_ITEMS.flatMap((item) => (local[item.id] || [])
+            .map((attempt) => ({ itemId: cgcItemIds.get(item.id), date: attempt.date, result: attempt.result, notes: attempt.notes })));
+        const hasAccountAttempts = Object.values(cgcAttempts).some((attempts) => attempts.length);
+        if (!rows.length || hasAccountAttempts) return 0;
+        await addTaskAttempts(cgcDogId, rows);
+        localStorage.removeItem(CGC_LOCAL_KEY);
+        return rows.length;
+    };
+
+    // load the dog you're training's attempts from the account, or fall back to this browser's
+    async function loadCgc() {
+        cgcMode = "local";
+        cgcAttempts = readLocalCgcAttempts();
+        cgcDogLabel.textContent = "";
+
+        const user = supabaseClient ? await getSignedInUser() : null;
+        if (!user) {
+            showCgcStatus("Saved in this browser. Log in to keep each dog's CGC progress in your account.");
+            renderCgc();
+            return;
+        }
+        try {
+            const dogs = await getDogs();
+            const dog = dogs.find((item) => item.id === getCurrentDogId()) || null;
+            if (!dog) {
+                showCgcStatus("Add a dog on My Dogs to track their CGC progress.");
+                renderCgc();
+                return;
+            }
+            const items = await getCgcTaskItems(user.id);
+            cgcItemIds.clear();
+            CGC_CHECKLIST_ITEMS.forEach((item, index) => {
+                if (items[index]) cgcItemIds.set(item.id, items[index].id);
+            });
+            const localIdFor = new Map(Array.from(cgcItemIds, ([localId, itemId]) => [itemId, localId]));
+
+            cgcDogId = dog.id;
+            cgcMode = "account";
+            const loadAttempts = async () => {
+                cgcAttempts = {};
+                (await getTaskAttempts(dog.id, Array.from(cgcItemIds.values()))).forEach((row) => {
+                    const localId = localIdFor.get(row.task_list_item_id);
+                    (cgcAttempts[localId] = cgcAttempts[localId] || []).push({
+                        id: row.id, date: row.attempted_on, result: row.result, notes: row.notes || "",
+                    });
+                });
+            };
+            await loadAttempts();
+            const moved = await moveLocalCgcAttemptsToDog();
+            if (moved) {
+                await loadAttempts();
+                await Promise.all(CGC_CHECKLIST_ITEMS.map(syncCgcProgress));
+            }
+            cgcDogLabel.textContent = `for ${dog.name}`;
+            showCgcStatus(moved ? `Moved ${moved} attempt${moved === 1 ? "" : "s"} saved in this browser to ${dog.name}.` : "");
+        } catch (error) {
+            console.error("Could not load CGC attempts:", error);
+            cgcMode = "local";
+            cgcAttempts = readLocalCgcAttempts();
+            const missingTable = /dog_task_attempts/.test(error.message || "") || ["42P01", "PGRST205"].includes(error.code);
+            showCgcStatus(missingTable
+                ? "CGC attempts can't be saved to your account yet. Run supabase/cgc_attempts.sql in Supabase. Saving in this browser for now."
+                : `Couldn't load CGC progress from your account (${error.message}). Saving in this browser for now.`, true);
+        }
+        renderCgc();
+    }
 
     cgcProgressBar.max = CGC_CHECKLIST_ITEMS.length;
-    updateCgcProgressDisplay();
+    renderCgc();
+    loadCgc();
 
     cgcToggleButton.addEventListener("click", () => {
         cgcPanel.hidden = !cgcPanel.hidden;
+        cgcToggleButton.setAttribute("aria-expanded", String(!cgcPanel.hidden));
     });
 }
 

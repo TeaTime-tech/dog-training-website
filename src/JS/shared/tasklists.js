@@ -1,7 +1,6 @@
-/* Supabase-backed task lists (CGC etc.). Needs supabaseClient.js loaded first. */
+/* Supabase-backed task lists (CGC etc.) and CGC attempts per dog. Needs supabaseClient.js loaded first. */
 
-// Supabase-backed CGC task list definition (separate data model from the
-// localStorage-based CGC checklist in app.js; used to seed the "task_lists" table)
+// the CGC task list every account gets (seeds "task_lists"); the Commands page's checklist shows these 10 steps in this order
 
 const CGC_TASK_LIST = {
   name: 'Canine Good Citizen (CGC)',
@@ -96,4 +95,70 @@ async function ensureDefaultTaskLists(accountId) {
   if (count === 0) {
     await seedTaskList(accountId, CGC_TASK_LIST);
   }
+}
+
+// CGC attempts (commands.js): each pass/fail try at a step, per dog, in dog_task_attempts (supabase/cgc_attempts.sql)
+
+// the account's CGC task list and its 10 items in step order, creating the list first if the account has none
+async function getCgcTaskItems(accountId) {
+  await ensureDefaultTaskLists(accountId);
+  const { data: lists, error: listError } = await supabaseClient
+    .from('task_lists')
+    .select('id')
+    .eq('name', CGC_TASK_LIST.name)
+    .order('created_at')
+    .limit(1);
+  if (listError) throw listError;
+  if (!lists.length) throw new Error("Couldn't find your Canine Good Citizen list.");
+  const { data: items, error: itemsError } = await supabaseClient
+    .from('task_list_items')
+    .select('id, sort_order')
+    .eq('task_list_id', lists[0].id)
+    .order('sort_order');
+  if (itemsError) throw itemsError;
+  return items;
+}
+
+// every attempt a dog has made at these items, oldest first
+async function getTaskAttempts(dogId, itemIds) {
+  const { data, error } = await supabaseClient
+    .from('dog_task_attempts')
+    .select('id, task_list_item_id, attempted_on, result, notes, created_at')
+    .eq('dog_id', dogId)
+    .in('task_list_item_id', itemIds)
+    .order('attempted_on')
+    .order('created_at');
+  if (error) throw error;
+  return data;
+}
+
+// save attempts for a dog ([{ itemId, date, result, notes }]); returns the saved rows
+async function addTaskAttempts(dogId, attempts) {
+  const rows = attempts.map(({ itemId, date, result, notes }) => ({
+    dog_id: dogId,
+    task_list_item_id: itemId,
+    attempted_on: date,
+    result,
+    notes: notes || null,
+  }));
+  const { data, error } = await supabaseClient.from('dog_task_attempts').insert(rows).select();
+  if (error) throw error;
+  return data;
+}
+
+async function deleteTaskAttempt(attemptId) {
+  const { error } = await supabaseClient.from('dog_task_attempts').delete().eq('id', attemptId);
+  if (error) throw error;
+}
+
+// keep dog_task_progress in step: an item is complete when its latest attempt passed (on that attempt's date)
+async function setTaskProgressFromLatest(dogId, itemId, latestAttempt) {
+  const completed = latestAttempt && latestAttempt.result === 'pass';
+  const { error } = await supabaseClient
+    .from('dog_task_progress')
+    .upsert(
+      { dog_id: dogId, task_list_item_id: itemId, completed_at: completed ? `${latestAttempt.date}T12:00:00Z` : null },
+      { onConflict: 'dog_id,task_list_item_id' }
+    );
+  if (error) throw error;
 }

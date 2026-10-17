@@ -24,6 +24,7 @@
     <script src="../JS/shared/mastery.js" defer></script>
     <script src="../JS/shared/commandDisplay.js" defer></script>
     <script src="../JS/shared/commandNotes.js" defer></script>
+    <script src="../JS/shared/tasklists.js" defer></script>
     <script src="../JS/pages/commands.js" defer></script>
 </head>
 <body>
@@ -123,12 +124,14 @@
         <details open>
             <summary class="collapsible-toggle"><h2 class="section-title">Programs and Goals</h2></summary>
             <div class="cgc-header">
-                <button type="button" id="cgc-toggle" class="secondary-btn">Canine Good Citizen (CGC)</button>
+                <button type="button" id="cgc-toggle" class="secondary-btn" aria-expanded="false" aria-controls="cgc-panel">Canine Good Citizen (CGC)</button>
+                <span id="cgc-dog" class="cgc-dog"></span>
                 <div class="cgc-progress">
                     <progress id="cgc-progress-bar" max="10" value="0"></progress>
                     <span id="cgc-progress-label">0/10</span>
                 </div>
             </div>
+            <p id="cgc-status" class="cgc-status" role="status"></p>
             <div id="cgc-panel" class="cgc-panel" hidden>
                 <p class="subhead">Track your dog's progress toward the AKC Canine Good Citizen certification:</p>
                 <ul class="cgc-checklist" id="cgc-checklist"></ul>
