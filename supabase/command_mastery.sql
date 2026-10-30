@@ -25,6 +25,8 @@ create table if not exists public.training_sessions (
 -- for tables created before session sync: start/end times from the log page, and last-edit time
 -- (the browser sets it, and the newer copy wins when two devices edit the same session)
 alter table public.training_sessions add column if not exists session_start_time text;
+-- the session's 1-10 score (session_score_weather.sql adds its range check); mastery decay reads it
+alter table public.training_sessions add column if not exists score smallint;
 alter table public.training_sessions add column if not exists session_end_time text;
 alter table public.training_sessions add column if not exists updated_at timestamptz not null default now();
 
@@ -97,10 +99,26 @@ create policy "anyone signed in can read tiers" on public.mastery_tiers
   using (true);
 
 
--- walk a base level down one tier at a time, spending each tier's decay window of idle days
+-- how much longer a command holds its level before decaying, from its recent average score (1-10):
+-- 5 or below (or no scores) = the tier's normal window, rising evenly to twice as long at a perfect 10.
+-- Change the numbers here to retune it
+create or replace function public.mastery_score_hold_factor(p_average_score numeric)
+returns numeric
+language sql
+immutable
+as $$
+  select round(1 + greatest(coalesce(p_average_score, 0) - 5, 0) / 5, 2);
+$$;
+
+-- the older two-argument version; dropped so calls can't be ambiguous with the one below
+drop function if exists public.mastery_apply_decay(smallint, integer);
+
+-- walk a base level down one tier at a time, spending each tier's decay window of idle days.
+-- p_hold_factor stretches every window (mastery_score_hold_factor: high scores hold longer)
 create or replace function public.mastery_apply_decay(
   p_base_level smallint,
   p_days_idle integer,
+  p_hold_factor numeric default 1,
   out decayed_level smallint,
   out days_until_drop integer
 )
@@ -114,7 +132,8 @@ declare
 begin
   decayed_level := p_base_level;
   loop
-    select t.decay_after_days into step from mastery_tiers t where t.level = decayed_level;
+    select ceil(t.decay_after_days * greatest(coalesce(p_hold_factor, 1), 1))::integer into step
+    from mastery_tiers t where t.level = decayed_level;
     exit when step is null or remaining <= step;
     remaining := remaining - step;
     decayed_level := decayed_level - 1;
@@ -127,9 +146,12 @@ $$;
 
 -- mastery for every command the signed-in account has practiced.
 -- p_dog_id: limit to one dog (null = all sessions). p_today: pass the browser's local date so decay matches the user's day.
--- base_level never goes down; decayed_level accounts for time since last practice;
+-- base_level never goes down; decayed_level accounts for time since last practice, held longer when the command's
+-- recent sessions scored well (average_score over its last 10 scored sessions, decay_hold_factor);
 -- display_level is whichever one the account's mastery_decay_enabled setting says to show.
-create or replace function public.get_command_mastery(
+-- dropped first because its returned columns changed (create or replace can't change them)
+drop function if exists public.get_command_mastery(uuid, date);
+create function public.get_command_mastery(
   p_dog_id uuid default null,
   p_today date default current_date
 )
@@ -147,6 +169,8 @@ returns table (
   decayed_level smallint,
   decayed_level_name text,
   days_until_decay integer,
+  average_score numeric,
+  decay_hold_factor numeric,
   decay_enabled boolean,
   display_level smallint,
   display_level_name text
@@ -174,6 +198,25 @@ as $$
       and trim(loc) <> ''
     group by lower(trim(ts.command))
   ),
+  -- the average of each command's 10 most recent scored sessions
+  recent_scores as (
+    select r.command_key, round(avg(r.score), 1) as average_score
+    from (
+      select
+        lower(trim(ts.command)) as command_key,
+        ts.score,
+        row_number() over (
+          partition by lower(trim(ts.command))
+          order by ts.session_date desc, ts.session_time desc nulls last
+        ) as recency
+      from training_sessions ts
+      where ts.account_id = auth.uid()
+        and (p_dog_id is null or ts.dog_id = p_dog_id)
+        and ts.score is not null
+    ) r
+    where r.recency <= 10
+    group by r.command_key
+  ),
   stats as (
     select
       min(ts.command) as command,
@@ -184,9 +227,11 @@ as $$
       )::integer as distraction_sessions,
       coalesce(min(cl.location_count), 0)::integer as location_count,
       min(ts.session_date) as first_practiced,
-      max(ts.session_date) as last_practiced
+      max(ts.session_date) as last_practiced,
+      min(rs.average_score) as average_score
     from training_sessions ts
     left join command_locations cl on cl.command_key = lower(trim(ts.command))
+    left join recent_scores rs on rs.command_key = lower(trim(ts.command))
     where ts.account_id = auth.uid()
       and (p_dog_id is null or ts.dog_id = p_dog_id)
     group by lower(trim(ts.command))
@@ -194,6 +239,7 @@ as $$
   leveled as (
     select
       st.*,
+      mastery_score_hold_factor(st.average_score) as hold_factor,
       greatest(p_today - st.last_practiced, 0) as days_idle,
       (
         select max(t.level)
@@ -209,7 +255,7 @@ as $$
   decayed as (
     select l.*, d.decayed_level, d.days_until_drop
     from leveled l
-    cross join lateral mastery_apply_decay(l.base_level, l.days_idle) d
+    cross join lateral mastery_apply_decay(l.base_level, l.days_idle, l.hold_factor) d
   )
   select
     d.command,
@@ -225,6 +271,8 @@ as $$
     d.decayed_level,
     dt.name,
     d.days_until_drop,
+    d.average_score,
+    d.hold_factor,
     s.decay_enabled,
     case when s.decay_enabled then d.decayed_level else d.base_level end,
     case when s.decay_enabled then dt.name else bt.name end
@@ -236,4 +284,5 @@ as $$
 $$;
 
 grant execute on function public.get_command_mastery(uuid, date) to authenticated;
-grant execute on function public.mastery_apply_decay(smallint, integer) to authenticated;
+grant execute on function public.mastery_apply_decay(smallint, integer, numeric) to authenticated;
+grant execute on function public.mastery_score_hold_factor(numeric) to authenticated;

@@ -1297,6 +1297,162 @@ if (graphCommandSelect) {
     drawCommandGraph();
 }
 
+/*score trend (load.html): each scored session as a dot, the average per week, per month, or over the last 5
+  sessions as a line, and tiles for the overall and recent averages*/
+
+const scoreChartEl = document.getElementById("score-chart");
+
+if (scoreChartEl) {
+    const scoreCommandSelect = document.getElementById("score-command");
+    const scoreGroupSelect = document.getElementById("score-group");
+    const scoreSummary = document.getElementById("score-summary");
+    const ALL_COMMANDS = "";
+
+    // the picked dog's sessions that have a score, oldest first
+    const readScoredSessions = () => getSessionHistory()
+        .filter((session) => matchesViewingDog(session) && session.date && Number(session.score) >= 1)
+        .sort((a, b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`));
+
+    // "All commands", then each command with scored sessions, keeping the current pick when it's still there
+    const fillScoreCommands = () => {
+        const counts = new Map();
+        readScoredSessions().forEach((session) => counts.set(session.command, (counts.get(session.command) || 0) + 1));
+        const previous = scoreCommandSelect.value;
+        const names = [...counts.keys()].sort((a, b) => a.localeCompare(b));
+        scoreCommandSelect.replaceChildren(
+            new Option("All commands", ALL_COMMANDS),
+            ...names.map((name) => new Option(`${name} (${counts.get(name)})`, name)),
+        );
+        scoreCommandSelect.value = names.includes(previous) ? previous : ALL_COMMANDS;
+    };
+
+    // the Monday that starts a date's week, as YYYY-MM-DD
+    const weekStartIso = (iso) => {
+        const date = new Date(`${iso}T00:00:00`);
+        date.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+        return localDateString(date);
+    };
+
+    const average = (values) => values.reduce((sum, value) => sum + value, 0) / values.length;
+    const oneDecimal = (value) => Math.round(value * 10) / 10;
+
+    // the trend line: the average per week or month (dated at its start), or over each session's last 5
+    const buildScoreTrend = (sessions, group) => {
+        if (group === "session") {
+            return sessions.map((session, index) => ({
+                x: session.date,
+                y: oneDecimal(average(sessions.slice(Math.max(0, index - 4), index + 1).map((s) => Number(s.score)))),
+            }));
+        }
+        const buckets = new Map();
+        sessions.forEach((session) => {
+            const key = group === "monthly" ? `${session.date.slice(0, 7)}-01` : weekStartIso(session.date);
+            if (!buckets.has(key)) buckets.set(key, []);
+            buckets.get(key).push(Number(session.score));
+        });
+        return [...buckets.entries()].map(([key, scores]) => ({ x: key, y: oneDecimal(average(scores)) }));
+    };
+
+    // overall average, the last 10, and the change between the 10 before those and the last 10
+    const renderScoreSummary = (sessions) => {
+        const scores = sessions.map((session) => Number(session.score));
+        const recent = scores.slice(-10);
+        const before = scores.slice(-20, -10);
+        const tile = (value, label, variant) => {
+            const el = document.createElement("div");
+            el.className = `stat-tile stat-tile--${variant}`;
+            const valueEl = document.createElement("span");
+            valueEl.className = "stat-value";
+            valueEl.textContent = value;
+            const labelEl = document.createElement("span");
+            labelEl.className = "stat-label";
+            labelEl.textContent = label;
+            el.append(valueEl, labelEl);
+            return el;
+        };
+        const tiles = [
+            tile(oneDecimal(average(recent)).toFixed(1), `Average of the last ${recent.length}`, "moss"),
+            tile(oneDecimal(average(scores)).toFixed(1), `All-time average (${scores.length} scored)`, "brass"),
+        ];
+        if (before.length) {
+            const change = oneDecimal(average(recent) - average(before));
+            const arrow = change > 0 ? "\u2191" : change < 0 ? "\u2193" : "";
+            tiles.push(tile(`${arrow}${change > 0 ? "+" : ""}${change.toFixed(1)}`, "Change from the 10 before", change < 0 ? "brass" : "moss"));
+        }
+        scoreSummary.replaceChildren(...tiles);
+    };
+
+    const drawScoreChart = () => {
+        if (typeof Plotly === "undefined") return;
+        const command = scoreCommandSelect.value;
+        const sessions = readScoredSessions().filter((session) => command === ALL_COMMANDS || session.command === command);
+
+        if (sessions.length === 0) {
+            Plotly.purge(scoreChartEl);
+            plottedCharts.delete(scoreChartEl);
+            scoreSummary.replaceChildren();
+            const empty = document.createElement("p");
+            empty.className = "subhead";
+            empty.textContent = "No scored sessions yet. Give a session a Score on the Log page to see its trend here.";
+            scoreChartEl.replaceChildren(empty);
+            return;
+        }
+        scoreChartEl.querySelectorAll(":scope > .subhead").forEach((el) => el.remove());
+        renderScoreSummary(sessions);
+
+        const group = scoreGroupSelect.value;
+        const trend = buildScoreTrend(sessions, group);
+        const trendName = { weekly: "Weekly average", monthly: "Monthly average", session: "Average of last 5" }[group];
+        const data = [
+            {
+                name: "Session score",
+                x: sessions.map((session) => session.date),
+                y: sessions.map((session) => Number(session.score)),
+                text: sessions.map((session) => session.command),
+                type: "scatter",
+                mode: "markers",
+                marker: { color: GRAPH_COLORS.brass, size: 8, opacity: 0.55 },
+                hovertemplate: "%{text}: %{y}<extra>%{x|%b %-d, %Y}</extra>",
+            },
+            {
+                name: trendName,
+                x: trend.map((point) => point.x),
+                y: trend.map((point) => point.y),
+                type: "scatter",
+                mode: "lines+markers",
+                line: { color: GRAPH_COLORS.moss, width: 3, shape: "linear" },
+                marker: { color: GRAPH_COLORS.moss, size: 6 },
+                hovertemplate: `${trendName}: %{y}<extra></extra>`,
+            },
+        ];
+        const layout = {
+            ...GRAPH_LAYOUT_BASE,
+            title: { text: `${command === ALL_COMMANDS ? "All commands" : command}: score over time` },
+            hovermode: "closest",
+            xaxis: { ...GRAPH_AXIS_STYLE, type: "date", gridcolor: "transparent" },
+            yaxis: { ...GRAPH_AXIS_STYLE, range: [0.5, 10.5], dtick: 1, title: { ...GRAPH_AXIS_STYLE.title, text: "Score" } },
+            legend: { orientation: "h", font: { family: "Newsreader, serif", color: GRAPH_COLORS.muted } },
+            showlegend: true,
+        };
+        plotChart(scoreChartEl, data, layout);
+    };
+
+    // sessions or the dog changed: refresh the command list (it may gain or lose commands), then redraw
+    const refreshScoreChart = () => {
+        fillScoreCommands();
+        drawScoreChart();
+    };
+
+    scoreChartEl.addEventListener("mouseleave", () => clearPlotlyHover(scoreChartEl));
+    [scoreCommandSelect, scoreGroupSelect].forEach((select) => select.addEventListener("change", drawScoreChart));
+    window.addEventListener("viewingdogchanged", refreshScoreChart);
+    window.addEventListener("trainingdatachanged", refreshScoreChart);
+    window.addEventListener("sessionhistorysynced", (event) => {
+        if (event.detail.changed) refreshScoreChart();
+    });
+    refreshScoreChart();
+}
+
 /*total training and exercise time: all-time tiles plus a day/week/month/year graph (load.html)*/
 
 const totalsTiles = document.getElementById("totals-tiles");
@@ -1724,7 +1880,7 @@ if (ganttChartEl) {
     window.addEventListener("viewingdogchanged", renderCommandTimeline);
 }
 
-/*tab strips (load.html): Logs (Sessions | Exercises) and Progress (three charts). Each strip switches its own panels.
+/*tab strips (load.html): Logs (Sessions | Exercises) and Progress (four charts). Each strip switches its own panels.
   Charts drawn while their tab was hidden have no width, so opening a tab resizes its chart to fit*/
 
 document.querySelectorAll('.load-tabs[role="tablist"]').forEach((tablist) => {
