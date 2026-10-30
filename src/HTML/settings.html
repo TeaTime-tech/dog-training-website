@@ -99,7 +99,7 @@
 
     <section class="page-section settings-card">
         <h2 class="section-title">Units</h2>
-        <p class="settings-note">Weights on My Dogs and in each dog's chart show in this unit. Exercises logged by distance start in the distance unit.</p>
+        <p class="settings-note">Weights on My Dogs and in each dog's chart show in this unit. Exercises logged by distance start in the distance unit. Changes save on this device as you pick them.</p>
         <div class="settings-row">
             <label for="weight-unit">Weight</label>
             <select id="weight-unit">
@@ -116,7 +116,6 @@
                 <option value="ft">Feet (ft)</option>
             </select>
         </div>
-        <button id="save-settings" type="button" class="save-btn">Save Settings</button>
         <p id="units-status" class="subhead settings-note" role="status"></p>
     </section>
 
@@ -140,6 +139,63 @@
             </div>
             <p id="clear-status" class="subhead settings-note" role="status"></p>
         </div>
+
+        <!-- delete everything: typing DELETE unlocks the button. Signed in, it also clears the account's data
+             (the login itself stays) -->
+        <div class="settings-clear settings-danger">
+            <h3 class="settings-subtitle">Delete my data</h3>
+            <p class="settings-note" id="delete-data-note">Permanently deletes your dogs, sessions, exercises, goals, CGC progress and settings, in your account and on this device. Your login stays, so you can start fresh. Export first if you want a copy.</p>
+            <div class="settings-row">
+                <label for="delete-data-confirm">Type DELETE to confirm</label>
+                <input type="text" id="delete-data-confirm" autocomplete="off" spellcheck="false">
+                <button id="delete-data" type="button" class="danger-btn" disabled>Delete all my data</button>
+            </div>
+            <p id="delete-data-status" class="subhead settings-note" role="status"></p>
+        </div>
+    </section>
+
+    <section class="page-section settings-card">
+        <h2 class="section-title">Help and Feedback</h2>
+        <div class="settings-help">
+            <details>
+                <summary>Where is my data saved?</summary>
+                <p>Signed in, everything you log is saved to your account and shows on every device you log in on. Signed out, it stays in this browser only; creating an account keeps it. Theme, units and a few preferences are kept per device.</p>
+            </details>
+            <details>
+                <summary>How does command mastery work?</summary>
+                <p>Each command earns levels, from Learning to Mastered, as you log more sessions on more days, in more places and with distractions. Commands page &gt; Command Mastery shows where each one stands.</p>
+            </details>
+            <details>
+                <summary>Why did a command drop a level?</summary>
+                <p>With mastery decay on, a command slips a level after a while without practice; higher levels hold longer, and so do commands that keep scoring well. Practice it to win the level back, or turn decay off on the Commands page.</p>
+            </details>
+            <details>
+                <summary>How do I log a walk by distance?</summary>
+                <p>On the Log page, switch to Exercise and set Track by to Distance. The unit starts on the one picked under Units above.</p>
+            </details>
+            <details>
+                <summary>How do I log several commands at once?</summary>
+                <p>On the Log page, pick every command you worked on. Each gets its own reps and duration, and each is saved as its own session.</p>
+            </details>
+        </div>
+        <!-- sent to the feedback table (supabase/feedback.sql); only the dashboard can read it -->
+        <form id="feedback-form" class="settings-feedback" novalidate>
+            <h3 class="settings-subtitle">Send feedback</h3>
+            <p class="settings-note">Something not working, or an idea for the app? Tell us here.</p>
+            <fieldset class="feedback-kind">
+                <legend class="visually-hidden">What kind of feedback</legend>
+                <label><input type="radio" name="feedback-kind" value="problem" checked><span>Something's wrong</span></label>
+                <label><input type="radio" name="feedback-kind" value="idea"><span>An idea</span></label>
+                <label><input type="radio" name="feedback-kind" value="other"><span>Something else</span></label>
+            </fieldset>
+            <label class="feedback-label" for="feedback-message">Message</label>
+            <textarea id="feedback-message" rows="5" maxlength="2000" required placeholder="What happened, or what would you like to see?"></textarea>
+            <p class="feedback-count" id="feedback-count" aria-live="polite">0 / 2000</p>
+            <label class="feedback-label" for="feedback-email">Email for a reply <span class="feedback-optional">(optional)</span></label>
+            <input type="email" id="feedback-email" maxlength="200" autocomplete="email" placeholder="you@example.com">
+            <button type="submit" id="feedback-send" class="save-btn">Send feedback</button>
+            <p id="feedback-status" class="subhead settings-note" role="status"></p>
+        </form>
     </section>
 
     <section class="page-section settings-card">
@@ -153,8 +209,6 @@
             <li>Privacy settings</li>
             <li>Sharing training plans with a trainer</li>
             <li>Subscription plans</li>
-            <li>Delete my data</li>
-            <li>Help, support and feedback</li>
         </ul>
     </section>
 </body>
