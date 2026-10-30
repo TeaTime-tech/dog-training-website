@@ -311,6 +311,42 @@
   display: none;
 }
 
+/* Clear History: a Sessions row and an Exercises row, each label | picker | Clear, lined up */
+.clear-history-rows {
+  display: grid;
+  grid-template-columns: auto minmax(0, 18rem) auto;
+  justify-content: start;
+  align-items: center;
+  gap: 0.625rem 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.clear-history-rows label {
+  font-weight: 600;
+}
+
+/* phones: each label on its own line, so the picker gets the width */
+@media (max-width: 640px) {
+  .clear-history-rows {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .clear-history-rows label {
+    grid-column: 1 / -1;
+    margin-bottom: -0.375rem;
+  }
+}
+
+.clear-history-rows select {
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--clay);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background: var(--bg);
+  color: var(--ink);
+}
+
 .clear-history-status {
   margin: 0.625rem 0 0;
   font-size: 0.875rem;

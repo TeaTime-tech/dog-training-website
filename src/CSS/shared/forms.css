@@ -22,6 +22,17 @@
   color: var(--ink);
 }
 
+/* an exercise's distance and unit side by side in Today's and View Logs' edit forms */
+.exercise-distance-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.exercise-distance-edit input {
+  width: 5rem;
+}
+
 .page-section > .save-btn {
   margin-top: 0.875rem;
 }
@@ -176,12 +187,11 @@
 .toggle-track::before {
   content: "OFF";
   position: absolute;
-  right: 0.5rem;
+  right: 0.3125rem;
   top: 50%;
   transform: translateY(-50%);
   font-size: 0.5625rem;
   font-weight: 600;
-  letter-spacing: 0.03em;
   color: var(--muted);
 }
 

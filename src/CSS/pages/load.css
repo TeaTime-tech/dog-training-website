@@ -71,14 +71,18 @@
   color: var(--ink);
 }
 
-/* summary: four tiles in a row (two on phones) */
+/* summary: three tiles in a row (on phones, sessions across the top and the two exercise tiles under it) */
 .load-summary #totals-tiles {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 @media (max-width: 640px) {
   .load-summary #totals-tiles {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .load-summary #totals-tiles .stat-tile:first-child {
+    grid-column: 1 / -1;
   }
 }
 
@@ -345,7 +349,7 @@
   height: 20rem;
 }
 
-/* Training Totals tiles: a 2 x 2 grid, with values sized so "6 hr 43 min" fits on one line */
+/* Training Totals tiles, with values sized so "6 hr 43 min" fits on one line */
 #totals-tiles {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

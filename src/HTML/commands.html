@@ -19,6 +19,7 @@
     <script src="../JS/shared/commandList.js" defer></script>
     <script src="../JS/shared/dogs.js" defer></script>
     <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/shared/exercises.js" defer></script>
     <script src="../JS/shared/accountNav.js" defer></script>
     <script src="../JS/shared/trainingData.js" defer></script>
     <script src="../JS/shared/mastery.js" defer></script>
@@ -205,16 +206,22 @@
     </section>
 
     <section class="page-section">
-        <details open>
-            <summary class="collapsible-toggle"><h2 class="section-title">Clear Command History</h2></summary>
-            <p class="display-hint">Delete every logged session of one command for <strong id="clear-history-dog">the dog you're training</strong>. Other dogs' sessions and the command itself stay. <a href="dogs.html" id="clear-history-dog-link" class="clear-history-dog-link" hidden>Switch dog</a></p>
-            <div class="field-row">
-                <label for="clear-history-command">Command:</label>
+        <!-- starts closed: open it to clear anything -->
+        <details>
+            <summary class="collapsible-toggle"><h2 class="section-title">Clear History</h2></summary>
+            <p class="display-hint">Delete one command's logged sessions, or logged exercises, for <strong id="clear-history-dog">the dog you're training</strong>. Other dogs' history and the commands themselves stay. <a href="dogs.html" id="clear-history-dog-link" class="clear-history-dog-link" hidden>Switch dog</a></p>
+            <div class="clear-history-rows">
+                <label for="clear-history-command">Sessions</label>
                 <!-- commands.js lists each command that has logged sessions -->
                 <select id="clear-history-command"></select>
-                <button type="button" id="clear-history-button" class="danger-btn">Clear History</button>
+                <button type="button" id="clear-history-button" class="danger-btn">Clear</button>
+                <label for="clear-exercises-name">Exercises</label>
+                <!-- commands.js lists "All exercises", then each exercise that has been logged -->
+                <select id="clear-exercises-name"></select>
+                <button type="button" id="clear-exercises-button" class="danger-btn">Clear</button>
             </div>
             <p id="clear-history-status" class="clear-history-status" role="status"></p>
+            <p id="clear-exercises-status" class="clear-history-status" role="status"></p>
         </details>
     </section>
 

@@ -355,9 +355,12 @@ async function saveDogProfile(dog, profile) {
 // delete a dog after confirming; its sessions go too, so remove them from this browser as well
 async function removeDog(dog) {
     const sessionCount = getSessionHistory().filter((session) => session.dogId === dog.id).length;
-    const sessionWarning = sessionCount
-        ? ` This also permanently deletes the ${sessionCount} training session${sessionCount === 1 ? "" : "s"} logged for ${dog.name}.`
-        : "";
+    const exerciseCount = getExerciseHistory().filter((exercise) => exercise.dogId === dog.id).length;
+    const logged = [
+        sessionCount && `${sessionCount} training session${sessionCount === 1 ? "" : "s"}`,
+        exerciseCount && `${exerciseCount} exercise${exerciseCount === 1 ? "" : "s"}`,
+    ].filter(Boolean).join(" and ");
+    const sessionWarning = logged ? ` This also permanently deletes the ${logged} logged for ${dog.name}.` : "";
     if (!confirm(`Delete ${dog.name}?${sessionWarning} This can't be undone.`)) return;
 
     try {
@@ -365,6 +368,9 @@ async function removeDog(dog) {
         // the account already dropped them; also drop copies not uploaded yet, which could no longer upload
         if (sessionCount) {
             setSessionHistory(getSessionHistory().filter((session) => session.dogId !== dog.id));
+        }
+        if (exerciseCount) {
+            setExerciseHistory(getExerciseHistory().filter((exercise) => exercise.dogId !== dog.id));
         }
         accountDogs = accountDogs.filter((d) => d.id !== dog.id);
         if (!getCurrentDogId() && accountDogs.length) setCurrentDogId(accountDogs[0].id);

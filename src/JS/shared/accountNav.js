@@ -69,6 +69,8 @@ async function logOut() {
         const cleared = await clearSessionsForLogOut();
         if (!cleared && !confirm("Some training sessions haven't synced to your account yet. They'll stay on this device. Log out anyway?")) return;
     }
+    // exercises sync like sessions; if they can't be saved to the account yet they stay on this device
+    if (typeof clearExercisesForLogOut === "function") await clearExercisesForLogOut();
     // pages without trainingData.js skip this; the next account's goal sync drops the old goals instead
     if (typeof clearGoalsForLogOut === "function") clearGoalsForLogOut();
     // send any display setting changes not uploaded yet, then forget them (the next account's sync also drops them)

@@ -15,7 +15,7 @@ const viewingDogRow = document.getElementById("viewing-dog-row");
 const viewingDogSelect = document.getElementById("viewing-dog");
 let viewingDogFilter = VIEWING_ALL_DOGS;
 
-// true when a session belongs to the dog picked in "Switch dog" (every session when there are no dogs)
+// true when a session or exercise belongs to the dog picked in "Switch dog" (every one when there are no dogs)
 function matchesViewingDog(session) {
     if (viewingDogFilter === VIEWING_ALL_DOGS) return true;
     return session.dogId === viewingDogFilter;
@@ -71,6 +71,10 @@ async function loadViewingDogOptions() {
         viewingDogRow.hidden = true;
         viewingDogFilter = VIEWING_ALL_DOGS;
         return;
+    }
+    // exercises logged before they were tied to a dog belong to the dog you're training
+    if (assignLooseExercises(dogs.some((dog) => dog.id === getCurrentDogId()) ? getCurrentDogId() : dogs[0].id)) {
+        window.dispatchEvent(new CustomEvent("trainingdatachanged"));
     }
 
     viewingDogSelect.replaceChildren(...dogs.map((dog) => {
@@ -515,7 +519,8 @@ if (exerciseTableBodyEl) {
     function buildExerciseViewRow(exercise, index) {
         const row = document.createElement("tr");
         // labels name each cell when rows turn into cards on phones
-        [["Name", exercise.name], ["Duration", formatDurationDisplay(exercise.duration)], ["Notes", exercise.notes], ["Date", exercise.date], ["Time", exercise.time]]
+        const amount = isDistanceExercise(exercise) ? formatExerciseDistance(exercise) : formatDurationDisplay(exercise.duration);
+        [["Name", exercise.name], ["Duration / distance", amount], ["Notes", exercise.notes], ["Date", exercise.date], ["Time", exercise.time]]
             .forEach(([label, value]) => {
                 const cell = document.createElement("td");
                 cell.dataset.label = label;
@@ -542,9 +547,9 @@ if (exerciseTableBodyEl) {
             if (!confirm("Delete this exercise? This cannot be undone.")) {
                 return;
             }
-            const currentHistory = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+            const currentHistory = getExerciseHistory();
             currentHistory.splice(index, 1);
-            localStorage.setItem("exerciseHistory", JSON.stringify(currentHistory));
+            setExerciseHistory(currentHistory);
             notifyTrainingDataChanged();
             renderExerciseTable();
         });
@@ -564,9 +569,8 @@ if (exerciseTableBodyEl) {
         nameInput.type = "text";
         nameInput.value = exercise.name ?? "";
 
-        const durationInput = document.createElement("input");
-        durationInput.type = "text";
-        durationInput.value = exercise.duration ?? "";
+        // the duration, or the distance and its unit for an exercise logged by distance
+        const amountInput = buildExerciseAmountInput(exercise);
 
         const notesInput = document.createElement("input");
         notesInput.type = "text";
@@ -580,7 +584,7 @@ if (exerciseTableBodyEl) {
         timeInputEdit.type = "time";
         timeInputEdit.value = exercise.time ?? "";
 
-        [nameInput, durationInput, notesInput, dateInputEdit, timeInputEdit].forEach((field) => {
+        [nameInput, amountInput.field, notesInput, dateInputEdit, timeInputEdit].forEach((field) => {
             const cell = document.createElement("td");
             cell.appendChild(field);
             row.appendChild(cell);
@@ -598,16 +602,19 @@ if (exerciseTableBodyEl) {
                 alert("Please enter an exercise name.");
                 return;
             }
+            const amount = amountInput.read();
+            if (!amount) return;
 
-            const currentHistory = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+            const currentHistory = getExerciseHistory();
             currentHistory[index] = {
+                ...currentHistory[index],
                 name,
-                duration: durationInput.value.trim(),
+                ...amount,
                 notes: notesInput.value.trim(),
                 date: dateInputEdit.value,
                 time: timeInputEdit.value,
             };
-            localStorage.setItem("exerciseHistory", JSON.stringify(currentHistory));
+            setExerciseHistory(currentHistory);
             notifyTrainingDataChanged();
             editingExerciseIndex = null;
             renderExerciseTable();
@@ -649,10 +656,11 @@ if (exerciseTableBodyEl) {
 
     // filter by date, sort newest first, paginate, and render the exercise history table
     function renderExerciseTable() {
-        const exerciseHistory = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+        const exerciseHistory = getExerciseHistory();
 
         const matches = exerciseHistory
             .map((exercise, index) => ({ exercise, index }))
+            .filter(({ exercise }) => matchesViewingDog(exercise))
             .filter(({ exercise }) => !exerciseDateInput.value || exercise.date === exerciseDateInput.value)
             .sort((a, b) => {
                 const dateCompare = (b.exercise.date || "").localeCompare(a.exercise.date || "");
@@ -698,6 +706,19 @@ if (exerciseTableBodyEl) {
     exerciseDateClearButton.addEventListener("click", () => {
         exerciseDateInput.value = "";
         applyExerciseDateFilter();
+    });
+
+    // a different dog was picked; start back on page 1
+    window.addEventListener("viewingdogchanged", () => {
+        editingExerciseIndex = null;
+        currentExercisePage = 1;
+        renderExerciseTable();
+    });
+    // exercises from the account arrived: redraw the table (unless mid-edit) and the totals
+    window.addEventListener("exercisessynced", (event) => {
+        if (!event.detail.changed) return;
+        if (editingExerciseIndex === null) renderExerciseTable();
+        window.dispatchEvent(new CustomEvent("trainingdatachanged"));
     });
 
     // newest exercises show as soon as the page opens, and again after test data or edits elsewhere on the page
@@ -782,6 +803,7 @@ if (seedTestDataButton && isLocalSite) {
     };
 
     const generateRandomExercises = (count) => Array.from({ length: count }, () => ({
+        dogId: viewingDogFilter === VIEWING_ALL_DOGS ? null : viewingDogFilter,
         name: randomItem(SEED_EXERCISE_NAMES),
         duration: randomItem(SEED_EXERCISE_DURATIONS),
         notes: randomItem(SEED_EXERCISE_NOTES),
@@ -795,7 +817,7 @@ if (seedTestDataButton && isLocalSite) {
         }
 
         const sessionHistory = getSessionHistory();
-        const exerciseHistory = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+        const exerciseHistory = getExerciseHistory();
 
         setSessionHistory(sessionHistory.concat(generateRandomSessions(25)));
         localStorage.setItem(
@@ -985,12 +1007,25 @@ const buildGraphTrace = (traceType, name, x, y, color, yaxisId) => {
 const graphCommandSelect = document.getElementById("graph-command");
 
 if (graphCommandSelect) {
-    getAllCommandNames().forEach((name) => {
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        graphCommandSelect.appendChild(option);
-    });
+    // list only the commands the picked dog has sessions for, keeping the current pick when it's still there
+    const fillGraphCommandOptions = () => {
+        const logged = new Set(getSessionHistory()
+            .filter((session) => session.command && session.date && matchesViewingDog(session))
+            .map((session) => session.command));
+        // the usual command order first, then logged commands that have since been removed
+        const names = [...getAllCommandNames().filter((name) => logged.has(name)),
+            ...[...logged].filter((name) => !getAllCommandNames().includes(name)).sort()];
+
+        const previous = graphCommandSelect.value;
+        graphCommandSelect.replaceChildren(...names.map((name) => new Option(name, name)));
+        if (names.length === 0) {
+            graphCommandSelect.add(new Option("No sessions logged yet", ""));
+        } else if (names.includes(previous)) {
+            graphCommandSelect.value = previous;
+        }
+        graphCommandSelect.disabled = names.length === 0;
+    };
+    fillGraphCommandOptions();
 
     const graphMetricSelect = document.getElementById("graph-metric");
     const graphTimeframeSelect = document.getElementById("graph-timeframe");
@@ -1107,6 +1142,17 @@ if (graphCommandSelect) {
         const selectedMetric = graphMetricSelect.value;
         const selectedTimeframe = graphTimeframeSelect.value;
         const selectedChartType = graphChartTypeSelect.value;
+
+        // no sessions for this dog: say so instead of drawing empty axes
+        if (!selectedCommand) {
+            graphPlotEl.hidden = true;
+            graphStatSummary.hidden = false;
+            const empty = document.createElement("p");
+            empty.className = "subhead";
+            empty.textContent = "No sessions logged yet. Log one to see it here.";
+            graphStatSummary.replaceChildren(empty);
+            return;
+        }
 
         let matches = sessionHistory
             .filter((session) => session.command === selectedCommand && session.date && matchesViewingDog(session))
@@ -1235,12 +1281,18 @@ if (graphCommandSelect) {
         plotChart(document.getElementById("tester"), data, layout);
     };
 
+    // sessions or the dog changed: refresh the command list (it may gain or lose commands), then redraw
+    const refreshCommandGraph = () => {
+        fillGraphCommandOptions();
+        drawCommandGraph();
+    };
+
     [graphCommandSelect, graphMetricSelect, graphTimeframeSelect, graphChartTypeSelect, graphDayPicker, graphMonthPicker, graphYearPicker]
         .forEach((control) => control.addEventListener("change", drawCommandGraph));
-    window.addEventListener("viewingdogchanged", drawCommandGraph);
-    window.addEventListener("trainingdatachanged", drawCommandGraph);
+    window.addEventListener("viewingdogchanged", refreshCommandGraph);
+    window.addEventListener("trainingdatachanged", refreshCommandGraph);
     window.addEventListener("sessionhistorysynced", (event) => {
-        if (event.detail.changed) drawCommandGraph();
+        if (event.detail.changed) refreshCommandGraph();
     });
     drawCommandGraph();
 }
@@ -1254,7 +1306,6 @@ if (totalsTiles) {
     const totalsShowSelect = document.getElementById("totals-show");
     const totalsChartTypeSelect = document.getElementById("totals-chart-type");
     const totalsChartEl = document.getElementById("totals-chart");
-    const totalsNote = document.getElementById("totals-note");
     const TOTALS_MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     totalsChartEl.addEventListener("mouseleave", () => clearPlotlyHover(totalsChartEl));
@@ -1278,13 +1329,8 @@ if (totalsTiles) {
         return minutes ? `${hours} hr ${minutes} min` : `${hours} hr`;
     };
 
-    const readExercises = () => {
-        try {
-            return JSON.parse(localStorage.getItem("exerciseHistory")) || [];
-        } catch {
-            return [];
-        }
-    };
+    // the picked dog's exercises (every one when there are no dogs)
+    const readExercises = () => getExerciseHistory().filter((exercise) => matchesViewingDog(exercise));
 
     // a Date for a "YYYY-MM-DD" string, at local midnight
     const parseIsoDate = (iso) => {
@@ -1353,12 +1399,11 @@ if (totalsTiles) {
         return tile;
     };
 
-    // all-time tiles: training time and sessions (for the picked dog), exercise time and exercises
+    // all-time tiles: sessions (for the picked dog), exercise time and exercises. No training-time tile: most sessions
+    // don't record how long they took, so a total would undercount
     const renderTotalsTiles = (sessions, exercises) => {
-        const trainingTotal = sessions.reduce((sum, session) => sum + sessionTrainingSeconds(session), 0);
         const exerciseTotal = exercises.reduce((sum, exercise) => sum + exerciseSeconds(exercise), 0);
         totalsTiles.replaceChildren(
-            buildTotalsTile(formatTotalTime(trainingTotal), "Total training time", "moss"),
             buildTotalsTile(String(sessions.length), `Training session${sessions.length === 1 ? "" : "s"} logged`, "moss"),
             buildTotalsTile(formatTotalTime(exerciseTotal), "Total exercise time", "brass"),
             buildTotalsTile(String(exercises.length), `Exercise${exercises.length === 1 ? "" : "s"} logged`, "brass"),
@@ -1432,7 +1477,6 @@ if (totalsTiles) {
         const sessions = getSessionHistory().filter((session) => matchesViewingDog(session));
         const exercises = readExercises();
         renderTotalsTiles(sessions, exercises);
-        totalsNote.hidden = viewingDogFilter === VIEWING_ALL_DOGS;
         if (typeof Plotly !== "undefined") renderTotalsChart(sessions, exercises);
     };
 
