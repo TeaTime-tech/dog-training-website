@@ -162,6 +162,18 @@ as $$
       true
     ) as decay_enabled
   ),
+  -- a session can list several places ("home, park"); each one counts as its own location
+  command_locations as (
+    select
+      lower(trim(ts.command)) as command_key,
+      count(distinct lower(trim(loc)))::integer as location_count
+    from training_sessions ts
+    cross join lateral unnest(string_to_array(ts.location, ',')) as loc
+    where ts.account_id = auth.uid()
+      and (p_dog_id is null or ts.dog_id = p_dog_id)
+      and trim(loc) <> ''
+    group by lower(trim(ts.command))
+  ),
   stats as (
     select
       min(ts.command) as command,
@@ -170,12 +182,11 @@ as $$
       count(*) filter (
         where coalesce(lower(trim(ts.distractions)), 'none') not in ('none', '', 'n/a')
       )::integer as distraction_sessions,
-      count(distinct lower(trim(ts.location))) filter (
-        where coalesce(trim(ts.location), '') <> ''
-      )::integer as location_count,
+      coalesce(min(cl.location_count), 0)::integer as location_count,
       min(ts.session_date) as first_practiced,
       max(ts.session_date) as last_practiced
     from training_sessions ts
+    left join command_locations cl on cl.command_key = lower(trim(ts.command))
     where ts.account_id = auth.uid()
       and (p_dog_id is null or ts.dog_id = p_dog_id)
     group by lower(trim(ts.command))

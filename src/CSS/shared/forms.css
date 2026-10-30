@@ -187,12 +187,11 @@
 .toggle-track::before {
   content: "OFF";
   position: absolute;
-  right: 0.5rem;
+  right: 0.3125rem;
   top: 50%;
   transform: translateY(-50%);
   font-size: 0.5625rem;
   font-weight: 600;
-  letter-spacing: 0.03em;
   color: var(--muted);
 }
 

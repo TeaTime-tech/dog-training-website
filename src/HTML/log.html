@@ -21,6 +21,7 @@
     <script src="../JS/shared/accountNav.js" defer></script>
     <script src="../JS/shared/sessions.js" defer></script>
     <script src="../JS/shared/exercises.js" defer></script>
+    <script src="../JS/shared/trainingData.js" defer></script>
     <script src="../JS/shared/commandDisplay.js" defer></script>
     <script src="../JS/pages/log.js" defer></script>
 </head>
@@ -62,32 +63,16 @@
     </div>
 
     <div role="tabpanel" id="log-panel-session" class="log-panel" aria-labelledby="log-tab-session">
-    <!-- the session in three cards: what and when, how it went (fields the command hides drop out), and length + notes -->
+    <!-- the sessions in three cards: which commands and when, how each went (fields the commands hide drop out), and
+         length + notes. Each picked command is saved as its own session -->
     <section class="page-section log-card">
         <h2 class="section-title">Session</h2>
         <div class="log-grid">
-            <div class="log-field">
-                <label for="command">Command</label>
-                <p class="log-hint">Manage commands on the <a href="commands.html">Commands page</a>.</p>
-                <div class="log-control">
-                    <select id="command" name="command">
-                        <option value="sit">Sit</option>
-                        <option value="stay">Stay</option>
-                        <option value="come">Come</option>
-                        <option value="down">Down</option>
-                        <option value="leave it">Leave it</option>
-                        <option value="drop it">Drop it</option>
-                        <option value="heel">Heel</option>
-                        <option value="wait">Wait</option>
-                        <option value="off">Off</option>
-                        <option value="place">Place</option>
-                        <option value="watch me">Watch me</option>
-                        <option value="touch">Touch</option>
-                        <option value="shake">Shake</option>
-                        <option value="quiet">Quiet</option>
-                        <option value="roll over">Roll over</option>
-                    </select>
-                </div>
+            <div class="log-field log-field--wide">
+                <span class="log-field-label" id="command-chips-label">Commands</span>
+                <p class="log-hint">Pick one or more; each is saved as its own session. Manage commands on the <a href="commands.html">Commands page</a>.</p>
+                <!-- log.js fills this with the account's commands -->
+                <div class="log-chips" id="command-chips" role="group" aria-labelledby="command-chips-label"></div>
                 <details class="log-add">
                     <summary>+ Add command</summary>
                     <div class="log-add-row">
@@ -107,162 +92,111 @@
                 </div>
             </div>
         </div>
-        <p id="log-display-note" class="log-display-note" hidden>Some fields are hidden for this command. Change this in Display Settings on the <a href="commands.html">Commands page</a>.</p>
+        <p id="log-display-note" class="log-display-note" hidden>Some fields are hidden for the picked commands. Change this in Display Settings on the <a href="commands.html">Commands page</a>.</p>
     </section>
 
     <section class="page-section log-card">
         <h2 class="section-title">How It Went</h2>
-        <!-- data-display-field: hidden when that field is turned off for the picked command (Commands > Display Settings) -->
-        <div class="log-grid">
-            <div class="log-field" data-display-field="repetitions">
-                <label for="repitions">Repetitions</label>
-                <p class="log-hint">How many times your dog performed the command.</p>
-                <div class="log-control">
-                    <select id="repitions" name="repitions">
-                    <option value="N/A">N/A</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    </select>
-                    <button id="remove-repition" type="button" class="hide-btn">Remove selected</button>
-                </div>
-                <details class="log-add">
-                    <summary>+ Add option</summary>
+
+        <!-- per command: a row of reps and duration for each picked command (log.js) -->
+        <h3 class="log-subtitle">Each command</h3>
+        <p class="log-hint">How many reps, and how long each command was held.</p>
+        <div class="log-command-rows" id="command-rows"></div>
+        <p class="log-laps-status" id="laps-status" role="status"></p>
+        <details class="log-add log-options">
+            <summary>Edit reps &amp; duration options</summary>
+            <div class="log-options-grid">
+                <div>
+                    <label class="log-field-label" for="new-repetition">Add a reps option</label>
                     <div class="log-add-row">
-                        <label class="visually-hidden" for="new-repition">New repetition count</label>
-                        <input type="text" id="new-repition" placeholder="Enter repetition count...">
-                        <button id="add-repition" type="button" class="secondary-btn">Add</button>
+                        <input type="text" id="new-repetition" placeholder="e.g. 8">
+                        <button id="add-repetition" type="button" class="secondary-btn">Add</button>
                     </div>
-                </details>
-            </div>
-            <div class="log-field" data-display-field="duration">
-                <label for="duration">Duration</label>
-                <p class="log-hint">How long the command was held.</p>
-                <div class="log-control">
-                    <select id="duration" name="duration">
-                    <option value="N/A">N/A</option>
-                    <option value="5">5 sec</option>
-                    <option value="10">10 sec</option>
-                    <option value="15">15 sec</option>
-                    <option value="20">20 sec</option>
-                    <option value="30">30 sec</option>
-                    <option value="1">1 min</option>
-                    <option value="1:30">1 min 30 sec</option>
-                    </select>
-                    <button id="remove-duration" type="button" class="hide-btn">Remove selected</button>
+                    <div class="log-chips log-chips--custom" id="custom-repetitions"></div>
                 </div>
-                <details class="log-add">
-                    <summary>+ Add option</summary>
+                <div>
+                    <label class="log-field-label" for="new-duration">Add a duration option</label>
                     <div class="log-add-row">
-                        <label class="visually-hidden" for="new-duration">New duration</label>
-                        <input type="text" id="new-duration" placeholder="Enter duration...">
+                        <input type="text" id="new-duration" placeholder="e.g. 45 or 2:00">
                         <button id="add-duration" type="button" class="secondary-btn">Add</button>
                     </div>
-                </details>
-            </div>
-            <div class="log-field log-field--wide" data-display-field="duration">
-                <label for="timer">Timer</label>
-                <p class="log-hint">Time the command as you train.</p>
-                <div class="log-control log-timer">
-                    <input type="text" id="timer" placeholder="00:00" readonly>
-                    <button id="timer-start" type="button" class="save-btn">Start</button>
-                    <button id="timer-stop" type="button" class="hide-btn">Stop</button>
-                    <button id="timer-reset" type="button" class="hide-btn">Reset</button>
-                    <button id="timer-direction" type="button" class="hide-btn">Mode: Countdown</button>
+                    <div class="log-chips log-chips--custom" id="custom-durations"></div>
                 </div>
             </div>
-            <div class="log-field" data-display-field="distractions">
-                <label for="distractions">Distractions</label>
-                <p class="log-hint">What was going on around you.</p>
-                <div class="log-control">
-                    <select id="distractions" name="distractions">
-                    <option value="none">None</option>
-                    <option value="other dogs">Other dogs</option>
-                    <option value="people">People</option>
-                    <option value="squirrels">Squirrels</option>
-                    <option value="birds">Birds</option>
-                    <option value="other">Other</option>
-                    </select>
-                    <button id="remove-distraction" type="button" class="hide-btn">Remove selected</button>
+        </details>
+
+        <!-- for the whole session; data-display-field rows hide when no picked command shows that field
+             (Commands > Display Settings) -->
+        <h3 class="log-subtitle">The session</h3>
+        <div class="log-rows">
+            <div class="log-row" data-display-field="distractions">
+                <div class="log-row-label">
+                    <span class="log-field-label" id="distraction-chips-label">Distractions</span>
+                    <span class="log-hint">Pick any</span>
                 </div>
-                <details class="log-add">
-                    <summary>+ Add option</summary>
-                    <div class="log-add-row">
-                        <label class="visually-hidden" for="new-distraction">New distraction</label>
-                        <input type="text" id="new-distraction" placeholder="Enter distraction...">
-                        <button id="add-distraction" type="button" class="secondary-btn">Add</button>
-                    </div>
-                </details>
-            </div>
-            <div class="log-field" data-display-field="location">
-                <label for="location">Location</label>
-                <p class="log-hint">Where the training took place.</p>
-                <div class="log-control">
-                    <select id="location" name="location">
-                    <option value="home">Home</option>
-                    <option value="park">Park</option>
-                    <option value="street">Street</option>
-                    <!-- keep this at the very end-->
-                    <option value="other">Other</option>
-                    </select>
-                    <button id="remove-location" type="button" class="hide-btn">Remove selected</button>
+                <div class="log-pick">
+                    <div class="log-chips" id="distraction-chips" role="group" aria-labelledby="distraction-chips-label"></div>
+                    <details class="log-add log-add--inline">
+                        <summary>+ Add</summary>
+                        <div class="log-add-row">
+                            <label class="visually-hidden" for="new-distraction">New distraction</label>
+                            <input type="text" id="new-distraction" placeholder="Enter distraction...">
+                            <button id="add-distraction" type="button" class="secondary-btn">Add</button>
+                        </div>
+                    </details>
                 </div>
-                <details class="log-add">
-                    <summary>+ Add option</summary>
-                    <div class="log-add-row">
-                        <label class="visually-hidden" for="new-location">New location</label>
-                        <input type="text" id="new-location" placeholder="Enter location...">
-                        <button id="add-location" type="button" class="secondary-btn">Add</button>
-                    </div>
-                </details>
             </div>
-            <div class="log-field" data-display-field="weather">
-                <label for="weather">Weather</label>
-                <p class="log-hint">The weather during the training.</p>
-                <div class="log-control">
-                    <select id="weather" name="weather">
-                    <option value="">Not recorded</option>
-                    <option value="sunny">Sunny</option>
-                    <option value="cloudy">Cloudy</option>
-                    <option value="rainy">Rainy</option>
-                    <option value="windy">Windy</option>
-                    <option value="snowy">Snowy</option>
-                    <option value="hot">Hot</option>
-                    <option value="cold">Cold</option>
-                    <option value="indoors">Indoors</option>
-                    <!-- keep this at the very end-->
-                    <option value="other">Other</option>
-                    </select>
-                    <button id="remove-weather" type="button" class="hide-btn">Remove selected</button>
+            <div class="log-row" data-display-field="location">
+                <div class="log-row-label">
+                    <span class="log-field-label" id="location-chips-label">Location</span>
+                    <span class="log-hint">Pick any</span>
                 </div>
-                <details class="log-add">
-                    <summary>+ Add option</summary>
-                    <div class="log-add-row">
-                        <label class="visually-hidden" for="new-weather">New weather type</label>
-                        <input type="text" id="new-weather" placeholder="Enter weather...">
-                        <button id="add-weather" type="button" class="secondary-btn">Add</button>
-                    </div>
-                </details>
+                <div class="log-pick">
+                    <div class="log-chips" id="location-chips" role="group" aria-labelledby="location-chips-label"></div>
+                    <details class="log-add log-add--inline">
+                        <summary>+ Add</summary>
+                        <div class="log-add-row">
+                            <label class="visually-hidden" for="new-location">New location</label>
+                            <input type="text" id="new-location" placeholder="Enter location...">
+                            <button id="add-location" type="button" class="secondary-btn">Add</button>
+                        </div>
+                    </details>
+                </div>
             </div>
-            <div class="log-field" data-display-field="score">
-                <label for="score">Score</label>
-                <p class="log-hint">From 1 (poor) to 10 (perfect).</p>
-                <div class="log-control">
-                    <select id="score" name="score">
-                    <option value="">No score</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    </select>
+            <div class="log-row" data-display-field="weather">
+                <div class="log-row-label">
+                    <span class="log-field-label" id="weather-chips-label">Weather</span>
+                    <span class="log-hint">Pick any, or none</span>
+                </div>
+                <div class="log-pick">
+                    <div class="log-chips" id="weather-chips" role="group" aria-labelledby="weather-chips-label"></div>
+                    <details class="log-add log-add--inline">
+                        <summary>+ Add</summary>
+                        <div class="log-add-row">
+                            <label class="visually-hidden" for="new-weather">New weather type</label>
+                            <input type="text" id="new-weather" placeholder="Enter weather...">
+                            <button id="add-weather" type="button" class="secondary-btn">Add</button>
+                        </div>
+                    </details>
+                </div>
+            </div>
+            <div class="log-row" data-display-field="score">
+                <div class="log-row-label">
+                    <span class="log-field-label" id="score-label">Score</span>
+                    <span class="log-hint">1 is poor, 10 is perfect</span>
+                </div>
+                <div class="log-chips log-score" id="score" role="radiogroup" aria-labelledby="score-label">
+                    <span class="log-chip"><label><input type="radio" name="score" value="" checked><span>None</span></label></span>
+                    <span class="log-chip"><label><input type="radio" name="score" value="1"><span>1</span></label></span>
+                    <span class="log-chip"><label><input type="radio" name="score" value="2"><span>2</span></label></span>
+                    <span class="log-chip"><label><input type="radio" name="score" value="3"><span>3</span></label></span>
+                    <span class="log-chip"><label><input type="radio" name="score" value="4"><span>4</span></label></span>
+                    <span class="log-chip"><label><input type="radio" name="score" value="5"><span>5</span></label></span>
+                    <span class="log-chip"><label><input type="radio" name="score" value="6"><span>6</span></label></span>
+                    <span class="log-chip"><label><input type="radio" name="score" value="7"><span>7</span></label></span>
+                    <span class="log-chip"><label><input type="radio" name="score" value="8"><span>8</span></label></span>
+                    <span class="log-chip"><label><input type="radio" name="score" value="9"><span>9</span></label></span>
+                    <span class="log-chip"><label><input type="radio" name="score" value="10"><span>10</span></label></span>
                 </div>
             </div>
         </div>
@@ -271,24 +205,11 @@
     <section class="page-section log-card">
         <h2 class="section-title">Length &amp; Notes</h2>
         <div class="log-field">
-            <div class="log-toggle-row">
-                <label for="session-duration-mode-toggle">Log the length without the clock</label>
-                <label class="toggle">
-                    <input type="checkbox" id="session-duration-mode-toggle" class="toggle-input">
-                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                </label>
-            </div>
-            <div class="log-control" id="session-clock-fields">
-                <label for="session-start-time">From</label>
-                <input type="time" id="session-start-time" name="session-start-time">
-                <label for="session-end-time">to</label>
-                <input type="time" id="session-end-time" name="session-end-time">
-            </div>
-            <div class="log-control" id="session-manual-fields" hidden>
-                <label for="session-duration-hours">Hours</label>
-                <input type="number" id="session-duration-hours" min="0" max="23" value="0">
+            <span class="log-field-label">Length</span>
+            <p class="log-hint">How long the whole session took. Leave at 0 if you didn't keep track.</p>
+            <div class="log-control">
                 <label for="session-duration-minutes">Minutes</label>
-                <input type="number" id="session-duration-minutes" min="0" max="59" value="0">
+                <input type="number" id="session-duration-minutes" min="0" value="0">
             </div>
             <p class="total-time-display" id="session-total-time-label">Total time: &mdash;</p>
         </div>
@@ -307,6 +228,54 @@
             <a class="home-link" href="load.html">Logged sessions &rarr;</a>
         </form>
     </section>
+
+    <!-- the timer: a button pinned to the corner of the Session panel opens it; it keeps running while closed -->
+    <button type="button" class="log-timer-fab" id="timer-open" aria-haspopup="dialog" title="Open the timer. Drag to move it (or Alt + arrow keys).">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2h5M12 2v3"/></svg>
+        <span id="timer-fab-text">Timer</span>
+    </button>
+    <div class="modal-overlay" id="timer-overlay" hidden>
+        <div class="modal-card log-timer-card" role="dialog" aria-modal="true" aria-labelledby="timer-title">
+            <h2 class="section-title" id="timer-title">Timer</h2>
+            <!-- the timer itself; swapped for the "log your laps" step when closing with laps -->
+            <div class="log-timer-main" id="timer-main">
+                <div class="log-segment" id="timer-mode" role="radiogroup" aria-label="Timer mode">
+                    <label><input type="radio" name="timer-mode" value="down" checked><span>Count down</span></label>
+                    <label><input type="radio" name="timer-mode" value="up"><span>Count up</span></label>
+                </div>
+                <div class="log-timer-from" id="timer-from-row">
+                    <label for="timer-from">From</label>
+                    <select id="timer-from"></select>
+                </div>
+                <p class="log-timer-display" id="timer" role="timer" aria-atomic="true">0:00</p>
+                <p class="visually-hidden" id="timer-announce" aria-live="assertive"></p>
+                <div class="log-timer-actions">
+                    <button type="button" class="save-btn" id="timer-start">Start</button>
+                    <button type="button" class="secondary-btn" id="timer-lap" disabled>Lap</button>
+                    <button type="button" class="secondary-btn" id="timer-reset">Reset</button>
+                </div>
+                <!-- each lap is one rep; log.js lists them here -->
+                <div class="log-timer-laps" id="timer-laps-wrap" hidden>
+                    <ol class="log-timer-lap-list" id="timer-laps" aria-label="Laps"></ol>
+                    <button type="button" class="hide-btn" id="timer-laps-clear">Clear laps</button>
+                </div>
+                <button type="button" class="hide-btn log-timer-close" id="timer-close">Close</button>
+            </div>
+            <div class="log-timer-log" id="timer-log" hidden>
+                <p class="log-timer-log-title" id="timer-log-title">Log your laps?</p>
+                <p class="log-hint" id="timer-log-summary"></p>
+                <div class="log-timer-from">
+                    <label for="timer-log-command">Command</label>
+                    <select id="timer-log-command"></select>
+                </div>
+                <div class="log-timer-actions">
+                    <button type="button" class="save-btn" id="timer-log-add">Add to session</button>
+                    <button type="button" class="secondary-btn" id="timer-log-discard">Discard laps</button>
+                </div>
+                <button type="button" class="hide-btn log-timer-close" id="timer-log-back">Back to timer</button>
+            </div>
+        </div>
+    </div>
     </div>
 
     <!-- an exercise (walk, fetch...), for the dog picked at the top -->
@@ -316,7 +285,7 @@
         <form id="exercise-form">
             <div class="log-grid">
                 <div class="log-field">
-                    <label for="exercise-name">Exercise</label>
+                    <label for="exercise-name">Activity</label>
                     <p class="log-hint">A walk, fetch, a swim...</p>
                     <div class="log-control">
                         <input type="text" id="exercise-name" list="exercise-name-suggestions" placeholder="e.g. Walk">
@@ -341,13 +310,11 @@
                     </div>
                 </div>
                 <div class="log-field">
-                    <label for="exercise-measure">Track by</label>
+                    <span class="log-field-label" id="exercise-measure-label">Track by</span>
                     <p class="log-hint">How long it took, or how far you went.</p>
-                    <div class="log-control">
-                        <select id="exercise-measure">
-                            <option value="time">Time</option>
-                            <option value="distance">Distance</option>
-                        </select>
+                    <div class="log-segment" id="exercise-measure" role="radiogroup" aria-labelledby="exercise-measure-label">
+                        <label><input type="radio" name="exercise-measure" value="time" checked><span>Time</span></label>
+                        <label><input type="radio" name="exercise-measure" value="distance"><span>Distance</span></label>
                     </div>
                 </div>
                 <div class="log-field" id="exercise-duration-field">

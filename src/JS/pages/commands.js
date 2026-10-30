@@ -570,7 +570,7 @@ if (commandButtonsContainer) {
     });
 }
 
-/*clear one command's logged sessions for the dog you're training (commands.html)*/
+/*Clear History card, sessions row: clear one command's logged sessions for the dog you're training (commands.html)*/
 
 const clearHistorySelect = document.getElementById("clear-history-command");
 
@@ -643,6 +643,8 @@ if (clearHistorySelect) {
             return;
         }
 
+        const clearExercisesStatus = document.getElementById("clear-exercises-status");
+        if (clearExercisesStatus) clearExercisesStatus.textContent = "";
         clearHistoryStatus.textContent = `Clearing ${removed} ${plural}...`;
         const synced = await setSessionHistory(kept);
         clearHistoryStatus.textContent = synced === false
@@ -658,6 +660,94 @@ if (clearHistorySelect) {
     window.addEventListener("commandrenamed", fillClearHistoryCommands);
     showClearHistoryDog();
     fillClearHistoryCommands();
+}
+
+/*Clear History card, exercises row: clear logged exercises (one kind, or all) for the dog you're training*/
+
+const clearExercisesSelect = document.getElementById("clear-exercises-name");
+
+if (clearExercisesSelect) {
+    const clearExercisesButton = document.getElementById("clear-exercises-button");
+    const clearExercisesStatus = document.getElementById("clear-exercises-status");
+    // the "All exercises" option's value; exercise names are never blank
+    const ALL_EXERCISES = "";
+    let clearExercisesDogName = null;
+
+    const sameName = (a, b) => String(a || "").toLowerCase() === String(b || "").toLowerCase();
+
+    // exercises of the dog you're training (when no dog is picked, e.g. signed out, the exercises that have no dog)
+    const isCurrentDogExercise = (exercise) => (exercise.dogId || null) === getCurrentDogId();
+
+    // the exercises the picked option clears
+    const isPicked = (exercise, name) =>
+        isCurrentDogExercise(exercise) && (name === ALL_EXERCISES || sameName(exercise.name, name));
+
+    // the name of the dog whose exercises get cleared, for the messages (the card's dog line shows it)
+    const loadClearExercisesDog = async () => {
+        let dogs = [];
+        try {
+            if (await getSignedInUser()) dogs = await getDogs();
+        } catch (error) {
+            console.error("Could not load dogs:", error);
+        }
+        const dog = dogs.find((item) => item.id === getCurrentDogId());
+        clearExercisesDogName = dog ? dog.name : null;
+    };
+
+    // list "All exercises" then each logged exercise with its count, keeping the current choice when it's still there
+    const fillClearExercises = () => {
+        const counts = new Map();
+        let total = 0;
+        getExerciseHistory().forEach((exercise) => {
+            if (!isCurrentDogExercise(exercise)) return;
+            total += 1;
+            const key = String(exercise.name || "Exercise").toLowerCase();
+            const entry = counts.get(key) || { name: exercise.name || "Exercise", count: 0 };
+            entry.count += 1;
+            counts.set(key, entry);
+        });
+
+        const countText = (count) => `${count} ${count === 1 ? "exercise" : "exercises"}`;
+        const previous = clearExercisesSelect.value;
+        const entries = [...counts.values()].sort((a, b) => a.name.localeCompare(b.name));
+        clearExercisesSelect.replaceChildren(
+            new Option(total ? `All exercises (${countText(total)})` : "No logged exercises", ALL_EXERCISES),
+            ...entries.map(({ name, count }) => new Option(`${name} (${countText(count)})`, name)),
+        );
+        const keep = entries.find(({ name }) => sameName(name, previous));
+        clearExercisesSelect.value = keep ? keep.name : ALL_EXERCISES;
+        clearExercisesSelect.disabled = total === 0;
+        clearExercisesButton.disabled = total === 0;
+    };
+
+    clearExercisesButton.addEventListener("click", async () => {
+        const name = clearExercisesSelect.value;
+        const history = getExerciseHistory();
+        const kept = history.filter((exercise) => !isPicked(exercise, name));
+        const removed = history.length - kept.length;
+        if (!removed) return;
+        const plural = removed === 1 ? "exercise" : "exercises";
+        const what = name === ALL_EXERCISES ? `all ${removed} logged ${plural}` : `all ${removed} logged "${name}" ${plural}`;
+        const forDog = clearExercisesDogName ? ` for ${clearExercisesDogName}` : "";
+        if (!confirm(`Delete ${what}${forDog}? This can't be undone. Other dogs' exercises stay.`)) {
+            return;
+        }
+
+        document.getElementById("clear-history-status").textContent = "";
+        clearExercisesStatus.textContent = `Clearing ${removed} ${plural}...`;
+        const synced = await setExerciseHistory(kept);
+        const done = name === ALL_EXERCISES ? `${removed} ${plural}` : `${removed} "${name}" ${plural}`;
+        clearExercisesStatus.textContent = synced === false
+            ? `Cleared ${done}${forDog} on this device. Couldn't reach your account yet; it will retry next time.`
+            : `Cleared ${done}${forDog}.`;
+        fillClearExercises();
+    });
+
+    window.addEventListener("exercisessynced", (event) => {
+        if (event.detail.changed) fillClearExercises();
+    });
+    loadClearExercisesDog();
+    fillClearExercises();
 }
 
 /*Canine Good Citizen checklist panel (commands.html)*/
