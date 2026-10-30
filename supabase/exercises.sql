@@ -20,9 +20,19 @@ create table if not exists public.exercises (
   updated_at timestamptz not null default now()
 );
 
--- for tables made before distance tracking
+-- an exercises table made earlier (by hand, or an older version of this file) is left as it is by "create table if
+-- not exists" above, so add any column it's missing
+alter table public.exercises add column if not exists account_id uuid references auth.users (id) on delete cascade default auth.uid();
+alter table public.exercises add column if not exists dog_id uuid references public.dogs (id) on delete cascade;
+alter table public.exercises add column if not exists name text not null default 'Exercise';
+alter table public.exercises add column if not exists duration text;
 alter table public.exercises add column if not exists distance numeric;
 alter table public.exercises add column if not exists distance_unit text;
+alter table public.exercises add column if not exists notes text;
+alter table public.exercises add column if not exists exercise_date date not null default current_date;
+alter table public.exercises add column if not exists exercise_time time;
+alter table public.exercises add column if not exists created_at timestamptz not null default now();
+alter table public.exercises add column if not exists updated_at timestamptz not null default now();
 
 alter table public.exercises drop constraint if exists exercises_distance_check;
 alter table public.exercises add constraint exercises_distance_check check (
