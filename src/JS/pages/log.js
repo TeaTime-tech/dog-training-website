@@ -1,5 +1,37 @@
-/* log.html: the training session form (dog, option pickers, timer, session length, save).
-   Needs commandList.js, dogs.js, sessions.js and commandDisplay.js loaded first. */
+/* log.html: the Session | Exercise switch, the training session form (dog, option pickers, timer, session length,
+   save), and the exercise form. Needs commandList.js, dogs.js, sessions.js, exercises.js and commandDisplay.js
+   loaded first. */
+
+/*Session | Exercise switch: shows one panel; log.html#exercise opens on Exercise*/
+
+const logSwitchTabs = Array.from(document.querySelectorAll(".log-switch-tab"));
+
+// show one tab's panel and hide the other, keeping the choice in the address so a reload stays on it
+function selectLogTab(tab, focus = false) {
+    logSwitchTabs.forEach((other) => {
+        const selected = other === tab;
+        other.setAttribute("aria-selected", String(selected));
+        other.tabIndex = selected ? 0 : -1;
+        document.getElementById(other.getAttribute("aria-controls")).hidden = !selected;
+    });
+    if (focus) tab.focus();
+    const hash = tab.id === "log-tab-exercise" ? "#exercise" : "";
+    if (window.location.hash !== hash) {
+        history.replaceState(null, "", window.location.pathname + window.location.search + hash);
+    }
+}
+
+logSwitchTabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => selectLogTab(tab));
+    // arrow keys move between the two, like a native tab strip
+    tab.addEventListener("keydown", (event) => {
+        const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+        if (!step) return;
+        event.preventDefault();
+        selectLogTab(logSwitchTabs[(index + step + logSwitchTabs.length) % logSwitchTabs.length], true);
+    });
+});
+if (window.location.hash === "#exercise") selectLogTab(document.getElementById("log-tab-exercise"));
 
 /*pick which dog this session is for*/
 
@@ -31,7 +63,7 @@ async function loadLogDogOptions() {
     logDogSection.hidden = false;
 }
 
-// the dog picked for this session, or null when the picker isn't shown
+// the dog picked for this session or exercise, or null when the picker isn't shown
 function getLogDog() {
     if (!logDogSection || logDogSection.hidden || !logDogSelect.value) return null;
     return { id: logDogSelect.value, name: logDogSelect.selectedOptions[0].textContent };
@@ -492,4 +524,96 @@ if (commandSelect) {
         if (event.detail.changed) applyCommandDisplay();
     });
     applyCommandDisplay();
+}
+
+/*log an exercise (walk, fetch...) for the dog picked at the top*/
+
+const exerciseForm = document.getElementById("exercise-form");
+
+if (exerciseForm) {
+    const exerciseNameInput = document.getElementById("exercise-name");
+    const exerciseDateInput = document.getElementById("exercise-when-date");
+    const exerciseTimeInput = document.getElementById("exercise-when-time");
+    const exerciseMeasureSelect = document.getElementById("exercise-measure");
+    const exerciseDurationField = document.getElementById("exercise-duration-field");
+    const exerciseDurationInput = document.getElementById("exercise-duration");
+    const exerciseDurationUnitSelect = document.getElementById("exercise-duration-unit");
+    const exerciseDistanceField = document.getElementById("exercise-distance-field");
+    const exerciseDistanceInput = document.getElementById("exercise-distance");
+    const exerciseDistanceUnitSelect = document.getElementById("exercise-distance-unit");
+    const exerciseNotesInput = document.getElementById("exercise-notes");
+    const exerciseSaveMessage = document.getElementById("exercise-save-message");
+
+    const now = new Date();
+    exerciseDateInput.value = localDateString(now);
+    exerciseTimeInput.value = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    exerciseDistanceUnitSelect.value = getDistanceUnit();
+
+    // show the duration or the distance field, whichever "Track by" picks
+    const showExerciseMeasure = () => {
+        const byDistance = exerciseMeasureSelect.value === "distance";
+        exerciseDurationField.hidden = byDistance;
+        exerciseDistanceField.hidden = !byDistance;
+    };
+    exerciseMeasureSelect.addEventListener("change", showExerciseMeasure);
+    showExerciseMeasure();
+
+    exerciseForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const name = exerciseNameInput.value.trim();
+        if (!name) {
+            alert("Please enter an exercise name.");
+            exerciseNameInput.focus();
+            return;
+        }
+
+        const byDistance = exerciseMeasureSelect.value === "distance";
+        const duration = byDistance ? "" : exerciseDurationInput.value.trim();
+        if (duration !== "" && !/^\d+$/.test(duration)) {
+            alert("Duration must be a whole number.");
+            return;
+        }
+
+        const distanceText = byDistance ? exerciseDistanceInput.value.trim() : "";
+        const distance = distanceText === "" ? "" : parseDistanceInput(distanceText);
+        if (distance === null) {
+            alert("Distance must be a number above 0, like 2 or 1.5.");
+            return;
+        }
+
+        // minutes are stored as "M:00", like Today's Add Exercise, so durations read back the same everywhere
+        const exercise = {
+            name,
+            duration: duration !== "" && exerciseDurationUnitSelect.value === "min" ? `${duration}:00` : duration,
+            distance,
+            distanceUnit: distance ? exerciseDistanceUnitSelect.value : "",
+            notes: exerciseNotesInput.value.trim(),
+            date: exerciseDateInput.value || localDateString(),
+            time: exerciseTimeInput.value,
+        };
+        const logDog = getLogDog();
+        if (logDog) exercise.dogId = logDog.id;
+
+        const exerciseHistory = getExerciseHistory();
+        exerciseHistory.push(exercise);
+
+        exerciseSaveMessage.textContent = logDog ? `Exercise saved for ${logDog.name}!` : "Exercise saved!";
+        setExerciseHistory(exerciseHistory).then((synced) => {
+            if (synced === false) {
+                exerciseSaveMessage.textContent = "Exercise saved on this device only. Couldn't sync to your account.";
+            }
+        });
+
+        // ready for the next one: keep the date, time and how it's tracked
+        exerciseNameInput.value = "";
+        exerciseDurationInput.value = "";
+        exerciseDistanceInput.value = "";
+        exerciseNotesInput.value = "";
+
+        exerciseSaveMessage.hidden = false;
+        setTimeout(() => {
+            exerciseSaveMessage.hidden = true;
+        }, 3000);
+    });
 }

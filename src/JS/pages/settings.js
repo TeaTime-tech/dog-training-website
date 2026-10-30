@@ -226,7 +226,8 @@ window.addEventListener("themechange", () => {
 });
 
 /* weight and distance units: saved in this browser when "Save Settings" is clicked.
-   The weight unit is what My Dogs and the dog chart show weights in (getWeightUnit in dogs.js) */
+   The weight unit is what My Dogs and the dog chart show weights in (getWeightUnit in dogs.js); the distance unit
+   is the one Today's Add Exercise starts on (getDistanceUnit in exercises.js) */
 
 const WEIGHT_UNIT_STORAGE_KEY = "weightUnit";
 const DISTANCE_UNIT_STORAGE_KEY = "distanceUnit";
@@ -235,7 +236,7 @@ const distanceUnitSelect = document.getElementById("distance-unit");
 const unitsStatus = document.getElementById("units-status");
 
 weightUnitSelect.value = getWeightUnit();
-distanceUnitSelect.value = localStorage.getItem(DISTANCE_UNIT_STORAGE_KEY) || distanceUnitSelect.value;
+distanceUnitSelect.value = getDistanceUnit();
 
 document.getElementById("save-settings").addEventListener("click", () => {
     localStorage.setItem(WEIGHT_UNIT_STORAGE_KEY, weightUnitSelect.value);
@@ -243,6 +244,77 @@ document.getElementById("save-settings").addEventListener("click", () => {
     const unitName = weightUnitSelect.value === "kg" ? "kilograms" : "pounds";
     showStatus(unitsStatus, `Saved. Dog weights now show in ${unitName} on this device.`);
 });
+
+/* clear history: delete the logged sessions or exercises of one dog (or all of them). setSessionHistory and
+   setExerciseHistory sync the deletes to the account */
+
+const CLEAR_ALL_DOGS = "all";
+const clearDogRow = document.getElementById("clear-dog-row");
+const clearDogSelect = document.getElementById("clear-dog");
+const clearSessionsButton = document.getElementById("clear-sessions");
+const clearExercisesButton = document.getElementById("clear-exercises");
+const clearStatus = document.getElementById("clear-status");
+
+// the picked dog's id, or null for every dog (also when there are no dogs)
+const pickedClearDog = () => (clearDogSelect.value && clearDogSelect.value !== CLEAR_ALL_DOGS ? clearDogSelect.value : null);
+const pickedClearDogName = () => (pickedClearDog() ? clearDogSelect.selectedOptions[0].textContent : "");
+const inClearScope = (item) => !pickedClearDog() || item.dogId === pickedClearDog();
+
+// show how many of each there are for the picked dog, and disable a button with nothing to clear
+function updateClearButtons() {
+    const sessions = getSessionHistory().filter(inClearScope).length;
+    const exercises = getExerciseHistory().filter(inClearScope).length;
+    clearSessionsButton.textContent = `Clear session history (${sessions})`;
+    clearExercisesButton.textContent = `Clear exercise history (${exercises})`;
+    clearSessionsButton.disabled = sessions === 0;
+    clearExercisesButton.disabled = exercises === 0;
+}
+
+// fill the dog picker when signed in with dogs, starting on the dog you're training
+async function loadClearDogs() {
+    let dogs = [];
+    try {
+        if (await getSignedInUser()) dogs = await getDogs();
+    } catch (error) {
+        console.error("Could not load dogs:", error);
+    }
+    clearDogRow.hidden = dogs.length === 0;
+    clearDogSelect.replaceChildren(
+        ...dogs.map((dog) => new window.Option(dog.name, dog.id)),
+        new window.Option("All dogs", CLEAR_ALL_DOGS),
+    );
+    clearDogSelect.value = dogs.some((dog) => dog.id === getCurrentDogId()) ? getCurrentDogId() : CLEAR_ALL_DOGS;
+    updateClearButtons();
+}
+
+// delete the picked dog's items from one history after confirming; returns how many went
+async function clearHistory(kind, getHistory, setHistory) {
+    const history = getHistory();
+    const kept = history.filter((item) => !inClearScope(item));
+    const removed = history.length - kept.length;
+    if (!removed) return;
+    const name = pickedClearDogName();
+    const whose = name ? ` for ${name}` : clearDogRow.hidden ? "" : " for all dogs";
+    const noun = `${kind}${removed === 1 ? "" : "s"}`;
+    if (!confirm(`Permanently delete all ${removed} logged ${noun}${whose}? This can't be undone.`)) return;
+    showStatus(clearStatus, "Deleting...");
+    const synced = await setHistory(kept);
+    showStatus(clearStatus, synced === false
+        ? `Deleted ${removed} ${noun}${whose} on this device. Couldn't reach your account yet; it will retry next time.`
+        : `Deleted ${removed} ${noun}${whose}.`);
+    updateClearButtons();
+}
+
+clearDogSelect.addEventListener("change", () => {
+    showStatus(clearStatus, "");
+    updateClearButtons();
+});
+clearSessionsButton.addEventListener("click", () => clearHistory("session", getSessionHistory, setSessionHistory));
+clearExercisesButton.addEventListener("click", () => clearHistory("exercise", getExerciseHistory, setExerciseHistory));
+window.addEventListener("sessionhistorysynced", updateClearButtons);
+window.addEventListener("exercisessynced", updateClearButtons);
+updateClearButtons();
+loadClearDogs();
 
 /* export: download this browser's training data, plus the account's cloud data if signed in */
 

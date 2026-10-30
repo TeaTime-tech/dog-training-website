@@ -56,6 +56,24 @@ fieldset:disabled .avatar-choose {
   color: var(--danger);
 }
 
+/* Data > Clear history */
+.settings-clear {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--clay);
+}
+
+.settings-subtitle {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.settings-clear-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
 .settings-note {
   margin: 0 0 0.75rem;
   font-size: 0.9375rem;

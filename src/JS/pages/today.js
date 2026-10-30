@@ -336,7 +336,7 @@ if (todaySessionList) {
     let todayDogs = [];
     const todayDogChips = document.getElementById("today-dog-chips");
 
-    // true when a session belongs to the dog you're training, so Today matches the home page and View Logs
+    // true when a session (or exercise) belongs to the dog you're training, so Today matches the home page and View Logs
     const isTodayDogSession = (session) => todayDogs.length === 0 || session.dogId === getCurrentDogId();
 
     // one pill per dog in the hero; the picked one is filled. Picking one makes it the dog you're training
@@ -359,6 +359,7 @@ if (todaySessionList) {
                 setCurrentDogId(dog.id);
                 renderTodayDogChips();
                 renderToday();
+                if (renderTodayExercises) renderTodayExercises();
                 todayDogChips.querySelector('[aria-checked="true"]').focus();
             });
             return chip;
@@ -386,8 +387,11 @@ if (todaySessionList) {
             todayDogs = [];
         }
         if (todayDogs.length && !todayDogs.some((dog) => dog.id === getCurrentDogId())) setCurrentDogId(todayDogs[0].id);
+        // exercises logged before they were tied to a dog belong to the dog you're training
+        if (todayDogs.length) assignLooseExercises(getCurrentDogId());
         renderTodayDogChips();
         if (editingSessionIndex === null) renderToday();
+        if (renderTodayExercises) renderTodayExercises();
     };
 
     function renderToday() {
@@ -533,11 +537,14 @@ if (todaySessionList) {
             const chipsWrap = document.createElement("div");
             chipsWrap.className = "today-session-chips";
 
-            if (exercise.duration) {
-                const durationChip = document.createElement("span");
-                durationChip.className = "today-session-chip";
-                durationChip.textContent = formatDurationDisplay(exercise.duration);
-                chipsWrap.appendChild(durationChip);
+            const amount = isDistanceExercise(exercise)
+                ? formatExerciseDistance(exercise)
+                : exercise.duration && formatDurationDisplay(exercise.duration);
+            if (amount) {
+                const amountChip = document.createElement("span");
+                amountChip.className = "today-session-chip";
+                amountChip.textContent = amount;
+                chipsWrap.appendChild(amountChip);
             }
 
             const editButton = document.createElement("button");
@@ -569,9 +576,8 @@ if (todaySessionList) {
             nameInput.type = "text";
             nameInput.value = exercise.name ?? "";
 
-            const durationInput = document.createElement("input");
-            durationInput.type = "text";
-            durationInput.value = exercise.duration ?? "";
+            // the duration, or the distance and its unit for an exercise logged by distance
+            const amountInput = buildExerciseAmountInput(exercise);
 
             const notesInput = document.createElement("input");
             notesInput.type = "text";
@@ -596,7 +602,7 @@ if (todaySessionList) {
             };
 
             addField("Name:", nameInput);
-            addField("Duration:", durationInput);
+            addField(isDistanceExercise(exercise) ? "Distance:" : "Duration:", amountInput.field);
             addField("Notes:", notesInput);
             addField("Date:", dateInputEdit);
             addField("Time:", timeInputEdit);
@@ -614,16 +620,19 @@ if (todaySessionList) {
                     alert("Please enter an exercise name.");
                     return;
                 }
+                const amount = amountInput.read();
+                if (!amount) return;
 
-                const currentHistory = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+                const currentHistory = getExerciseHistory();
                 currentHistory[index] = {
+                    ...currentHistory[index],
                     name,
-                    duration: durationInput.value.trim(),
+                    ...amount,
                     notes: notesInput.value.trim(),
                     date: dateInputEdit.value,
                     time: timeInputEdit.value,
                 };
-                localStorage.setItem("exerciseHistory", JSON.stringify(currentHistory));
+                setExerciseHistory(currentHistory);
                 editingExerciseIndex = null;
                 renderTodayExercises();
             });
@@ -647,10 +656,10 @@ if (todaySessionList) {
 
         renderTodayExercises = () => {
             const viewedDateIso = getViewedDateIso();
-            const exerciseHistory = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+            const exerciseHistory = getExerciseHistory();
             const todaysExercises = exerciseHistory
                 .map((exercise, index) => ({ exercise, index }))
-                .filter(({ exercise }) => exercise.date === viewedDateIso)
+                .filter(({ exercise }) => exercise.date === viewedDateIso && isTodayDogSession(exercise))
                 .sort((a, b) => (b.exercise.time || "").localeCompare(a.exercise.time || ""));
 
             todayExerciseList.innerHTML = "";
@@ -688,11 +697,15 @@ if (todaySessionList) {
             }
 
             const indicesToRemove = new Set(checkedBoxes.map((checkbox) => Number(checkbox.dataset.index)));
-            const currentHistory = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+            const currentHistory = getExerciseHistory();
             const updatedHistory = currentHistory.filter((_, index) => !indicesToRemove.has(index));
-            localStorage.setItem("exerciseHistory", JSON.stringify(updatedHistory));
-
+            setExerciseHistory(updatedHistory);
             renderTodayExercises();
+        });
+
+        // exercises from the account arrived; redraw unless one is mid-edit
+        window.addEventListener("exercisessynced", (event) => {
+            if (event.detail.changed && editingExerciseIndex === null) renderTodayExercises();
         });
 
         renderTodayExercises();
@@ -826,6 +839,19 @@ if (todaySessionList) {
         const addExerciseNameInput = document.getElementById("add-exercise-name");
         const addExerciseDurationInput = document.getElementById("add-exercise-duration");
         const addExerciseDurationUnitSelect = document.getElementById("add-exercise-duration-unit");
+        const addExerciseMeasureSelect = document.getElementById("add-exercise-measure");
+        const addExerciseDurationRow = document.getElementById("add-exercise-duration-row");
+        const addExerciseDistanceRow = document.getElementById("add-exercise-distance-row");
+        const addExerciseDistanceInput = document.getElementById("add-exercise-distance");
+        const addExerciseDistanceUnitSelect = document.getElementById("add-exercise-distance-unit");
+
+        // show the duration or the distance row, whichever "Track by" picks
+        const showExerciseMeasure = () => {
+            const byDistance = addExerciseMeasureSelect.value === "distance";
+            addExerciseDurationRow.hidden = byDistance;
+            addExerciseDistanceRow.hidden = !byDistance;
+        };
+        addExerciseMeasureSelect.addEventListener("change", showExerciseMeasure);
         const addExerciseNotesInput = document.getElementById("add-exercise-notes");
         const addExerciseDateInput = document.getElementById("add-exercise-date");
         const addExerciseTimeInput = document.getElementById("add-exercise-time");
@@ -834,6 +860,10 @@ if (todaySessionList) {
             addExerciseNameInput.value = "";
             addExerciseDurationInput.value = "";
             addExerciseDurationUnitSelect.value = "min";
+            addExerciseMeasureSelect.value = "time";
+            addExerciseDistanceInput.value = "";
+            addExerciseDistanceUnitSelect.value = getDistanceUnit();
+            showExerciseMeasure();
             addExerciseNotesInput.value = "";
             addExerciseDateInput.value = getViewedDateIso();
 
@@ -875,9 +905,17 @@ if (todaySessionList) {
                 return;
             }
 
-            const duration = addExerciseDurationInput.value.trim();
+            const byDistance = addExerciseMeasureSelect.value === "distance";
+            const duration = byDistance ? "" : addExerciseDurationInput.value.trim();
             if (duration !== "" && !/^\d+$/.test(duration)) {
                 alert("Duration must be a whole number.");
+                return;
+            }
+
+            const distanceText = byDistance ? addExerciseDistanceInput.value.trim() : "";
+            const distance = distanceText === "" ? "" : parseDistanceInput(distanceText);
+            if (distance === null) {
+                alert("Distance must be a number above 0, like 2 or 1.5.");
                 return;
             }
 
@@ -886,17 +924,21 @@ if (todaySessionList) {
                 ? `${duration}:00`
                 : duration;
 
+            // logged for the dog you're training (none when signed out)
             const exercise = {
+                dogId: getCurrentDogId(),
                 name,
                 duration: storedDuration,
+                distance,
+                distanceUnit: distance ? addExerciseDistanceUnitSelect.value : "",
                 notes: addExerciseNotesInput.value.trim(),
                 date: addExerciseDateInput.value,
                 time: addExerciseTimeInput.value,
             };
 
-            const exerciseHistory = JSON.parse(localStorage.getItem("exerciseHistory")) || [];
+            const exerciseHistory = getExerciseHistory();
             exerciseHistory.push(exercise);
-            localStorage.setItem("exerciseHistory", JSON.stringify(exerciseHistory));
+            setExerciseHistory(exerciseHistory);
 
             closeAddExerciseModal();
             if (renderTodayExercises) {

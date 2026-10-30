@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- before the styles, so the saved light/dark theme applies from the first paint -->
     <script src="../JS/shared/theme.js"></script>
-    <title>Training session log</title>
+    <title>Log training</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&display=swap" rel="stylesheet">
     <!-- shared styles, then this page's styles -->
@@ -20,6 +20,7 @@
     <script src="../JS/shared/dogs.js" defer></script>
     <script src="../JS/shared/accountNav.js" defer></script>
     <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/shared/exercises.js" defer></script>
     <script src="../JS/shared/commandDisplay.js" defer></script>
     <script src="../JS/pages/log.js" defer></script>
 </head>
@@ -45,20 +46,26 @@
         </div>
     </div>
 
-    <h1>Log Training Session</h1>
+    <h1>Log Training</h1>
 
+    <!-- what to log (a session or an exercise; log.js swaps the panels below) and the dog it's for -->
+    <div class="log-switch-bar">
+        <div class="log-switch" role="tablist" aria-label="What to log">
+            <button type="button" role="tab" id="log-tab-session" class="log-switch-tab" aria-controls="log-panel-session" aria-selected="true">Session</button>
+            <button type="button" role="tab" id="log-tab-exercise" class="log-switch-tab" aria-controls="log-panel-exercise" aria-selected="false" tabindex="-1">Exercise</button>
+        </div>
+        <!-- log.js fills this with the account's dogs and shows it once there are any -->
+        <div class="log-switch-dog" id="log-dog-section" hidden>
+            <label for="log-dog">Dog</label>
+            <select id="log-dog"></select>
+        </div>
+    </div>
+
+    <div role="tabpanel" id="log-panel-session" class="log-panel" aria-labelledby="log-tab-session">
     <!-- the session in three cards: what and when, how it went (fields the command hides drop out), and length + notes -->
     <section class="page-section log-card">
         <h2 class="section-title">Session</h2>
         <div class="log-grid">
-            <!-- log.js fills this with the account's dogs and shows it once there are any -->
-            <div class="log-field" id="log-dog-section" hidden>
-                <label for="log-dog">Dog</label>
-                <p class="log-hint">This session is logged for the selected dog.</p>
-                <div class="log-control">
-                    <select id="log-dog"></select>
-                </div>
-            </div>
             <div class="log-field">
                 <label for="command">Command</label>
                 <p class="log-hint">Manage commands on the <a href="commands.html">Commands page</a>.</p>
@@ -300,5 +307,89 @@
             <a class="home-link" href="load.html">Logged sessions &rarr;</a>
         </form>
     </section>
+    </div>
+
+    <!-- an exercise (walk, fetch...), for the dog picked at the top -->
+    <div role="tabpanel" id="log-panel-exercise" class="log-panel" aria-labelledby="log-tab-exercise" hidden>
+    <section class="page-section log-card">
+        <h2 class="section-title">Exercise</h2>
+        <form id="exercise-form">
+            <div class="log-grid">
+                <div class="log-field">
+                    <label for="exercise-name">Exercise</label>
+                    <p class="log-hint">A walk, fetch, a swim...</p>
+                    <div class="log-control">
+                        <input type="text" id="exercise-name" list="exercise-name-suggestions" placeholder="e.g. Walk">
+                        <datalist id="exercise-name-suggestions">
+                            <option value="Walk"></option>
+                            <option value="Run"></option>
+                            <option value="Fetch"></option>
+                            <option value="Tug of war"></option>
+                            <option value="Swim"></option>
+                            <option value="Hike"></option>
+                            <option value="Agility"></option>
+                        </datalist>
+                    </div>
+                </div>
+                <div class="log-field">
+                    <label for="exercise-when-date">When</label>
+                    <p class="log-hint">The day and time you exercised.</p>
+                    <div class="log-control">
+                        <input type="date" id="exercise-when-date">
+                        <label class="visually-hidden" for="exercise-when-time">Time</label>
+                        <input type="time" id="exercise-when-time">
+                    </div>
+                </div>
+                <div class="log-field">
+                    <label for="exercise-measure">Track by</label>
+                    <p class="log-hint">How long it took, or how far you went.</p>
+                    <div class="log-control">
+                        <select id="exercise-measure">
+                            <option value="time">Time</option>
+                            <option value="distance">Distance</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="log-field" id="exercise-duration-field">
+                    <label for="exercise-duration">Duration</label>
+                    <p class="log-hint">Leave blank if you didn't time it.</p>
+                    <div class="log-control">
+                        <input type="text" id="exercise-duration" inputmode="numeric" placeholder="e.g. 15">
+                        <label class="visually-hidden" for="exercise-duration-unit">Duration unit</label>
+                        <select id="exercise-duration-unit" class="log-unit-select">
+                            <option value="min">min</option>
+                            <option value="sec">sec</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="log-field" id="exercise-distance-field" hidden>
+                    <label for="exercise-distance">Distance</label>
+                    <p class="log-hint">Decimals are fine, like 1.5.</p>
+                    <div class="log-control">
+                        <input type="text" id="exercise-distance" inputmode="decimal" placeholder="e.g. 1.5">
+                        <label class="visually-hidden" for="exercise-distance-unit">Distance unit</label>
+                        <select id="exercise-distance-unit" class="log-unit-select">
+                            <option value="mi">mi</option>
+                            <option value="km">km</option>
+                            <option value="m">m</option>
+                            <option value="ft">ft</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="log-field log-field--wide">
+                    <label for="exercise-notes">Notes</label>
+                    <div class="log-control">
+                        <input type="text" id="exercise-notes" placeholder="Anything worth remembering about this exercise...">
+                    </div>
+                </div>
+            </div>
+            <div class="log-save">
+                <button type="submit" class="save-btn">Save Exercise</button>
+                <p id="exercise-save-message" class="log-save-message" role="status" hidden></p>
+                <a class="home-link" href="load.html">Logged exercises &rarr;</a>
+            </div>
+        </form>
+    </section>
+    </div>
 </body>
 </html>

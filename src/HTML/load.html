@@ -21,6 +21,7 @@
     <script src="../JS/shared/commandList.js" defer></script>
     <script src="../JS/shared/dogs.js" defer></script>
     <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/shared/exercises.js" defer></script>
     <script src="../JS/shared/accountNav.js" defer></script>
     <script src="../JS/shared/trainingData.js" defer></script>
     <script src="../JS/pages/load.js" defer></script>
@@ -62,7 +63,6 @@
     <section class="page-section load-summary" aria-label="Totals">
         <div id="totals-tiles" class="stat-row"></div>
         <p class="load-note">Training time uses each session's length (Session Duration), or its Duration when no length was entered.</p>
-        <p id="totals-note" class="load-note" hidden>Training totals are for the dog picked above. Exercises aren't tied to a dog, so they include everything.</p>
     </section>
 
     <!-- one Logs card: sessions and exercises behind tabs, newest first, with an optional date filter -->
@@ -132,7 +132,7 @@
                     <thead>
                         <tr>
                             <th>Name</th>
-                            <th>Duration</th>
+                            <th>Duration / distance</th>
                             <th>Notes</th>
                             <th>Date</th>
                             <th>Time</th>

@@ -19,6 +19,7 @@
     <script src="../JS/shared/commandList.js" defer></script>
     <script src="../JS/shared/dogs.js" defer></script>
     <script src="../JS/shared/sessions.js" defer></script>
+    <script src="../JS/shared/exercises.js" defer></script>
     <script src="../JS/shared/accountNav.js" defer></script>
     <script src="../JS/pages/settings.js" defer></script>
 </head>
@@ -98,7 +99,7 @@
 
     <section class="page-section settings-card">
         <h2 class="section-title">Units</h2>
-        <p class="settings-note">Weights on My Dogs and in each dog's chart show in this unit.</p>
+        <p class="settings-note">Weights on My Dogs and in each dog's chart show in this unit. Exercises logged by distance start in the distance unit.</p>
         <div class="settings-row">
             <label for="weight-unit">Weight</label>
             <select id="weight-unit">
@@ -109,11 +110,12 @@
         <div class="settings-row">
             <label for="distance-unit">Distance</label>
             <select id="distance-unit">
+                <option value="mi">Miles (mi)</option>
+                <option value="km">Kilometers (km)</option>
                 <option value="m">Meters (m)</option>
                 <option value="ft">Feet (ft)</option>
             </select>
         </div>
-        <p class="settings-hint">Nothing in the app records distances yet; this is for upcoming features.</p>
         <button id="save-settings" type="button" class="save-btn">Save Settings</button>
         <p id="units-status" class="subhead settings-note" role="status"></p>
     </section>
@@ -123,6 +125,21 @@
         <p class="settings-note">Download everything you've logged as a file.</p>
         <button id="export-data" type="button" class="secondary-btn">Export My Data</button>
         <p id="export-status" class="subhead settings-note" role="status"></p>
+
+        <!-- deleting history: pick a dog (settings.js lists them when signed in), then clear its sessions or exercises -->
+        <div class="settings-clear">
+            <h3 class="settings-subtitle">Clear history</h3>
+            <p class="settings-note">Permanently delete logged sessions or exercises. Export first if you want a copy.</p>
+            <div class="settings-row" id="clear-dog-row" hidden>
+                <label for="clear-dog">Dog</label>
+                <select id="clear-dog"></select>
+            </div>
+            <div class="settings-clear-actions">
+                <button id="clear-sessions" type="button" class="danger-btn">Clear session history</button>
+                <button id="clear-exercises" type="button" class="danger-btn">Clear exercise history</button>
+            </div>
+            <p id="clear-status" class="subhead settings-note" role="status"></p>
+        </div>
     </section>
 
     <section class="page-section settings-card">
