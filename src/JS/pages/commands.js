@@ -1235,6 +1235,11 @@ if (masteryList) {
             } else if (showDecay && row.days_until_decay !== null && row.days_until_decay <= 7) {
                 parts.push(`practice within ${row.days_until_decay} ${row.days_until_decay === 1 ? "day" : "days"} to keep ${tierName(decayedLevel)}`);
             }
+            // high recent scores stretch the decay window (get_command_mastery's decay_hold_factor)
+            const holdFactor = Number(row.decay_hold_factor);
+            if (showDecay && holdFactor > 1) {
+                parts.push(`averaging ${Number(row.average_score)}/10, so it holds ${holdFactor}× longer`);
+            }
             detail.textContent = parts.join(" · ");
         }
 

@@ -579,3 +579,28 @@
     transition: none;
   }
 }
+
+/* Score trend: three small tiles above the chart */
+.score-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.score-summary:empty {
+  display: none;
+}
+
+.score-summary .stat-tile {
+  min-width: 0;
+}
+
+.score-summary .stat-value {
+  font-size: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .score-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

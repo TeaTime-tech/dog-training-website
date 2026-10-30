@@ -162,11 +162,12 @@
         </div>
     </section>
 
-    <!-- one Progress card, three charts behind tabs; each draws when its tab opens or an option changes -->
+    <!-- one Progress card, four charts behind tabs; each draws when its tab opens or an option changes -->
     <section class="page-section load-progress">
         <h2 class="section-title">Progress</h2>
         <div class="load-tabs" role="tablist" aria-label="Charts">
             <button type="button" role="tab" id="tab-command" class="load-tab" aria-controls="panel-command" aria-selected="true">Command over time</button>
+            <button type="button" role="tab" id="tab-score" class="load-tab" aria-controls="panel-score" aria-selected="false" tabindex="-1">Score trend</button>
             <button type="button" role="tab" id="tab-time" class="load-tab" aria-controls="panel-time" aria-selected="false" tabindex="-1">Training &amp; exercise time</button>
             <button type="button" role="tab" id="tab-timeline" class="load-tab" aria-controls="panel-timeline" aria-selected="false" tabindex="-1">Timeline</button>
         </div>
@@ -215,6 +216,29 @@
                 <div id="tester" class="graph-plot"></div>
                 <div id="graph-stat-summary" class="stat-row" hidden></div>
             </div>
+        </div>
+
+        <!-- scores (1-10) over time: each scored session as a dot, and the average per week or month as a line -->
+        <div role="tabpanel" id="panel-score" class="load-panel" aria-labelledby="tab-score" hidden>
+            <div class="load-options">
+                <div class="load-option">
+                    <label for="score-command">Command</label>
+                    <select id="score-command"></select>
+                </div>
+                <div class="load-option">
+                    <label for="score-group">Average by</label>
+                    <select id="score-group">
+                        <option value="weekly" selected>Week</option>
+                        <option value="monthly">Month</option>
+                        <option value="session">Last 5 sessions</option>
+                    </select>
+                </div>
+            </div>
+            <div id="score-summary" class="stat-row score-summary"></div>
+            <div class="graph-area" id="score-area">
+                <div id="score-chart" class="graph-plot"></div>
+            </div>
+            <p class="load-note">Scores come from the Score you give a session on the Log page. Commands that keep scoring well hold their mastery longer.</p>
         </div>
 
         <div role="tabpanel" id="panel-time" class="load-panel" aria-labelledby="tab-time" hidden>
